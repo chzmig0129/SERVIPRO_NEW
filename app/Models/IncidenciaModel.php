@@ -10,7 +10,14 @@ class IncidenciaModel extends Model
     protected $primaryKey = 'id';     // Clave primaria
 
     protected $allowedFields = [
-        'id_trampa', 'sede_id', 'fecha', 'tipo_plaga', 'cantidad_organismos', 'tipo_incidencia', 
-        'notas', 'inspector'
-    ]; // Campos permitidos
+        'id_trampa',
+        'sede_id',
+        'fecha',
+        'tipo_plaga',
+        'tipo_insecto',  
+        'cantidad_organismos',
+        'tipo_incidencia',
+        'notas',
+        'inspector'
+    ];
 }

@@ -9,11 +9,25 @@ class Blueprints extends BaseController
 {
     public function index()
     {
-        // Cargar el modelo de sedes
+        // Cargar los modelos necesarios
         $sedeModel = new SedeModel();
+        $planoModel = new PlanoModel();
         
         // Obtener todas las sedes
         $data['sedes'] = $sedeModel->findAll();
+        
+        // Obtener todos los planos
+        $planos = $planoModel->findAll();
+        
+        // Procesar las previsualizaciones de los planos
+        foreach ($planos as &$plano) {
+            $plano['preview_image'] = $this->getPreviewImage($plano);
+            // Obtener el nombre de la sede para cada plano
+            $sede = $sedeModel->find($plano['sede_id']);
+            $plano['sede_nombre'] = $sede ? $sede['nombre'] : 'Sede desconocida';
+        }
+        
+        $data['planos'] = $planos;
         
         // Cargar la vista con los datos
         return view('blueprints/index', $data);
@@ -326,27 +340,43 @@ class Blueprints extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Solicitud no válida']);
         }
         
-        // Obtener los datos de la incidencia
+        // Obtener los datos del POST
         $trampaId = $this->request->getPost('trampa_id');
         $tipoPlaga = $this->request->getPost('tipo_plaga');
-        $cantidadOrganismos = $this->request->getPost('cantidad_organismos');
+        
+        // Agregar logs para debug
+        log_message('info', 'trampa_id recibido: ' . $trampaId);
+        log_message('info', 'tipo_plaga recibido: ' . $tipoPlaga);
+
+        if (!$trampaId || !$tipoPlaga) {
+            return $this->response->setJSON([
+                'success' => false, 
+                'message' => 'Datos incompletos',
+                'debug' => [
+                    'trampa_id' => $trampaId,
+                    'tipo_plaga' => $tipoPlaga
+                ]
+            ]);
+        }
+        
+        // Obtener directamente los valores de los campos del formulario
+        $tipoInsecto = $this->request->getPost('tipo_insecto');
         $tipoIncidencia = $this->request->getPost('tipo_incidencia');
+        
+        $cantidadOrganismos = $this->request->getPost('cantidad_organismos');
         $notas = $this->request->getPost('notas');
         $inspector = $this->request->getPost('inspector');
         
         // Registrar los datos recibidos para depuración
         log_message('info', 'Datos de incidencia recibidos: ' . json_encode([
-            'trampa_id' => $trampaId,
+            'id_trampa' => $trampaId,
             'tipo_plaga' => $tipoPlaga,
+            'tipo_insecto' => $tipoInsecto,
             'cantidad_organismos' => $cantidadOrganismos,
             'tipo_incidencia' => $tipoIncidencia,
             'notas' => $notas,
             'inspector' => $inspector
         ]));
-        
-        if (!$trampaId || !$tipoPlaga) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Datos incompletos']);
-        }
         
         // Verificar que se haya proporcionado una fecha
         $fechaIncidencia = $this->request->getPost('fecha_incidencia');
@@ -391,14 +421,18 @@ class Blueprints extends BaseController
             // Formatear la fecha de incidencia para MySQL (YYYY-MM-DD HH:MM:SS)
             $fechaFormateada = date('Y-m-d H:i:s', strtotime($fechaIncidencia));
             
-            // Preparar los datos para guardar
+            // Verificar que los valores de tipo_insecto y tipo_incidencia sean correctos
+            log_message('info', 'Valores antes de guardar: tipo_insecto=' . $tipoInsecto . ', tipo_incidencia=' . $tipoIncidencia);
+            
+            // Preparar los datos para guardar - Asegurarse de que los campos estén correctamente asignados
             $data = [
                 'id_trampa' => $idTrampaReciente, // Usamos el ID de la trampa encontrada
                 'sede_id' => $idSede, // Agregamos el ID de la sede
                 'fecha' => $fechaFormateada, // Usamos la fecha proporcionada por el usuario
                 'tipo_plaga' => $tipoPlaga,
-                'cantidad_organismos' => $cantidadOrganismos ?? 0,
-                'tipo_incidencia' => $tipoIncidencia ?? 'Captura',
+                'tipo_insecto' => $tipoInsecto, // Asegurarse de que este valor sea correcto
+                'cantidad_organismos' => $cantidadOrganismos,
+                'tipo_incidencia' => $tipoIncidencia, // Asegurarse de que este valor sea correcto
                 'notas' => $notas,
                 'inspector' => $inspector ?? 'Sistema'
             ];
@@ -406,6 +440,10 @@ class Blueprints extends BaseController
             // Guardar la incidencia
             $incidenciaId = $incidenciaModel->insert($data);
             log_message('info', 'Incidencia guardada con ID: ' . $incidenciaId);
+            
+            // Verificar que se haya guardado correctamente
+            $incidenciaGuardada = $incidenciaModel->find($incidenciaId);
+            log_message('info', 'Incidencia guardada: ' . json_encode($incidenciaGuardada));
             
             return $this->response->setJSON([
                 'success' => true, 
@@ -419,5 +457,123 @@ class Blueprints extends BaseController
                 'message' => 'Error al guardar la incidencia: ' . $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * Obtiene todas las zonas únicas para un plano específico
+     * 
+     * @param int|null $plano_id ID del plano
+     * @return \CodeIgniter\HTTP\Response
+     */
+    public function obtener_zonas($plano_id = null)
+    {
+        // Verificar si es una solicitud AJAX
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No es una solicitud AJAX válida'
+            ]);
+        }
+
+        // Verificar que se proporcionó un ID de plano
+        if (!$plano_id) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'ID de plano no proporcionado'
+            ]);
+        }
+
+        // Cargar el modelo de trampas (asumiendo que tienes un modelo llamado TrampaModel)
+        $db = \Config\Database::connect();
+        
+        // Consultar zonas únicas desde la tabla 'trampas'
+        $query = $db->table('trampas')
+                    ->select('DISTINCT(ubicacion) as zona')
+                    ->where('plano_id', $plano_id)
+                    ->where('ubicacion IS NOT NULL')
+                    ->where('ubicacion !=', '')
+                    ->get();
+        
+        $zonas = [];
+        foreach ($query->getResult() as $row) {
+            $zonas[] = $row->zona;
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'zonas' => $zonas
+        ]);
+    }
+
+    /**
+     * Muestra la imagen del plano con las incidencias marcadas
+     * 
+     * @param int $id ID del plano
+     * @return \CodeIgniter\HTTP\Response
+     */
+    public function verImagen($id = null)
+    {
+        if (!$id) {
+            return redirect()->to('/blueprints')->with('error', 'Plano no especificado');
+        }
+
+        // Cargar modelos
+        $planoModel = new PlanoModel();
+        $sedeModel = new SedeModel();
+        $trampaModel = new \App\Models\TrampaModel();
+        $incidenciaModel = new \App\Models\IncidenciaModel();
+
+        // Obtener información del plano
+        $plano = $planoModel->find($id);
+        if (!$plano) {
+            return redirect()->to('/blueprints')->with('error', 'Plano no encontrado');
+        }
+
+        // Obtener la imagen de previsualización
+        $imagenUrl = $this->getPreviewImage($plano);
+        
+        // Obtener información de la sede asociada
+        $sede = $sedeModel->find($plano['sede_id']);
+        
+        // Obtener las trampas asociadas al plano
+        $trampas = $trampaModel->where('plano_id', $id)->findAll();
+        
+        // Obtener las incidencias asociadas a las trampas de este plano
+        $incidencias = [];
+        if (!empty($trampas)) {
+            $trampaIds = array_column($trampas, 'id');
+            $incidencias = $incidenciaModel->whereIn('id_trampa', $trampaIds)->findAll();
+            
+            // Asociar cada incidencia con su trampa correspondiente
+            foreach ($incidencias as &$incidencia) {
+                foreach ($trampas as $trampa) {
+                    if ($trampa['id'] == $incidencia['id_trampa']) {
+                        $incidencia['trampa'] = $trampa;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Obtener el estado del plano (JSON)
+        $estadoPlano = null;
+        if (!empty($plano['archivo'])) {
+            try {
+                $estadoPlano = json_decode($plano['archivo'], true);
+            } catch (\Exception $e) {
+                log_message('error', 'Error al decodificar el archivo del plano: ' . $e->getMessage());
+            }
+        }
+
+        $data = [
+            'plano' => $plano,
+            'sede' => $sede,
+            'imagen_url' => $imagenUrl,
+            'trampas' => $trampas,
+            'incidencias' => $incidencias,
+            'estadoPlano' => $estadoPlano
+        ];
+
+        return view('blueprints/ver_imagen', $data);
     }
 } 

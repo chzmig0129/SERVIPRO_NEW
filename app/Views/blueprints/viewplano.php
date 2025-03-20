@@ -14,9 +14,12 @@
         background-color: #f5f5f5;
     }
     
-    /* Estilos para la imagen del plano */
+    /* Estilos para la imagen del plano - IMPORTANTE: no modificar el tamaño original */
     #planoImage {
-        max-width: 100%;
+        width: auto;
+        height: auto;
+        max-width: none; /* Permite que la imagen mantenga su tamaño original */
+        max-height: none; /* Permite que la imagen mantenga su tamaño original */
         display: none;
     }
     
@@ -45,7 +48,6 @@
         cursor: pointer;
         z-index: 10;
         transition: all 0.2s ease;
-        padding: 5px;
     }
     
     .trap-marker:hover {
@@ -60,7 +62,7 @@
     
     /* Estilos para el tooltip */
     .trap-tooltip {
-        position: absolute;
+        position: fixed; /* Cambiado a fixed para evitar problemas con el scroll */
         background-color: white;
         border: 1px solid #ccc;
         border-radius: 4px;
@@ -115,6 +117,38 @@
     
     .trap-menu a:hover {
         background-color: #f5f5f5;
+    }
+    
+    /* Controles de zoom */
+    .zoom-controls {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        z-index: 30;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 5px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    
+    .zoom-btn {
+        width: 36px;
+        height: 36px;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        cursor: pointer;
+    }
+    
+    .zoom-btn:hover {
+        background-color: #f0f0f0;
     }
     
     /* Animaciones */
@@ -201,7 +235,7 @@
     }
 
     .trap-tooltip {
-        position: absolute;
+        position: fixed; /* Cambiado a fixed para evitar problemas con el scroll */
         background-color: white;
         border: 1px solid #ddd;
         border-radius: 4px;
@@ -239,8 +273,17 @@
     
     .trap-marker.highlighted {
         box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.7);
-        transform: scale(1.2);
+        transform: translate(-50%, -50%) scale(1.2);
         z-index: 1000;
+    }
+
+    /* Estilos para botones de reportes */
+    .reportes-btn-group {
+        margin-bottom: 15px;
+    }
+    
+    .reportes-btn-group .btn {
+        margin-right: 5px;
     }
 </style>
 
@@ -276,6 +319,8 @@
                 <i class="fas fa-trash-alt"></i>
                 Limpiar Todo
             </button>
+            
+
         </div>
     </div>
 
@@ -284,7 +329,13 @@
         <!-- Plano -->
         <div class="lg:col-span-3 bg-white rounded-lg shadow-md p-4">
             <div id="planoContainer" class="w-full h-[600px] bg-gray-100 rounded-lg flex items-center justify-center relative">
-                <img id="planoImage" class="max-w-full max-h-full hidden" style="object-fit: contain;" />
+                <!-- Controles de zoom -->
+                <div class="zoom-controls">
+                    <button class="zoom-btn" id="zoomIn">+</button>
+                    <button class="zoom-btn" id="zoomOut">-</button>
+                    <button class="zoom-btn" id="zoomReset"><i class="fas fa-sync-alt"></i></button>
+                </div>
+                <img id="planoImage" class="max-h-full hidden" style="object-fit: contain;" />
                 <p id="placeholderText" class="text-gray-500">Seleccione una imagen para comenzar</p>
             </div>
         </div>
@@ -402,6 +453,8 @@
                                 <option value="cucaracha">Cucaracha</option>
                                 <option value="hormiga">Hormiga</option>
                                 <option value="roedor">Roedor</option>
+                                <option value="Arañas">Arañas</option>
+                                <option value="Lagartija">Lagartijas</option>
                                 <option value="otro">Otro (especificar)</option>
                             </select>
                         </div>
@@ -420,10 +473,18 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Tipo de Incidencia</label>
-                            <select name="tipo_incidencia"
+                            <select name="tipo_incidencia" id="tipo_incidencia"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 <option value="Captura">Captura</option>
                                 <option value="Hallazgo">Hallazgo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tipo de Insecto</label>
+                            <select name="tipo_insecto" id="tipo_insecto"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="Volador">Volador</option>
+                                <option value="Rastrero">Rastrero</option>
                             </select>
                         </div>
                         <div>
@@ -459,6 +520,50 @@
     </div>
 </div>
 
+<!-- Modal para ingresar la zona de la trampa -->
+<div id="modalZonaTrampa" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold mb-4">Ingresar zona de ubicación</h3>
+                <form id="formZonaTrampa">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Seleccione una zona existente:</label>
+                            <select id="zonasExistentesSelect" 
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 mb-3">
+                                <option value="">-- Seleccionar zona existente --</option>
+                                <!-- Las opciones se cargarán dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="flex items-center py-2">
+                            <div class="flex-grow border-t border-gray-300"></div>
+                            <span class="mx-4 text-sm text-gray-500">O</span>
+                            <div class="flex-grow border-t border-gray-300"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ingrese una nueva zona:</label>
+                            <input type="text" id="zonaTrampaInput" name="zonaTrampa" 
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="Ingrese la zona">
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" id="cancelarZonaTrampa"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+                            Aceptar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Scripts -->
 <script src="<?= base_url('js/mapa.js') ?>"></script>
 <script>
@@ -484,6 +589,10 @@
         let trampaSeleccionada = null;
         let offsetX = 0;
         let offsetY = 0;
+        
+        // Variables para el modal de zona de trampa
+        let posicionTrampaX = 0;
+        let posicionTrampaY = 0;
 
         // Agregar estas variables al inicio del script
         let dibujandoPoligono = false;
@@ -1393,42 +1502,13 @@
                 
                 // Manejar modo de agregar trampa
                 else if (modoEdicion === 'agregarTrampa' && tipoTrampaSeleccionado) {
-                    // Ya no solicitamos el nombre de la trampa
+                    // Guardar la posición para usarla después de obtener la zona
+                    posicionTrampaX = clickX - imagenLeft;
+                    posicionTrampaY = clickY - imagenTop;
                     
-                    // Solicitar la zona
-                    const zona = prompt('Ingrese la zona donde se ubicará la trampa:', '');
-                    
-                    // Generar un ID temporal
-                    const tempId = `TEMP-${Date.now().toString().slice(-6)}`;
-                    
-                    // Crear nueva trampa con zona
-                    const nuevaTrampa = {
-                        id: tempId, // ID temporal que será reemplazado por el generado en el servidor
-                        tipo: tipoTrampaSeleccionado,
-                        x: clickX - imagenLeft,
-                        y: clickY - imagenTop,
-                        zona: zona || 'Sin zona' // Usar 'Sin zona' si no se proporciona una
-                    };
-
-                    // Agregar al array de puntos
-                    if (!window.puntos) window.puntos = [];
-                    window.puntos.push(nuevaTrampa);
-
-                    // Crear el marcador visual
-                    const marcador = marcarTrampa(nuevaTrampa);
-                    actualizarTablaTrampas();
-                    
-                    // Guardar en la base de datos
-                    guardarTrampaEnBD(nuevaTrampa);
-                    
-                    // Desactivar modo de agregar trampa después de colocar una
-                    modoEdicion = null;
-                    tipoTrampaSeleccionado = null;
-                    planoContainer.style.cursor = 'default';
-                    
-                    // Resetear estado visual del botón
-                    dropdownButton.classList.remove('active');
-                    dropdownButton.style.backgroundColor = '';
+                    // Mostrar el modal para ingresar la zona
+                    document.getElementById('modalZonaTrampa').classList.remove('hidden');
+                    document.getElementById('zonaTrampaInput').focus();
                 }
             }
         });
@@ -2384,6 +2464,175 @@
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.trap-marker') && !e.target.closest('.trap-tooltip')) {
                 hideTooltip();
+            }
+        });
+
+        // Manejar el formulario de zona
+        document.getElementById('formZonaTrampa').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Obtener la zona ingresada - priorizar el select si tiene un valor
+            let zona = document.getElementById('zonasExistentesSelect').value;
+            
+            // Si no se seleccionó una zona existente, usar el input de texto
+            if (!zona) {
+                zona = document.getElementById('zonaTrampaInput').value;
+            }
+            
+            // Generar un ID temporal
+            const tempId = `TEMP-${Date.now().toString().slice(-6)}`;
+            
+            // Crear nueva trampa con zona
+            const nuevaTrampa = {
+                id: tempId, // ID temporal que será reemplazado por el generado en el servidor
+                tipo: tipoTrampaSeleccionado,
+                x: posicionTrampaX,
+                y: posicionTrampaY,
+                zona: zona || 'Sin zona' // Usar 'Sin zona' si no se proporciona una
+            };
+
+            // Agregar al array de puntos
+            if (!window.puntos) window.puntos = [];
+            window.puntos.push(nuevaTrampa);
+
+            // Crear el marcador visual
+            const marcador = marcarTrampa(nuevaTrampa);
+            actualizarTablaTrampas();
+            
+            // Guardar en la base de datos
+            guardarTrampaEnBD(nuevaTrampa);
+            
+            // Desactivar modo de agregar trampa después de colocar una
+            modoEdicion = null;
+            tipoTrampaSeleccionado = null;
+            planoContainer.style.cursor = 'default';
+            
+            // Resetear estado visual del botón
+            dropdownButton.classList.remove('active');
+            dropdownButton.style.backgroundColor = '';
+            
+            // Ocultar el modal y limpiar el campo
+            document.getElementById('modalZonaTrampa').classList.add('hidden');
+            document.getElementById('zonaTrampaInput').value = '';
+            document.getElementById('zonasExistentesSelect').value = '';
+        });
+        
+        // Función para cargar las zonas existentes en el select
+        function cargarZonasExistentes() {
+            const select = document.getElementById('zonasExistentesSelect');
+            
+            // Limpiar opciones existentes excepto la primera
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            // Obtener las zonas desde la base de datos mediante AJAX
+            fetch('<?= base_url('blueprints/obtener_zonas/' . $plano['id']) ?>', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && Array.isArray(data.zonas)) {
+                    // Ordenar alfabéticamente y añadir al select
+                    data.zonas.sort().forEach(nombreZona => {
+                        if (nombreZona && nombreZona !== 'Sin zona') {
+                            const option = document.createElement('option');
+                            option.value = nombreZona;
+                            option.textContent = nombreZona;
+                            select.appendChild(option);
+                        }
+                    });
+                } else {
+                    console.log('No se encontraron zonas en la base de datos');
+                }
+                
+                // También agregar las zonas locales que puedan no estar en la BD
+                agregarZonasLocales(select);
+            })
+            .catch(error => {
+                console.error('Error al cargar zonas desde la BD:', error);
+                // Si hay un error, intentar cargar solo las zonas locales
+                agregarZonasLocales(select);
+            });
+        }
+        
+        // Función auxiliar para agregar zonas de los datos locales
+        function agregarZonasLocales(select) {
+            // Crear un conjunto para almacenar nombres únicos de zonas
+            const zonasUnicas = new Set();
+            
+            // Comprobar si hay opciones existentes para no añadir duplicados
+            const opcionesExistentes = new Set();
+            for (let i = 0; i < select.options.length; i++) {
+                opcionesExistentes.add(select.options[i].value);
+            }
+            
+            // Añadir nombres de zonas al conjunto
+            if (window.zonas && Array.isArray(window.zonas)) {
+                window.zonas.forEach(zona => {
+                    if (zona.nombre && !opcionesExistentes.has(zona.nombre)) {
+                        zonasUnicas.add(zona.nombre);
+                    }
+                });
+            }
+            
+            // Si hay puntos con zonas, también añadirlos
+            if (window.puntos && Array.isArray(window.puntos)) {
+                window.puntos.forEach(punto => {
+                    if (punto.zona && punto.zona !== 'Sin zona' && !opcionesExistentes.has(punto.zona)) {
+                        zonasUnicas.add(punto.zona);
+                    }
+                });
+            }
+            
+            // Convertir a array, ordenar y añadir al select
+            Array.from(zonasUnicas).sort().forEach(nombreZona => {
+                const option = document.createElement('option');
+                option.value = nombreZona;
+                option.textContent = nombreZona;
+                select.appendChild(option);
+            });
+        }
+        
+        // Cargar zonas cuando se abre el modal
+        document.addEventListener('click', function(e) {
+            // Si se hace clic en el plano en modo agregarTrampa, cargar las zonas
+            if (e.target.closest('#planoContainer') && modoEdicion === 'agregarTrampa' && tipoTrampaSeleccionado) {
+                cargarZonasExistentes();
+            }
+        });
+        
+        // Sincronizar el select con el input
+        document.getElementById('zonasExistentesSelect').addEventListener('change', function() {
+            // Si se selecciona una zona existente, limpiar el input de nueva zona
+            if (this.value) {
+                document.getElementById('zonaTrampaInput').value = '';
+            }
+        });
+        
+        document.getElementById('zonaTrampaInput').addEventListener('input', function() {
+            // Si se escribe en el input, limpiar la selección del select
+            if (this.value) {
+                document.getElementById('zonasExistentesSelect').value = '';
+            }
+        });
+        
+        // Botón cancelar del modal de zona
+        document.getElementById('cancelarZonaTrampa').addEventListener('click', function() {
+            document.getElementById('modalZonaTrampa').classList.add('hidden');
+            document.getElementById('zonaTrampaInput').value = '';
+            document.getElementById('zonasExistentesSelect').value = '';
+        });
+        
+        // Cerrar el modal al hacer clic fuera del contenido
+        document.getElementById('modalZonaTrampa').addEventListener('click', function(e) {
+            if (e.target === this) {
+                document.getElementById('modalZonaTrampa').classList.add('hidden');
+                document.getElementById('zonaTrampaInput').value = '';
+                document.getElementById('zonasExistentesSelect').value = '';
             }
         });
     });
