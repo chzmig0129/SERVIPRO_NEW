@@ -35,13 +35,13 @@ abstract class BaseController extends Controller
      *
      * @var list<string>
      */
-    protected $helpers = [];
+    protected $helpers = ['form', 'url'];
 
     /**
      * Be sure to declare properties for any property fetch you initialized.
      * The creation of dynamic property is deprecated in PHP 8.2.
      */
-    // protected $session;
+    protected $session;
 
     /**
      * @return void
@@ -52,7 +52,18 @@ abstract class BaseController extends Controller
         parent::initController($request, $response, $logger);
 
         // Preload any models, libraries, etc, here.
-
-        // E.g.: $this->session = service('session');
+        $this->session = \Config\Services::session();
+    }
+    
+    /**
+     * Verifica si el usuario ha iniciado sesión
+     * Si no tiene sesión, redirige al login
+     */
+    protected function verificarSesion()
+    {
+        if (!$this->session->get('logged_in')) {
+            return redirect()->to(base_url());
+        }
+        return true;
     }
 }

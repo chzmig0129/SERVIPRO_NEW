@@ -14,13 +14,16 @@
         background-color: #f5f5f5;
     }
     
-    /* Estilos para la imagen del plano - IMPORTANTE: no modificar el tamaño original */
+    /* Estilos para la imagen del plano - Modificar para asegurar que se ajuste al contenedor */
     #planoImage {
         width: auto;
         height: auto;
-        max-width: none; /* Permite que la imagen mantenga su tamaño original */
-        max-height: none; /* Permite que la imagen mantenga su tamaño original */
+        max-width: 100%; /* Cambiar para que se ajuste al contenedor */
+        max-height: 100%; /* Cambiar para que se ajuste al contenedor */
+        object-fit: contain; /* Asegurar que la imagen mantenga su proporción y se ajuste */
         display: none;
+        position: relative; /* Necesario para posicionamiento correcto */
+        margin: 0 auto; /* Centrar la imagen horizontalmente */
     }
     
     /* Estilos para el texto de placeholder */
@@ -38,7 +41,7 @@
         position: absolute;
         width: 24px;
         height: 24px;
-        background-color: rgba(255, 0, 0, 0.7);
+        background-color: rgba(59, 130, 246, 0.7);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -52,12 +55,12 @@
     
     .trap-marker:hover {
         transform: translate(-50%, -50%) scale(1.2);
-        background-color: rgba(255, 0, 0, 0.9);
+        background-color: rgba(59, 130, 246, 0.9);
     }
     
     .trap-marker.highlighted {
-        background-color: #ff6600;
-        box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.5);
+        background-color: #1D4ED8;
+        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.5);
     }
     
     /* Estilos para el tooltip */
@@ -76,16 +79,36 @@
         background-color: #4a90e2;
         color: white;
         border: none;
-        padding: 5px 10px;
-        border-radius: 4px;
+        padding: 8px 12px;
+        border-radius: 6px;
         cursor: pointer;
-        font-size: 12px;
+        font-size: 14px;
         display: flex;
         align-items: center;
+        width: 100%;
+        text-align: left;
+        margin-bottom: 4px;
+        transition: background-color 0.2s;
     }
     
     .trap-tooltip button:hover {
         background-color: #3a80d2;
+    }
+    
+    .trap-tooltip .add-incidence-btn {
+        background-color: #3B82F6;
+    }
+    
+    .trap-tooltip .add-incidence-btn:hover {
+        background-color: #2563EB;
+    }
+    
+    .trap-tooltip .edit-id-btn {
+        background-color: #10B981;
+    }
+    
+    .trap-tooltip .edit-id-btn:hover {
+        background-color: #059669;
     }
     
     /* Estilos para las zonas */
@@ -100,23 +123,34 @@
     /* Estilos para el dropdown de trampas */
     .trap-menu {
         position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
         background-color: white;
         border: 1px solid #ccc;
         border-radius: 4px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        z-index: 100;
-        width: 200px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 2px;
     }
     
     .trap-menu a {
         display: block;
-        padding: 8px 12px;
+        padding: 10px 12px;
         color: #333;
         text-decoration: none;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s;
+    }
+    
+    .trap-menu a:last-child {
+        border-bottom: none;
     }
     
     .trap-menu a:hover {
-        background-color: #f5f5f5;
+        background-color: #f8f9fa;
     }
     
     /* Controles de zoom */
@@ -272,7 +306,7 @@
     }
     
     .trap-marker.highlighted {
-        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.7);
+        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.7);
         transform: translate(-50%, -50%) scale(1.2);
         z-index: 1000;
     }
@@ -306,10 +340,6 @@
             <button id="btnGuardar" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                 <i class="fas fa-save"></i>
                 Guardar Estado
-            </button>
-            <button id="btnDescargar" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                <i class="fas fa-download"></i>
-                Descargar Estado
             </button>
             <button id="btnCargar" class="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
                 <i class="fas fa-upload"></i>
@@ -357,9 +387,12 @@
                                 <path d="m6 9 6 6 6-6"/>
                             </svg>
                         </button>
-                        <div class="trap-menu hidden absolute w-full bg-white border rounded-lg shadow-lg z-50">
+                        <div class="trap-menu hidden absolute w-full bg-white border rounded-lg shadow-lg" style="z-index: 1000;">
                             <a href="#" class="dropdown-item block px-4 py-2 hover:bg-gray-100" data-trap-type="edc_quimicas">
                                 <i class="fas fa-flask mr-2"></i> EDC Químicas
+                            </a>
+                            <a href="#" class="dropdown-item block px-4 py-2 hover:bg-gray-100" data-trap-type="edc_adhesivas">
+                                <i class="fas fa-flask mr-2 text-blue-600"></i> EDC Adhesivas
                             </a>
                             <a href="#" class="dropdown-item block px-4 py-2 hover:bg-gray-100" data-trap-type="luz_uv">
                                 <i class="fas fa-lightbulb mr-2"></i> Equipo de Luz UV
@@ -396,12 +429,39 @@
                         <i class="fas fa-draw-polygon mr-2"></i>
                         Agregar Zona
                     </button>
+
+                    <!-- Botón Ver Historial -->
+                    <a href="<?= base_url('historial/index/' . $plano['id']) ?>" class="w-full flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 mt-2">
+                        <i class="fas fa-history mr-2"></i>
+                        Ver Historial
+                    </a>
                 </div>
             </div>
 
             <!-- Lista de Trampas -->
             <div class="bg-white rounded-lg shadow-md p-4">
                 <h3 class="font-semibold mb-4">Lista de Trampas</h3>
+                <!-- Filtro por tipo de trampa -->
+                <div class="mb-4">
+                    <label for="filtroTipoTrampa" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por tipo:</label>
+                    <select id="filtroTipoTrampa" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                        <option value="">Todos los tipos</option>
+                        <option value="edc_quimicas">EDC Químicas</option>
+                        <option value="edc_adhesivas">EDC Adhesivas</option>
+                        <option value="luz_uv">Equipo de Luz UV</option>
+                        <option value="feromona_gorgojo">Trampa de Feromona Gorgojo</option>
+                        <option value="equipo_sonico">Equipo Sónico</option>
+                        <option value="globo_terror">Globo terror</option>
+                        <option value="atrayente_chinches">Trampa atrayente chinches</option>
+                        <option value="atrayente_pulgas">Trampa atrayente pulgas</option>
+                        <option value="feromona_picudo">Trampa feromonas picudo rojo</option>
+                        <!-- Mantener compatibilidad con tipos antiguos -->
+                        <option value="rodent">Trampa para Roedores</option>
+                        <option value="insect">Trampa para Insectos</option>
+                        <option value="fly">Trampa para Moscas</option>
+                        <option value="moth">Trampa para Polillas</option>
+                    </select>
+                </div>
                 <div class="overflow-y-auto max-h-[400px]">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50">
@@ -432,13 +492,13 @@
 <input type="file" id="cargarEstadoInput" accept="application/json" style="display: none;">
 
 <!-- Modal para Agregar Incidencia -->
-<div id="modalIncidencia" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+<div id="modalIncidencia" class="fixed inset-0 bg-black bg-opacity-50 hidden" style="z-index: 10000;">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div class="p-6">
                 <h3 class="text-lg font-semibold mb-2">Registrar Incidencia</h3>
                 <div id="trampaInfo" class="mb-4 p-3 bg-gray-100 rounded-md">
-                    <p class="text-sm"><strong>ID Base de Datos:</strong> <span id="trampaDbIdDisplay">-</span></p>
+                    <p class="text-sm"><strong>ID de Trampa:</strong> <span id="trampaDbIdDisplay">-</span></p>
                     <p class="text-sm"><strong>Ubicación:</strong> <span id="trampaZonaDisplay">-</span></p>
                 </div>
                 <form id="formIncidencia">
@@ -450,6 +510,18 @@
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 <option value="">Seleccione un tipo</option>
                                 <option value="mosca">Mosca</option>
+                                <option value="mosca_domestica">Mosca doméstica</option>
+                                <option value="mosca_fruta">Mosca de la fruta</option>
+                                <option value="mosca_drenaje">Mosca de drenaje</option>
+                                <option value="mosca_metalica">Moscas metálicas</option>
+                                <option value="mosca_forida">Mosca forida</option>
+                                <option value="palomilla_almacen">Palomillas de almacén</option>
+                                <option value="otras_palomillas">Otras palomillas</option>
+                                <option value="gorgojo">Gorgojos</option>
+                                <option value="otros_escarabajos">Otros escarabajos</option>
+                                <option value="abeja">Abejas</option>
+                                <option value="avispa">Avispas</option>
+                                <option value="mosquito">Mosquitos</option>
                                 <option value="cucaracha">Cucaracha</option>
                                 <option value="hormiga">Hormiga</option>
                                 <option value="roedor">Roedor</option>
@@ -509,25 +581,78 @@
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
                             Cancelar
                         </button>
-                        <button type="submit"
+                        <button type="button" id="btnAgregarIncidenciaLista"
+                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md">
+                            Agregar a lista
+                        </button>
+                        <button type="button" id="btnGuardarTodasIncidencias"
                             class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
-                            Guardar Incidencia
+                            Guardar todas
                         </button>
                     </div>
                 </form>
+                <!-- Lista de incidencias agregadas -->
+                <div id="listaIncidenciasModal" class="mt-6">
+                    <h4 class="font-semibold mb-2">Incidencias agregadas:</h4>
+                    <ul id="incidenciasAgregadas" class="space-y-2"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Editar ID de Trampa -->
+<div id="modalEditarId" class="fixed inset-0 bg-black bg-opacity-50 hidden" style="z-index: 10000;">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Editar ID de Trampa</h3>
+                    <button type="button" onclick="cerrarModalEditarId()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nuevo ID de Trampa:</label>
+                    <input type="text" id="nuevoIdTrampa" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                           placeholder="Ingrese el nuevo ID de la trampa">
+                    <p class="mt-1 text-xs text-gray-500">Este ID se usará para identificar la trampa en la incidencia</p>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="cerrarModalEditarId()"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="button" onclick="guardarNuevoId()"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors">
+                        Guardar ID
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Modal para ingresar la zona de la trampa -->
-<div id="modalZonaTrampa" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+<div id="modalZonaTrampa" class="fixed inset-0 bg-black bg-opacity-50 hidden" style="z-index: 10000;">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div class="p-6">
                 <h3 class="text-lg font-semibold mb-4">Ingresar zona de ubicación</h3>
                 <form id="formZonaTrampa">
                     <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ID de trampa:</label>
+                            <input type="text" id="idTrampaInput" name="idTrampa" 
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="Ingrese el ID de trampa (opcional)">
+                            <p class="text-xs text-gray-500 mt-1">Si no se ingresa, se generará automáticamente</p>
+                        </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Seleccione una zona existente:</label>
                             <select id="zonasExistentesSelect" 
@@ -601,6 +726,29 @@
         let tooltipElement = null;
         let confirmButton = null;
 
+        // Función para ajustar la imagen al contenedor
+        function adjustImageToContainer() {
+            const planoContainer = document.getElementById('planoContainer');
+            const planoImage = document.getElementById('planoImage');
+            
+            if (!planoImage.complete || !planoImage.naturalWidth) {
+                // La imagen aún no se ha cargado completamente
+                return;
+            }
+            
+            // Ajustar el scrollTop y scrollLeft para centrar la imagen en el viewport
+            setTimeout(() => {
+                planoContainer.scrollTop = (planoImage.offsetHeight - planoContainer.clientHeight) / 2;
+                planoContainer.scrollLeft = (planoImage.offsetWidth - planoContainer.clientWidth) / 2;
+                
+                // Después de ajustar la imagen, reposicionar las trampas
+                reposicionarTrampas();
+            }, 100);
+        }
+
+        // Evento para ajustar la imagen cuando cambia el tamaño de la ventana
+        window.addEventListener('resize', adjustImageToContainer);
+
         // Crear el tooltip
         const tooltip = document.createElement('div');
         tooltip.className = 'trap-tooltip';
@@ -649,6 +797,13 @@
         // Desactivar botones al inicio
         desactivarBotones();
 
+        // CARGAR TRAMPAS DESDE LA BASE DE DATOS (fuente de verdad)
+        <?php if (!empty($trampas)): ?>
+        const trampasDesdeDB = <?= json_encode($trampas) ?>;
+        <?php else: ?>
+        const trampasDesdeDB = [];
+        <?php endif; ?>
+
         // Cargar estado guardado en la base de datos si existe
         <?php if (!empty($plano['archivo'])): ?>
         try {
@@ -659,15 +814,25 @@
                 planoImage.style.display = 'block';
                 document.getElementById('placeholderText').style.display = 'none';
                 
-                // Activar botones
-                activarBotones();
-                
-                // Guardar las trampas en una variable global
-                if (estadoGuardado.trampas && Array.isArray(estadoGuardado.trampas)) {
-                    window.puntos = estadoGuardado.trampas;
+                // Ajustar la imagen cuando se cargue
+                planoImage.onload = function() {
+                    adjustImageToContainer();
                     
-                    // Crear una función para colocar las trampas después de que la imagen esté completamente cargada
-                    const colocarTrampas = function() {
+                    // PRIORIDAD: Cargar trampas desde la BD si existen, sino desde el JSON
+                    const trampasParaCargar = trampasDesdeDB.length > 0 ? trampasDesdeDB.map(t => ({
+                        id: t.id_trampa || t.id,
+                        id_trampa: t.id_trampa || t.id, // Asegurar que siempre haya un id_trampa
+                        nombre: t.nombre || t.id_trampa || t.id, // Usar nombre o id_trampa como fallback
+                        tipo: t.tipo,
+                        x: parseFloat(t.coordenada_x),
+                        y: parseFloat(t.coordenada_y),
+                        zona: t.ubicacion,
+                        ubicacion: t.ubicacion
+                    })) : (estadoGuardado.trampas || []);
+                    
+                    if (trampasParaCargar.length > 0) {
+                        window.puntos = trampasParaCargar;
+                        
                         // Limpiar marcadores existentes para evitar duplicados
                         document.querySelectorAll('.trap-marker').forEach(marker => marker.remove());
                         
@@ -689,23 +854,12 @@
                         
                         // Reposicionar las trampas para asegurar que estén en la posición correcta
                         setTimeout(reposicionarTrampas, 100);
-                    };
-                    
-                    // Si la imagen ya está cargada, colocar las trampas inmediatamente
-                    if (planoImage.complete) {
-                        colocarTrampas();
-                    } else {
-                        // Si la imagen aún no está cargada, esperar a que se cargue
-                        planoImage.onload = colocarTrampas;
                     }
-                }
-                
-                // Guardar las zonas en una variable global
-                if (estadoGuardado.zonas && Array.isArray(estadoGuardado.zonas)) {
-                    window.zonas = estadoGuardado.zonas;
                     
-                    // Crear una función para colocar las zonas después de que la imagen esté completamente cargada
-                    const colocarZonas = function() {
+                    // Guardar las zonas en una variable global
+                    if (estadoGuardado.zonas && Array.isArray(estadoGuardado.zonas)) {
+                        window.zonas = estadoGuardado.zonas;
+                        
                         // Limpiar zonas existentes para evitar duplicados
                         document.querySelectorAll('.zona, .zona-poligono, .zona-texto').forEach(zona => zona.remove());
                         
@@ -713,16 +867,11 @@
                         window.zonas.forEach(zona => {
                             crearZonaExistente(zona);
                         });
-                    };
-                    
-                    // Si la imagen ya está cargada, colocar las zonas inmediatamente
-                    if (planoImage.complete) {
-                        colocarZonas();
-                    } else {
-                        // Si la imagen aún no está cargada, esperar a que se cargue
-                        planoImage.addEventListener('load', colocarZonas);
                     }
-                }
+                };
+                
+                // Activar botones
+                activarBotones();
             }
         } catch (error) {
             console.error('Error al cargar el estado guardado:', error);
@@ -742,6 +891,12 @@
                     planoImage.src = e.target.result;
                     planoImage.style.display = 'block';
                     document.getElementById('placeholderText').style.display = 'none';
+                    
+                    // Ajustar la imagen cuando se cargue
+                    planoImage.onload = function() {
+                        adjustImageToContainer();
+                    };
+                    
                     // Activar botones cuando se carga la imagen
                     activarBotones();
                     
@@ -756,25 +911,6 @@
         // Botón Guardar Estado
         btnGuardar.addEventListener('click', function() {
             guardarEstadoPlano(true);
-        });
-
-        // Botón Descargar Estado
-        btnDescargar.addEventListener('click', () => {
-            // Crear una copia del estado actual
-            const estado = {
-                imagen: planoImage.src, // Mantener la URL de la imagen
-                trampas: window.puntos || [],
-                zonas: window.zonas || []
-            };
-            
-            // Para la descarga, podemos mantener la URL de la imagen
-            // ya que el usuario puede necesitar acceder a ella más tarde
-            const blob = new Blob([JSON.stringify(estado)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'estado-plano.json';
-            a.click();
         });
 
         // Función para mostrar mensajes
@@ -929,6 +1065,8 @@
         function limpiarEstadoCompleto() {
             // Limpiar imagen
             if (planoImage) {
+                // Eliminar el evento onload para evitar ejecuciones inesperadas
+                planoImage.onload = null;
                 planoImage.src = '';
                 planoImage.style.display = 'none';
             }
@@ -1010,72 +1148,50 @@
                     
                     // Verificar si la imagen es una URL o datos base64
                     if (estado.imagen) {
-                        // Crear una nueva imagen para asegurar que se dispare el evento onload
-                        const img = new Image();
-                        img.onload = function() {
-                            planoImage.src = img.src;
-                            planoImage.style.display = 'block';
-                            document.getElementById('placeholderText').style.display = 'none';
+                        // Mostrar la imagen
+                        planoImage.src = estado.imagen;
+                        planoImage.style.display = 'block';
+                        document.getElementById('placeholderText').style.display = 'none';
+                        
+                        // Ajustar la imagen cuando se cargue
+                        planoImage.onload = function() {
+                            adjustImageToContainer();
                             
-                            // Cargar trampas después de que la imagen esté cargada
+                            // Cargar trampas después de que la imagen esté ajustada
                             if (estado.trampas && Array.isArray(estado.trampas)) {
                                 window.puntos = estado.trampas;
                                 
-                                // Crear una función para colocar las trampas después de que la imagen esté completamente cargada
-                                const colocarTrampas = function() {
-                                    // Limpiar marcadores existentes para evitar duplicados
-                                    document.querySelectorAll('.trap-marker').forEach(marker => marker.remove());
-                                    
-                                    // Colocar las trampas
-                                    window.puntos.forEach(punto => {
-                                        marcarTrampa(punto);
-                                    });
-                                    
-                                    // Actualizar la tabla
-                                    actualizarTablaTrampas();
-                                };
+                                // Limpiar marcadores existentes para evitar duplicados
+                                document.querySelectorAll('.trap-marker').forEach(marker => marker.remove());
                                 
-                                // Si la imagen ya está cargada, colocar las trampas inmediatamente
-                                if (planoImage.complete) {
-                                    colocarTrampas();
-                                } else {
-                                    // Si la imagen aún no está cargada, esperar a que se cargue
-                                    planoImage.addEventListener('load', colocarTrampas);
-                                }
+                                // Colocar las trampas
+                                window.puntos.forEach(punto => {
+                                    marcarTrampa(punto);
+                                });
+                                
+                                // Actualizar la tabla
+                                actualizarTablaTrampas();
                             }
                             
-                            // Cargar zonas después de que la imagen esté cargada
+                            // Cargar zonas después de que la imagen esté ajustada
                             if (estado.zonas && Array.isArray(estado.zonas)) {
                                 window.zonas = estado.zonas;
                                 
-                                // Crear una función para colocar las zonas después de que la imagen esté completamente cargada
-                                const colocarZonas = function() {
-                                    // Limpiar zonas existentes para evitar duplicados
-                                    document.querySelectorAll('.zona, .zona-poligono, .zona-texto').forEach(zona => zona.remove());
-                                    
-                                    // Colocar las zonas
-                                    window.zonas.forEach(zona => {
-                                        crearZonaExistente(zona);
-                                    });
-                                };
+                                // Limpiar zonas existentes para evitar duplicados
+                                document.querySelectorAll('.zona, .zona-poligono, .zona-texto').forEach(zona => zona.remove());
                                 
-                                // Si la imagen ya está cargada, colocar las zonas inmediatamente
-                                if (planoImage.complete) {
-                                    colocarZonas();
-                                } else {
-                                    // Si la imagen aún no está cargada, esperar a que se cargue
-                                    planoImage.addEventListener('load', colocarZonas);
-                                }
+                                // Colocar las zonas
+                                window.zonas.forEach(zona => {
+                                    crearZonaExistente(zona);
+                                });
                             }
-                            
-                            // Activar botones
-                            activarBotones();
-                            
-                            // Guardar el estado automáticamente para asegurar que se guarde la imagen en el servidor
-                            guardarEstadoPlano(false);
                         };
                         
-                        img.src = estado.imagen;
+                        // Activar botones
+                        activarBotones();
+                        
+                        // Guardar el estado automáticamente para asegurar que se guarde la imagen en el servidor
+                        guardarEstadoPlano(false);
                     } else {
                         mostrarMensaje('El archivo JSON no contiene una imagen válida.', 'error');
                     }
@@ -1128,6 +1244,10 @@
                 case 'edc_quimicas':
                     icon.className = 'fas fa-flask';
                     break;
+                case 'edc_adhesivas':
+                    icon.className = 'fas fa-flask';
+                    icon.style.color = '#3B82F6'; // Color azul
+                    break;
                 case 'luz_uv':
                     icon.className = 'fas fa-lightbulb';
                     break;
@@ -1148,7 +1268,7 @@
                     break;
                 case 'feromona_picudo':
                     icon.className = 'fas fa-seedling';
-                    icon.style.color = '#dc2626'; // Color rojo
+                    icon.style.color = '#3B82F6'; // Color azul
                     break;
                 // Mantener compatibilidad con tipos antiguos
                 case 'rodent':
@@ -1166,14 +1286,18 @@
             }
             marcador.appendChild(icon);
 
+            // Determinar el texto a mostrar: usar 'nombre' si existe, sino 'id'
+            const displayText = punto.id.startsWith('TEMP-') ? 'Nueva' : (punto.nombre || punto.id);
+            
             // Agregar tooltip con información
-            marcador.title = `${getTipoTrampa(punto.tipo)} - ${punto.zona || 'Sin zona'} (ID: ${punto.id.startsWith('TEMP-') ? 'Nueva' : punto.id})`;
+            marcador.title = `${getTipoTrampa(punto.tipo)} - ${punto.zona || 'Sin zona'} (ID: ${displayText})`;
             
             // Agregar ID visible en el marcador
             const idLabel = document.createElement('span');
             idLabel.className = 'trap-id-label';
             // No mostrar el ID temporal con prefijo TEMP-, mostrar "Nueva" en su lugar
-            idLabel.textContent = punto.id.startsWith('TEMP-') ? 'Nueva' : punto.id;
+            // Usar 'nombre' si existe, sino usar 'id'
+            idLabel.textContent = displayText;
             idLabel.style.position = 'absolute';
             idLabel.style.top = '-20px';
             idLabel.style.left = '50%';
@@ -1252,10 +1376,16 @@
             
             // Asegurarse de que el tooltip tenga el contenido correcto
             tooltip.innerHTML = `
-                <button type="button" class="add-incidence-btn">
-                    <i class="fas fa-plus-circle mr-2"></i>
-                    Agregar incidencia
-                </button>
+                <div class="space-y-2">
+                    <button type="button" class="add-incidence-btn w-full text-left">
+                        <i class="fas fa-plus-circle mr-2"></i>
+                        Agregar incidencia
+                    </button>
+                    <button type="button" class="edit-id-btn w-full text-left">
+                        <i class="fas fa-edit mr-2"></i>
+                        Editar ID
+                    </button>
+                </div>
             `;
             
             // Agregar evento al botón de incidencia
@@ -1274,7 +1404,8 @@
                     
                     // Actualizar la información de la trampa en el modal
                     document.getElementById('trampa_id').value = trampa.id_trampa || trampa.id; // Usar id_trampa si existe, si no usar id
-                    document.getElementById('trampaDbIdDisplay').textContent = trampa.id.startsWith('TEMP-') ? 'Pendiente' : (trampa.id || 'Sin ID');
+                    // Mostrar el 'nombre' (lo que los inspectores llaman ID), sino mostrar id_trampa o id
+                    document.getElementById('trampaDbIdDisplay').textContent = trampa.nombre || trampa.id_trampa || (trampa.id.startsWith('TEMP-') ? 'Sin ID' : (trampa.id || 'Sin ID'));
                     document.getElementById('trampaZonaDisplay').textContent = trampa.zona || 'Sin zona';
                     
                     // Establecer la fecha y hora actual como valor predeterminado
@@ -1297,6 +1428,41 @@
                     hideTooltip();
                 }
             });
+            
+            // Agregar evento al botón de editar ID
+            tooltip.querySelector('.edit-id-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (activeMarker) {
+                    const trampaIndex = activeMarker.dataset.index;
+                    const trampa = window.puntos[trampaIndex];
+                    
+                    if (!trampa) {
+                        mostrarMensaje('Error: No se pudo identificar la trampa', 'error');
+                        return;
+                    }
+                    
+                    // Establecer la trampa activa para edición (incluir índice)
+                    window.trampaSeleccionadaParaEdicion = {
+                        ...trampa,
+                        index: trampaIndex,
+                        marker: activeMarker
+                    };
+                    
+                    // Prellenar el campo con el nombre actual (lo que los inspectores llaman "ID")
+                    const idActual = trampa.nombre || trampa.id_trampa || (trampa.id.startsWith('TEMP-') ? '' : (trampa.id || ''));
+                    document.getElementById('nuevoIdTrampa').value = idActual;
+                    
+                    // Mostrar el modal de edición
+                    document.getElementById('modalEditarId').classList.remove('hidden');
+                    
+                    // Enfocar el campo de texto
+                    document.getElementById('nuevoIdTrampa').focus();
+                    
+                                         hideTooltip();
+                 }
+             });
             
             // Mostrar el tooltip
             tooltip.style.display = 'block';
@@ -1332,6 +1498,9 @@
         // Reattach trap click events when page becomes visible again
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
+                // Reajustar la imagen cuando la página vuelve a ser visible
+                adjustImageToContainer();
+                
                 // Recargar el estado del plano desde el servidor
                 recargarEstadoPlano();
                 
@@ -1344,9 +1513,6 @@
                         marker.parentNode.replaceChild(newMarker, marker);
                     }
                 });
-                
-                // Reposicionar las trampas
-                reposicionarTrampas();
             }
         });
 
@@ -1365,37 +1531,61 @@
                 return response.json();
             })
             .then(data => {
-                if (data.success && data.plano && data.plano.archivo) {
-                    try {
-                        const estadoGuardado = JSON.parse(data.plano.archivo);
-                        if (estadoGuardado && estadoGuardado.trampas && Array.isArray(estadoGuardado.trampas)) {
-                            // Actualizar el array de puntos con los datos del servidor
-                            window.puntos = estadoGuardado.trampas;
-                            
-                            // Limpiar marcadores existentes para evitar duplicados
-                            document.querySelectorAll('.trap-marker').forEach(marker => marker.remove());
-                            
-                            // Colocar las trampas
-                            window.puntos.forEach(punto => {
-                                marcarTrampa(punto);
-                            });
-                            
-                            // Actualizar la tabla
-                            actualizarTablaTrampas();
-                            
-                            // Asegurar que todos los marcadores tengan el evento de clic
-                            document.querySelectorAll('.trap-marker').forEach(marker => {
-                                const newMarker = addTrapClickEvent(marker);
-                                if (marker !== newMarker && marker.parentNode) {
-                                    marker.parentNode.replaceChild(newMarker, marker);
-                                }
-                            });
-                            
-                            // Reposicionar las trampas para asegurar que estén en la posición correcta
-                            setTimeout(reposicionarTrampas, 100);
+                if (data.success) {
+                    console.log('Estado recargado desde servidor:', data);
+                    
+                    // PRIORIDAD: Usar trampas desde BD si existen, sino desde JSON
+                    let trampasParaCargar = [];
+                    
+                    if (data.trampas && data.trampas.length > 0) {
+                        // Cargar desde la BD (fuente de verdad)
+                        trampasParaCargar = data.trampas.map(t => ({
+                            id: t.id_trampa || t.id,
+                            id_trampa: t.id_trampa || t.id, // Asegurar que siempre haya un id_trampa
+                            nombre: t.nombre || t.id_trampa || t.id, // Usar nombre o id_trampa como fallback
+                            tipo: t.tipo,
+                            x: parseFloat(t.coordenada_x),
+                            y: parseFloat(t.coordenada_y),
+                            zona: t.ubicacion,
+                            ubicacion: t.ubicacion
+                        }));
+                    } else if (data.plano && data.plano.archivo) {
+                        // Fallback: cargar desde JSON si no hay trampas en BD
+                        try {
+                            const estadoGuardado = JSON.parse(data.plano.archivo);
+                            if (estadoGuardado && estadoGuardado.trampas && Array.isArray(estadoGuardado.trampas)) {
+                                trampasParaCargar = estadoGuardado.trampas;
+                            }
+                        } catch (error) {
+                            console.error('Error al procesar el estado del plano:', error);
                         }
-                    } catch (error) {
-                        console.error('Error al procesar el estado del plano:', error);
+                    }
+                    
+                    if (trampasParaCargar.length > 0) {
+                        // Actualizar el array de puntos con los datos del servidor
+                        window.puntos = trampasParaCargar;
+                        
+                        // Limpiar marcadores existentes para evitar duplicados
+                        document.querySelectorAll('.trap-marker').forEach(marker => marker.remove());
+                        
+                        // Colocar las trampas
+                        window.puntos.forEach(punto => {
+                            marcarTrampa(punto);
+                        });
+                        
+                        // Actualizar la tabla
+                        actualizarTablaTrampas();
+                        
+                        // Asegurar que todos los marcadores tengan el evento de clic
+                        document.querySelectorAll('.trap-marker').forEach(marker => {
+                            const newMarker = addTrapClickEvent(marker);
+                            if (marker !== newMarker && marker.parentNode) {
+                                marker.parentNode.replaceChild(newMarker, marker);
+                            }
+                        });
+                        
+                        // Reposicionar las trampas para asegurar que estén en la posición correcta
+                        setTimeout(reposicionarTrampas, 100);
                     }
                 }
             })
@@ -1408,6 +1598,9 @@
         window.addEventListener('pageshow', function(event) {
             // If the page is loaded from cache (navigating back)
             if (event.persisted) {
+                // Reajustar la imagen
+                adjustImageToContainer();
+                
                 // Recargar el estado del plano desde el servidor
                 recargarEstadoPlano();
                 
@@ -1420,9 +1613,6 @@
                         marker.parentNode.replaceChild(newMarker, marker);
                     }
                 });
-                
-                // Reposicionar las trampas
-                reposicionarTrampas();
             }
         });
 
@@ -1540,12 +1730,156 @@
             document.getElementById('cantidad_organismos').removeAttribute('required');
         }
 
+        // Funciones para el modal de editar ID
+        window.abrirModalEditarId = function() {
+            // Obtener el ID actual mostrado
+            const idActual = document.getElementById('trampaDbIdDisplay').textContent;
+            
+            // Prellenar el campo con el ID actual (si no es "Sin ID")
+            document.getElementById('nuevoIdTrampa').value = idActual !== 'Sin ID' ? idActual : '';
+            
+            // Mostrar el modal
+            document.getElementById('modalEditarId').classList.remove('hidden');
+            
+            // Enfocar el campo de texto
+            document.getElementById('nuevoIdTrampa').focus();
+        }
+
+        window.cerrarModalEditarId = function() {
+            document.getElementById('modalEditarId').classList.add('hidden');
+            document.getElementById('nuevoIdTrampa').value = '';
+        }
+
+                         window.guardarNuevoId = function() {
+            const nuevoId = document.getElementById('nuevoIdTrampa').value.trim();
+            
+            if (!nuevoId) {
+                alert('Por favor ingrese un ID válido');
+                return;
+            }
+            
+            if (!window.trampaSeleccionadaParaEdicion) {
+                alert('Error: No hay trampa seleccionada para editar');
+                return;
+            }
+            
+            // Preparar datos para enviar al servidor
+            const formData = new FormData();
+            formData.append('trampa_id_actual', window.trampaSeleccionadaParaEdicion.id_trampa || window.trampaSeleccionadaParaEdicion.id);
+            formData.append('nuevo_id_trampa', nuevoId);
+            formData.append('plano_id', <?= $plano['id'] ?>);
+            
+            // Mostrar indicador de carga
+            const btnGuardar = document.querySelector('#modalEditarId button[onclick="guardarNuevoId()"]');
+            const textoOriginal = btnGuardar.textContent;
+            btnGuardar.textContent = 'Guardando...';
+            btnGuardar.disabled = true;
+            
+            // Enviar al servidor
+            fetch('<?= base_url('blueprints/actualizar_id_trampa') ?>', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    const trampaIndex = window.trampaSeleccionadaParaEdicion.index;
+                    const marker = window.trampaSeleccionadaParaEdicion.marker;
+                    
+                    // Actualizar los datos en el array principal de puntos con TODOS los datos del servidor
+                    if (trampaIndex !== undefined && window.puntos && window.puntos[trampaIndex] && data.trampa) {
+                        // Preservar el tipo original si el servidor no lo devuelve o está vacío
+                        const tipoOriginal = window.puntos[trampaIndex].tipo;
+                        const tipoServidor = data.trampa.tipo;
+                        
+                        // Actualizar con los datos completos del servidor para mantener consistencia
+                        window.puntos[trampaIndex].nombre = data.trampa.nombre;
+                        window.puntos[trampaIndex].tipo = tipoServidor || tipoOriginal; // Usar tipo del servidor o mantener el original
+                        window.puntos[trampaIndex].ubicacion = data.trampa.ubicacion;
+                        window.puntos[trampaIndex].zona = data.trampa.ubicacion; // Sincronizar zona con ubicacion
+                        
+                        // Si es una trampa temporal que aún no tiene id_trampa, establecerlo ahora
+                        if (window.puntos[trampaIndex].id && window.puntos[trampaIndex].id.startsWith('TEMP-')) {
+                            window.puntos[trampaIndex].id_trampa = data.trampa.id_trampa;
+                            window.puntos[trampaIndex].id = data.trampa.id_trampa;
+                        }
+                    }
+                    
+                    // Actualizar el marcador visual
+                    if (marker) {
+                        // Actualizar el label del nombre en el marcador
+                        const idLabel = marker.querySelector('.trap-id-label');
+                        if (idLabel) {
+                            idLabel.textContent = nuevoId;
+                        }
+                        
+                        // Actualizar el tooltip del marcador
+                        const tipoTrampa = window.puntos[trampaIndex] ? getTipoTrampa(window.puntos[trampaIndex].tipo) : 'Trampa';
+                        const zona = window.puntos[trampaIndex] ? window.puntos[trampaIndex].zona : 'Sin zona';
+                        marker.title = `${tipoTrampa} - ${zona} (ID: ${nuevoId})`;
+                    }
+                    
+                    // Actualizar la tabla de trampas si existe
+                    if (typeof actualizarTablaTrampas === 'function') {
+                        actualizarTablaTrampas();
+                    }
+                    
+                    // Cerrar el modal
+                    cerrarModalEditarId();
+                    
+                    // Mostrar mensaje de confirmación
+                    mostrarMensaje(`ID de trampa actualizado correctamente a: ${nuevoId}`, 'success');
+                    
+                    // Limpiar la variable temporal
+                    window.trampaSeleccionadaParaEdicion = null;
+                } else {
+                    // Error del servidor
+                    mostrarMensaje(`Error: ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error al actualizar ID de trampa:', error);
+                mostrarMensaje('Error al comunicarse con el servidor', 'error');
+            })
+            .finally(() => {
+                // Restaurar el botón
+                btnGuardar.textContent = textoOriginal;
+                btnGuardar.disabled = false;
+            });
+        }
+
+         // Agregar soporte para cerrar modal con Escape y Enter para guardar
+         document.addEventListener('keydown', function(event) {
+             const modalEditarId = document.getElementById('modalEditarId');
+             if (!modalEditarId.classList.contains('hidden')) {
+                 if (event.key === 'Escape') {
+                     cerrarModalEditarId();
+                 } else if (event.key === 'Enter') {
+                     event.preventDefault();
+                     guardarNuevoId();
+                 }
+             }
+         });
+
         // Manejar envío del formulario de incidencia
         document.getElementById('formIncidencia').addEventListener('submit', function(e) {
             e.preventDefault();
             
             // Obtener los datos del formulario
             const formData = new FormData(this);
+            
+            // Agregar el ID de trampa personalizado si existe
+            if (window.trampaIdPersonalizado) {
+                formData.set('trampa_codigo', window.trampaIdPersonalizado);
+            }
             
             // Verificar que se haya seleccionado un tipo de plaga
             if (!formData.get('tipo_plaga')) {
@@ -1681,6 +2015,24 @@
                 return;
             }
 
+            // Obtener el valor del filtro
+            const filtroTipo = document.getElementById('filtroTipoTrampa').value;
+
+            // Filtrar puntos según el tipo seleccionado
+            const puntosFiltrados = filtroTipo 
+                ? window.puntos.filter(punto => punto.tipo === filtroTipo)
+                : window.puntos;
+
+            if (puntosFiltrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-4 py-2 text-center text-gray-500">
+                            No hay trampas del tipo seleccionado
+                        </td>
+                    </tr>`;
+                return;
+            }
+
             // Modificar el encabezado de la tabla para eliminar la columna de nombre
             const thead = document.querySelector('table thead tr');
             if (thead) {
@@ -1693,11 +2045,14 @@
                 `;
             }
 
-            window.puntos.forEach((punto, index) => {
+            puntosFiltrados.forEach((punto, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 cursor-pointer';
+                // Mostrar solo el nombre (lo que los inspectores llaman "ID")
+                const displayId = punto.id && punto.id.startsWith('TEMP-') ? 'Nueva' : (punto.nombre || punto.id_trampa || punto.id || `T${index + 1}`);
+                
                 tr.innerHTML = `
-                    <td class="px-4 py-2">${punto.id && punto.id.startsWith('TEMP-') ? 'Nueva' : (punto.id || `T${index + 1}`)}</td>
+                    <td class="px-4 py-2">${displayId}</td>
                     <td class="px-4 py-2">${getTipoTrampa(punto.tipo)}</td>
                     <td class="px-4 py-2">(${Math.round(punto.x)}, ${Math.round(punto.y)})</td>
                     <td class="px-4 py-2">${punto.zona || 'Sin zona'}</td>
@@ -1720,7 +2075,10 @@
                         row.classList.remove('selected');
                     });
                     
-                    const marker = document.querySelector(`.trap-marker[data-index="${index}"]`);
+                    // Encontrar el índice original en el array de puntos
+                    const originalIndex = window.puntos.findIndex(p => p === punto);
+                    
+                    const marker = document.querySelector(`.trap-marker[data-index="${originalIndex}"]`);
                     if (marker) {
                         marker.classList.add('highlighted');
                         marker.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1734,12 +2092,15 @@
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (confirm('¿Está seguro de que desea eliminar esta trampa?')) {
+                        // Encontrar el índice original en el array de puntos
+                        const originalIndex = window.puntos.findIndex(p => p === punto);
+                        
                         // Eliminar el marcador del plano
-                        const marker = document.querySelector(`.trap-marker[data-index="${index}"]`);
+                        const marker = document.querySelector(`.trap-marker[data-index="${originalIndex}"]`);
                         if (marker) marker.remove();
                         
                         // Eliminar del array de puntos
-                        window.puntos.splice(index, 1);
+                        window.puntos.splice(originalIndex, 1);
                         
                         // Reindexar las trampas restantes
                         reindexarTrampas();
@@ -1752,6 +2113,10 @@
                     }
                 });
                 
+
+
+
+
                 tbody.appendChild(tr);
             });
         }
@@ -1759,7 +2124,13 @@
         // Función auxiliar para obtener el nombre del tipo de trampa
         function getTipoTrampa(tipo) {
             const tipos = {
+                // Tipos que están en la base de datos (valores exactos)
+                'Equipo de Luz UV': 'Equipo de Luz UV',
+                'Equipo Sónico': 'Equipo Sónico',
+                'Globo terror': 'Globo terror',
+                // Tipos de códigos internos (para compatibilidad)
                 'edc_quimicas': 'EDC Químicas',
+                'edc_adhesivas': 'EDC Adhesivas',
                 'luz_uv': 'Equipo de Luz UV',
                 'feromona_gorgojo': 'Trampa de Feromona Gorgojo',
                 'equipo_sonico': 'Equipo Sónico',
@@ -1773,6 +2144,7 @@
                 'fly': 'Trampa para Moscas',
                 'moth': 'Trampa para Polillas'
             };
+            
             return tipos[tipo] || 'Desconocido';
         }
 
@@ -1848,7 +2220,7 @@
         const highlightStyles = document.createElement('style');
         highlightStyles.textContent = `
             .trap-marker.highlighted {
-                box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.7);
+                box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.7);
                 transform: scale(1.2);
                 z-index: 1000;
             }
@@ -2084,14 +2456,27 @@
                 cursor: not-allowed !important;
             }
             
-            /* Estilos para el modal de incidencias */
-            #modalIncidencia {
-                z-index: 9999 !important; /* Asegurar que esté por encima de todo */
+            /* Estilos para todos los modales - asegurar que estén por encima de las trampas */
+            #modalIncidencia,
+            #modalEditarId,
+            #modalZonaTrampa {
+                z-index: 10000 !important; /* Asegurar que estén por encima de todo */
             }
             
-            #modalIncidencia .bg-white {
+            #modalIncidencia .bg-white,
+            #modalEditarId .bg-white,
+            #modalZonaTrampa .bg-white {
                 position: relative;
-                z-index: 10000; /* Asegurar que el contenido del modal esté por encima del fondo */
+                z-index: 10001; /* Asegurar que el contenido del modal esté por encima del fondo */
+            }
+            
+            /* Asegurar que las trampas estén por debajo de los modales */
+            .trap-marker {
+                z-index: 10 !important;
+            }
+            
+            .trap-tooltip {
+                z-index: 100 !important;
             }
         `;
         document.head.appendChild(buttonStyles);
@@ -2224,29 +2609,28 @@
                 if (data.success) {
                     console.log('Trampa guardada correctamente:', data);
                     
-                    // Determinar si es una trampa nueva o una movida
-                    const esTrampaMovida = data.trampa?.es_movida || (trampa.id && !trampa.id.startsWith('TEMP-'));
-                    
                     // Actualizar el ID de la trampa con el ID único generado
                     if (data.trampa && data.trampa.id_trampa) {
                         // Guardar el ID original como referencia interna
                         trampa.id_interno = trampa.id;
                         
-                        // Actualizar el ID visible con el ID único generado
+                        // Actualizar los campos con los datos del servidor
                         trampa.id = data.trampa.id_trampa;
+                        trampa.id_trampa = data.trampa.id_trampa;
+                        trampa.nombre = data.trampa.nombre || data.trampa.id_trampa; // Nombre para mostrar
                         
                         // Actualizar la trampa en el array de puntos
-                        const index = puntos.findIndex(p => p.id_interno === trampa.id_interno);
+                        const index = window.puntos.findIndex(p => p.id_interno === trampa.id_interno);
                         if (index !== -1) {
-                            puntos[index] = trampa;
+                            window.puntos[index] = trampa;
                         }
                         
-                        // Actualizar el ID visible en el marcador
+                        // Actualizar el nombre visible en el marcador
                         const marcador = document.querySelector(`.trap-marker[data-index="${index}"]`);
                         if (marcador) {
                             const idLabel = marcador.querySelector('.trap-id-label');
                             if (idLabel) {
-                                idLabel.textContent = trampa.id;
+                                idLabel.textContent = trampa.nombre; // Mostrar el nombre
                             }
                             // Actualizar también el tooltip
                             marcador.title = `${getTipoTrampa(trampa.tipo)} - ${trampa.zona || 'Sin zona'} (ID: ${trampa.id})`;
@@ -2254,17 +2638,10 @@
                         
                         // Actualizar la tabla de trampas
                         actualizarTablaTrampas();
-                        
-                        // Ya no necesitamos redibujar todo el plano, solo actualizamos el ID en el marcador
-                        // dibujarPlano();
                     }
                     
                     // Mostrar mensaje apropiado
-                    if (esTrampaMovida) {
-                        mostrarMensaje(`Trampa movida correctamente. Se ha creado un nuevo registro con el mismo ID: ${trampa.id}`, 'success');
-                    } else {
-                        mostrarMensaje(`Trampa guardada correctamente con ID: ${trampa.id}`, 'success');
-                    }
+                    mostrarMensaje(`Trampa actualizada correctamente con ID: ${trampa.id}`, 'success');
                     
                     // Guardar automáticamente el estado del plano después de guardar la trampa
                     guardarEstadoPlano(false);
@@ -2275,8 +2652,7 @@
             })
             .catch(error => {
                 console.error('Error en la solicitud:', error);
-                // No mostrar mensaje de error al usuario ya que la operación se realiza correctamente
-                // mostrarMensaje('Error en la comunicación con el servidor', 'error');
+                mostrarMensaje('Error en la comunicación con el servidor', 'error');
             });
         }
 
@@ -2287,6 +2663,9 @@
                 mostrarMensaje('La imagen no está completamente cargada. Espere un momento y vuelva a intentarlo.', 'error');
                 return;
             }
+            
+            // Obtener el ancho renderizado actual de la imagen
+            const renderedWidth = planoImage.offsetWidth;
             
             // Verificar y limpiar los datos antes de guardar
             const trampasProcesadas = [];
@@ -2307,7 +2686,8 @@
             const estado = {
                 imagen: planoImage.src,
                 trampas: trampasProcesadas,
-                zonas: window.zonas || []
+                zonas: window.zonas || [],
+                renderedWidth: renderedWidth // Guardar el ancho renderizado
             };
             
             // Convertir el estado a JSON
@@ -2366,14 +2746,14 @@
             const index = parseInt(trampaSeleccionada.dataset.index);
             const trampaOriginal = window.puntos[index];
             
-            // Solicitar la nueva zona
+            // Solicitar la nueva zona y el comentario
             const nuevaZona = prompt('Ingrese la zona para la nueva ubicación de la trampa:', trampaOriginal.zona || '');
             
             if (nuevaZona) {
-                // Mostrar mensaje al usuario
-                mostrarMensaje(`Moviendo trampa ID: ${trampaOriginal.id} - Se creará un nuevo registro manteniendo el mismo ID`, 'info');
+                // Solicitar el comentario del movimiento
+                const comentario = prompt('Ingrese el motivo del movimiento de la trampa:', '');
                 
-                // En lugar de crear una nueva trampa, actualizar la existente
+                // Actualizar la posición y zona de la trampa
                 trampaOriginal.x = newX;
                 trampaOriginal.y = newY;
                 trampaOriginal.zona = nuevaZona;
@@ -2386,11 +2766,36 @@
                 trampaSeleccionada.dataset.originalX = newX;
                 trampaSeleccionada.dataset.originalY = newY;
                 
-                // Guardar el movimiento en la base de datos
-                guardarTrampaEnBD(trampaOriginal);
+                // Guardar el movimiento en la base de datos incluyendo el comentario
+                const formData = new FormData();
+                formData.append('sede_id', <?= $sede['id'] ?>);
+                formData.append('plano_id', <?= $plano['id'] ?>);
+                formData.append('tipo', trampaOriginal.tipo);
+                formData.append('ubicacion', nuevaZona);
+                formData.append('coordenada_x', newX);
+                formData.append('coordenada_y', newY);
+                formData.append('id_trampa', trampaOriginal.id);
+                formData.append('comentario', comentario || 'Sin comentario');
                 
-                // Guardar automáticamente el estado del plano después de mover la trampa
-                guardarEstadoPlano(false);
+                fetch('<?= base_url('blueprints/guardar_trampa') ?>', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarMensaje('Trampa movida correctamente', 'success');
+                    } else {
+                        mostrarMensaje('Error al mover la trampa: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mostrarMensaje('Error en la comunicación con el servidor', 'error');
+                });
             } else {
                 // Si se canceló, restaurar la posición original
                 trampaSeleccionada.style.left = `${imagenRect.left - containerRect.left + trampaOriginal.x}px`;
@@ -2408,13 +2813,14 @@
             actualizarTablaTrampas();
         });
 
-        // Función para reposicionar todas las trampas
+        // Función para reposicionar trampas basado en las coordenadas originales
         function reposicionarTrampas() {
             const planoContainer = document.getElementById('planoContainer');
             const planoImage = document.getElementById('planoImage');
             
-            // Verificar que la imagen esté cargada
             if (!planoImage.complete || !planoImage.naturalWidth) {
+                console.warn('La imagen no está completamente cargada. Reintentando en 100ms...');
+                setTimeout(reposicionarTrampas, 100);
                 return;
             }
             
@@ -2426,28 +2832,45 @@
             const imagenLeft = imagenRect.left - containerRect.left;
             const imagenTop = imagenRect.top - containerRect.top;
             
-            // Reposicionar cada trampa
+            // Reposicionar cada marcador
             document.querySelectorAll('.trap-marker').forEach(marker => {
-                const index = parseInt(marker.dataset.index);
-                if (!isNaN(index) && window.puntos && window.puntos[index]) {
-                    // Usar las coordenadas actualizadas del array window.puntos
-                    const punto = window.puntos[index];
-                    const x = parseFloat(punto.x);
-                    const y = parseFloat(punto.y);
+                const originalX = parseFloat(marker.dataset.originalX);
+                const originalY = parseFloat(marker.dataset.originalY);
+                
+                if (!isNaN(originalX) && !isNaN(originalY)) {
+                    marker.style.left = `${imagenLeft + originalX}px`;
+                    marker.style.top = `${imagenTop + originalY}px`;
+                }
+            });
+            
+            // Reposicionar zonas
+            document.querySelectorAll('.zona-poligono').forEach(zona => {
+                const index = parseInt(zona.dataset.index);
+                if (isNaN(index) || !window.zonas || !window.zonas[index]) return;
+                
+                const zonaData = window.zonas[index];
+                if (zonaData.tipo !== 'poligono' || !zonaData.puntos) return;
+                
+                // Calcular el nuevo path del polígono
+                const path = zonaData.puntos.map(p => 
+                    `${p.x + imagenLeft}px ${p.y + imagenTop}px`
+                ).join(',');
+                
+                zona.style.clipPath = `polygon(${path})`;
+            });
+            
+            // Reposicionar textos de zonas
+            document.querySelectorAll('.zona-texto').forEach(texto => {
+                const indice = Array.from(texto.parentNode.children)
+                    .filter(el => el.matches('.zona-poligono'))
+                    .findIndex(el => el.nextElementSibling === texto);
                     
-                    // Actualizar también los atributos data-originalX y data-originalY
-                    marker.dataset.originalX = x;
-                    marker.dataset.originalY = y;
-                    
-                    marker.style.left = `${imagenLeft + x}px`;
-                    marker.style.top = `${imagenTop + y}px`;
-                } else if (marker.dataset.originalX && marker.dataset.originalY) {
-                    // Fallback a los atributos data-originalX y data-originalY si no se encuentra en window.puntos
-                    const x = parseFloat(marker.dataset.originalX);
-                    const y = parseFloat(marker.dataset.originalY);
-                    
-                    marker.style.left = `${imagenLeft + x}px`;
-                    marker.style.top = `${imagenTop + y}px`;
+                if (indice !== -1 && window.zonas && window.zonas[indice]) {
+                    const zonaData = window.zonas[indice];
+                    if (zonaData.centro) {
+                        texto.style.left = `${imagenLeft + zonaData.centro.x}px`;
+                        texto.style.top = `${imagenTop + zonaData.centro.y}px`;
+                    }
                 }
             });
         }
@@ -2471,6 +2894,9 @@
         document.getElementById('formZonaTrampa').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Obtener el ID de trampa ingresado por el usuario
+            const idTrampaManual = document.getElementById('idTrampaInput').value.trim();
+            
             // Obtener la zona ingresada - priorizar el select si tiene un valor
             let zona = document.getElementById('zonasExistentesSelect').value;
             
@@ -2479,12 +2905,12 @@
                 zona = document.getElementById('zonaTrampaInput').value;
             }
             
-            // Generar un ID temporal
-            const tempId = `TEMP-${Date.now().toString().slice(-6)}`;
+            // Usar el ID manual si se proporcionó, sino generar uno temporal
+            const trampaId = idTrampaManual || `TEMP-${Date.now().toString().slice(-6)}`;
             
             // Crear nueva trampa con zona
             const nuevaTrampa = {
-                id: tempId, // ID temporal que será reemplazado por el generado en el servidor
+                id: trampaId, // ID manual o temporal que será reemplazado por el generado en el servidor
                 tipo: tipoTrampaSeleccionado,
                 x: posicionTrampaX,
                 y: posicionTrampaY,
@@ -2511,8 +2937,9 @@
             dropdownButton.classList.remove('active');
             dropdownButton.style.backgroundColor = '';
             
-            // Ocultar el modal y limpiar el campo
+            // Ocultar el modal y limpiar los campos
             document.getElementById('modalZonaTrampa').classList.add('hidden');
+            document.getElementById('idTrampaInput').value = '';
             document.getElementById('zonaTrampaInput').value = '';
             document.getElementById('zonasExistentesSelect').value = '';
         });
@@ -2623,6 +3050,7 @@
         // Botón cancelar del modal de zona
         document.getElementById('cancelarZonaTrampa').addEventListener('click', function() {
             document.getElementById('modalZonaTrampa').classList.add('hidden');
+            document.getElementById('idTrampaInput').value = '';
             document.getElementById('zonaTrampaInput').value = '';
             document.getElementById('zonasExistentesSelect').value = '';
         });
@@ -2631,10 +3059,144 @@
         document.getElementById('modalZonaTrampa').addEventListener('click', function(e) {
             if (e.target === this) {
                 document.getElementById('modalZonaTrampa').classList.add('hidden');
+                document.getElementById('idTrampaInput').value = '';
                 document.getElementById('zonaTrampaInput').value = '';
                 document.getElementById('zonasExistentesSelect').value = '';
             }
         });
+
+        // Agregar el evento para el filtro de tipo de trampa
+        document.getElementById('filtroTipoTrampa').addEventListener('change', function() {
+            actualizarTablaTrampas();
+            
+            // Resaltar visualmente las trampas filtradas
+            const filtroTipo = this.value;
+            
+            // Quitar resaltado de todas las trampas
+            document.querySelectorAll('.trap-marker').forEach(marker => {
+                if (filtroTipo === '') {
+                    // Si no hay filtro, mostrar todas las trampas con opacidad normal
+                    marker.style.opacity = '1';
+                } else {
+                    // Si hay filtro, verificar si la trampa es del tipo seleccionado
+                    const index = marker.dataset.index;
+                    const punto = window.puntos[index];
+                    
+                    if (punto && punto.tipo === filtroTipo) {
+                        // Si coincide con el filtro, mostrar con opacidad normal
+                        marker.style.opacity = '1';
+                    } else {
+                        // Si no coincide, mostrar con opacidad reducida
+                        marker.style.opacity = '0.3';
+                    }
+                }
+            });
+        });
+
+        // --- INICIO: Lógica para incidencias múltiples ---
+        let incidenciasTemp = [];
+
+        function renderizarListaIncidencias() {
+            const ul = document.getElementById('incidenciasAgregadas');
+            ul.innerHTML = '';
+            if (incidenciasTemp.length === 0) {
+                ul.innerHTML = '<li class="text-gray-400">No hay incidencias agregadas.</li>';
+                return;
+            }
+            incidenciasTemp.forEach((inc, idx) => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between bg-gray-50 rounded px-2 py-1';
+                li.innerHTML = `
+                    <span>
+                        <b>${inc.tipo_plaga || inc.tipo_plaga_select}</b> - ${inc.tipo_incidencia} - ${inc.tipo_insecto} - ${inc.fecha_incidencia} - ${inc.inspector || ''}
+                    </span>
+                    <button type="button" class="text-red-600 hover:text-red-800 ml-2" onclick="eliminarIncidenciaDeLista(${idx})"><i class="fas fa-trash-alt"></i></button>
+                `;
+                ul.appendChild(li);
+            });
+        }
+
+        // Hacer global la función para que funcione el botón eliminar
+        window.eliminarIncidenciaDeLista = function(idx) {
+            incidenciasTemp.splice(idx, 1);
+            renderizarListaIncidencias();
+        };
+
+        document.getElementById('btnAgregarIncidenciaLista').addEventListener('click', function() {
+            const form = document.getElementById('formIncidencia');
+            const formData = new FormData(form);
+            // Validar campos mínimos
+            if (!formData.get('tipo_plaga') && !formData.get('tipo_plaga_select')) {
+                mostrarMensaje('Debe seleccionar un tipo de plaga', 'error');
+                return;
+            }
+            if (!formData.get('fecha_incidencia')) {
+                mostrarMensaje('Debe ingresar la fecha de incidencia', 'error');
+                return;
+            }
+            // Convertir FormData a objeto
+            const obj = {};
+            formData.forEach((v, k) => obj[k] = v);
+            incidenciasTemp.push(obj);
+            renderizarListaIncidencias();
+            form.reset();
+            document.getElementById('tipo_plaga_personalizado_container').style.display = 'none';
+            document.getElementById('cantidad_organismos_container').style.display = 'none';
+            document.getElementById('tipo_plaga_personalizado').removeAttribute('required');
+            document.getElementById('cantidad_organismos').removeAttribute('required');
+        });
+
+        document.getElementById('btnGuardarTodasIncidencias').addEventListener('click', function() {
+            if (incidenciasTemp.length === 0) {
+                mostrarMensaje('No hay incidencias para guardar', 'error');
+                return;
+            }
+            let guardadas = 0;
+            let errores = 0;
+            incidenciasTemp.forEach((inc, idx) => {
+                const formData = new FormData();
+                Object.entries(inc).forEach(([k, v]) => formData.append(k, v));
+                fetch('<?= base_url('blueprints/guardar_incidencia') ?>', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        guardadas++;
+                    } else {
+                        errores++;
+                    }
+                    if (guardadas + errores === incidenciasTemp.length) {
+                        mostrarMensaje(`${guardadas} incidencias guardadas, ${errores} errores`, errores ? 'error' : 'success');
+                        incidenciasTemp = [];
+                        renderizarListaIncidencias();
+                        closeIncidenciaModal();
+                    }
+                })
+                .catch(() => {
+                    errores++;
+                    if (guardadas + errores === incidenciasTemp.length) {
+                        mostrarMensaje(`${guardadas} incidencias guardadas, ${errores} errores`, 'error');
+                        incidenciasTemp = [];
+                        renderizarListaIncidencias();
+                        closeIncidenciaModal();
+                    }
+                });
+            });
+        });
+
+        // Limpiar lista al cerrar modal
+        const oldCloseIncidenciaModal = window.closeIncidenciaModal;
+        window.closeIncidenciaModal = function() {
+            incidenciasTemp = [];
+            renderizarListaIncidencias();
+            oldCloseIncidenciaModal();
+        };
+        // Render inicial
+        renderizarListaIncidencias();
+        // --- FIN: Lógica para incidencias múltiples ---
     });
 </script>
 

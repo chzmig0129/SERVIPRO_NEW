@@ -9,6 +9,9 @@ class Blueprints extends BaseController
 {
     public function index()
     {
+        // Verificar si el usuario ha iniciado sesión
+        $this->verificarSesion();
+        
         // Cargar los modelos necesarios
         $sedeModel = new SedeModel();
         $planoModel = new PlanoModel();
@@ -138,6 +141,7 @@ class Blueprints extends BaseController
         // Cargar modelos
         $planoModel = new PlanoModel();
         $sedeModel = new SedeModel();
+        $trampaModel = new \App\Models\TrampaModel();
 
         // Obtener información del plano
         $plano = $planoModel->find($id);
@@ -147,10 +151,14 @@ class Blueprints extends BaseController
 
         // Obtener información de la sede asociada
         $sede = $sedeModel->find($plano['sede_id']);
+        
+        // Obtener las trampas desde la base de datos (fuente de verdad)
+        $trampas = $trampaModel->where('plano_id', $id)->findAll();
 
         $data = [
             'plano' => $plano,
-            'sede' => $sede
+            'sede' => $sede,
+            'trampas' => $trampas // Agregar trampas desde BD
         ];
 
         return view('blueprints/viewplano', $data);
@@ -246,8 +254,9 @@ class Blueprints extends BaseController
         }
         
         try {
-            // Cargar el modelo de planos
+            // Cargar los modelos
             $planoModel = new PlanoModel();
+            $trampaModel = new \App\Models\TrampaModel();
             
             // Obtener el plano
             $plano = $planoModel->find($id);
@@ -255,10 +264,14 @@ class Blueprints extends BaseController
                 return $this->response->setJSON(['success' => false, 'message' => 'Plano no encontrado']);
             }
             
-            // Devolver el plano con su estado
+            // Obtener las trampas desde la base de datos (fuente de verdad)
+            $trampas = $trampaModel->where('plano_id', $id)->findAll();
+            
+            // Devolver el plano con su estado y las trampas de la BD
             return $this->response->setJSON([
                 'success' => true, 
-                'plano' => $plano
+                'plano' => $plano,
+                'trampas' => $trampas // Agregar trampas desde BD
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON(['success' => false, 'message' => 'Error al obtener el estado: ' . $e->getMessage()]);
@@ -281,53 +294,228 @@ class Blueprints extends BaseController
         $coordenadaX = $this->request->getPost('coordenada_x');
         $coordenadaY = $this->request->getPost('coordenada_y');
         $idTrampa = $this->request->getPost('id_trampa'); // Obtener id_trampa si existe
+        $comentario = $this->request->getPost('comentario'); // Obtener el comentario del movimiento
         
         if (!$sedeId || !$planoId || !$tipo || !$ubicacion || !$coordenadaX || !$coordenadaY) {
             return $this->response->setJSON(['success' => false, 'message' => 'Datos incompletos']);
         }
         
         try {
-            // Cargar el modelo de trampas
+            // Cargar los modelos necesarios
             $trampaModel = new \App\Models\TrampaModel();
+            $movimientoModel = new \App\Models\MovimientoTrampaModel();
             
-            // Preparar los datos para guardar
-            $data = [
-                'sede_id' => $sedeId,
-                'plano_id' => $planoId,
-                'tipo' => $tipo,
-                'ubicacion' => $ubicacion,
-                'coordenada_x' => $coordenadaX,
-                'coordenada_y' => $coordenadaY,
-                'fecha_instalacion' => date('Y-m-d H:i:s')
-            ];
-            
-            // Si se proporcionó un id_trampa, usarlo en lugar de generar uno nuevo
+            // Si se proporcionó un id_trampa, verificar si la trampa existe y obtener sus datos anteriores
+            $trampaAnterior = null;
             if ($idTrampa) {
-                $data['id_trampa'] = $idTrampa;
-                $esTrampaMovida = true;
-            } else {
-                $esTrampaMovida = false;
+                $trampaAnterior = $trampaModel->where('id_trampa', $idTrampa)->first();
+                
+                // Si existe una trampa anterior, es un movimiento
+                if ($trampaAnterior) {
+                    // Verificar si realmente hay cambios en la posición o ubicación
+                    if ($trampaAnterior['coordenada_x'] == $coordenadaX &&
+                        $trampaAnterior['coordenada_y'] == $coordenadaY &&
+                        $trampaAnterior['ubicacion'] == $ubicacion) {
+                        return $this->response->setJSON([
+                            'success' => false,
+                            'message' => 'No se detectaron cambios en la trampa'
+                        ]);
+                    }
+                } else {
+                    // Si no existe una trampa anterior pero se proporcionó un ID, 
+                    // verificar si el ID ya está en uso por otra trampa
+                    $trampaExistente = $trampaModel->where('id_trampa', $idTrampa)->first();
+                    if ($trampaExistente) {
+                        return $this->response->setJSON([
+                            'success' => false,
+                            'message' => 'El ID de trampa ' . $idTrampa . ' ya está en uso'
+                        ]);
+                    }
+                }
             }
             
-            // Guardar la trampa y obtener el ID insertado
-            $trampaId = $trampaModel->insert($data);
+            // Si es un movimiento, actualizar la trampa existente
+            if ($trampaAnterior) {
+                // Al mover una trampa, NO actualizar ni id_trampa ni nombre (deben permanecer constantes)
+                // Solo actualizar ubicación, coordenadas y otros datos
+                $dataActualizacion = [
+                    'sede_id' => $sedeId,
+                    'plano_id' => $planoId,
+                    'tipo' => $tipo,
+                    'ubicacion' => $ubicacion,
+                    'coordenada_x' => $coordenadaX,
+                    'coordenada_y' => $coordenadaY
+                    // nombre permanece igual - solo se cambia desde el modal "Editar ID"
+                ];
+                
+                $trampaModel->update($trampaAnterior['id'], $dataActualizacion);
+                $trampaId = $trampaAnterior['id'];
+            } else {
+                // Es una trampa nueva - preparar los datos para guardar
+                $data = [
+                    'sede_id' => $sedeId,
+                    'plano_id' => $planoId,
+                    'tipo' => $tipo,
+                    'ubicacion' => $ubicacion,
+                    'coordenada_x' => $coordenadaX,
+                    'coordenada_y' => $coordenadaY,
+                    'fecha_instalacion' => date('Y-m-d H:i:s')
+                ];
+                
+                // Si se proporcionó un id_trampa, usarlo (requerido para trampas nuevas)
+                if ($idTrampa) {
+                    $data['id_trampa'] = $idTrampa;
+                    // El campo 'nombre' se inicializará automáticamente con el valor de id_trampa
+                }
+                
+                // Guardar la trampa nueva y obtener el ID insertado
+                $trampaId = $trampaModel->insert($data);
+            }
             
             // Obtener el registro completo para recuperar el id_trampa generado
             $trampa = $trampaModel->find($trampaId);
             
+            // Si es una trampa existente y sus coordenadas o ubicación han cambiado
+            if ($trampaAnterior && (
+                $trampaAnterior['coordenada_x'] != $coordenadaX ||
+                $trampaAnterior['coordenada_y'] != $coordenadaY ||
+                $trampaAnterior['ubicacion'] != $ubicacion
+            )) {
+                // Registrar el movimiento en el historial
+                $movimientoModel->insert([
+                    'id_trampa' => $idTrampa,
+                    'tipo' => $tipo,
+                    'zona_anterior' => $trampaAnterior['ubicacion'],
+                    'zona_nueva' => $ubicacion,
+                    'x_anterior' => $trampaAnterior['coordenada_x'],
+                    'y_anterior' => $trampaAnterior['coordenada_y'],
+                    'x_nueva' => $coordenadaX,
+                    'y_nueva' => $coordenadaY,
+                    'plano_id' => $planoId,
+                    'comentario' => $comentario ?: 'Sin comentario' // Guardar el comentario o un valor por defecto
+                ]);
+            }
+            
             return $this->response->setJSON([
                 'success' => true, 
-                'message' => $esTrampaMovida ? 'Trampa movida correctamente' : 'Trampa guardada correctamente',
+                'message' => $trampaAnterior ? 'Trampa movida correctamente' : 'Trampa guardada correctamente',
                 'trampa' => [
                     'id' => $trampaId,
                     'id_trampa' => $trampa['id_trampa'] ?? '',
-                    'es_movida' => $esTrampaMovida
+                    'nombre' => $trampa['nombre'] ?? '',
+                    'es_movida' => (bool)$trampaAnterior
                 ]
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
                 'success' => false, 
                 'message' => 'Error al guardar la trampa: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    // Método para actualizar el ID de una trampa
+    public function actualizar_id_trampa()
+    {
+        // Verificar si la solicitud es AJAX
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Solicitud no válida']);
+        }
+        
+        // Obtener los datos del POST
+        $trampaIdActual = $this->request->getPost('trampa_id_actual');
+        $nuevoIdTrampa = $this->request->getPost('nuevo_id_trampa');
+        
+        if (!$trampaIdActual || !$nuevoIdTrampa) {
+            return $this->response->setJSON([
+                'success' => false, 
+                'message' => 'Datos incompletos para actualizar el ID'
+            ]);
+        }
+        
+        try {
+            // Cargar el modelo de trampas
+            $trampaModel = new \App\Models\TrampaModel();
+            
+            // Buscar la trampa por su ID actual (puede ser id_trampa o id)
+            $trampa = $trampaModel->where('id_trampa', $trampaIdActual)->first();
+            
+            // Si no se encuentra por id_trampa, buscar por id
+            if (!$trampa) {
+                $trampa = $trampaModel->find($trampaIdActual);
+            }
+            
+            // Si es un ID temporal, buscar trampas recientes sin id_trampa o con ID temporal
+            if (!$trampa && strpos($trampaIdActual, 'TEMP-') === 0) {
+                // Para IDs temporales, buscar la trampa más reciente de este plano
+                $planoId = $this->request->getPost('plano_id');
+                if ($planoId) {
+                    $trampa = $trampaModel->where('plano_id', $planoId)
+                                         ->where('id_trampa IS NULL OR id_trampa = ""')
+                                         ->orderBy('id', 'DESC')
+                                         ->first();
+                }
+            }
+            
+            if (!$trampa) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'No se encontró la trampa especificada'
+                ]);
+            }
+            
+            // IMPORTANTE: Este método actualiza el NOMBRE de la trampa, NO el id_trampa
+            // El id_trampa es único y permanente, el nombre es lo que los inspectores editan
+            
+            // Verificar que el nuevo nombre no esté ya en uso por otra trampa (opcional)
+            // Comentado porque el nombre podría repetirse entre trampas
+            // $trampaExistente = $trampaModel->where('nombre', $nuevoIdTrampa)
+            //                               ->where('id !=', $trampa['id'])
+            //                               ->first();
+            // 
+            // if ($trampaExistente) {
+            //     return $this->response->setJSON([
+            //         'success' => false,
+            //         'message' => 'El nombre "' . $nuevoIdTrampa . '" ya está en uso por otra trampa'
+            //     ]);
+            // }
+            
+            // Actualizar el NOMBRE de la trampa (no el id_trampa que permanece constante)
+            $actualizado = $trampaModel->update($trampa['id'], ['nombre' => $nuevoIdTrampa]);
+            
+            if ($actualizado) {
+                // Obtener la trampa actualizada con todos sus datos
+                $trampaActualizada = $trampaModel->find($trampa['id']);
+                
+                // Debug temporal: Verificar que el tipo se mantiene
+                log_message('info', 'Trampa actualizada - Tipo: ' . ($trampaActualizada['tipo'] ?? 'NULL') . ', Nombre: ' . $trampaActualizada['nombre']);
+                
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Nombre de trampa actualizado correctamente',
+                    'trampa' => [
+                        'id' => $trampaActualizada['id'],
+                        'id_trampa' => $trampaActualizada['id_trampa'], // Permanece igual
+                        'nombre' => $trampaActualizada['nombre'], // Nuevo nombre
+                        'tipo' => $trampaActualizada['tipo'], // Mantener tipo
+                        'ubicacion' => $trampaActualizada['ubicacion'], // Mantener ubicación
+                        'coordenada_x' => $trampaActualizada['coordenada_x'], // Mantener coordenadas
+                        'coordenada_y' => $trampaActualizada['coordenada_y'],
+                        'nombre_anterior' => $trampa['nombre'],
+                        'nombre_nuevo' => $nuevoIdTrampa
+                    ]
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Error al actualizar el nombre en la base de datos'
+                ]);
+            }
+            
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error al actualizar el ID: ' . $e->getMessage()
             ]);
         }
     }
@@ -573,6 +761,19 @@ class Blueprints extends BaseController
             'incidencias' => $incidencias,
             'estadoPlano' => $estadoPlano
         ];
+
+        // Obtener lista de plagas únicas para filtros
+        $db = \Config\Database::connect();
+        $query = $db->table('incidencias i')
+            ->select('DISTINCT(i.tipo_plaga) as plaga')
+            ->join('trampas t', 'i.id_trampa = t.id')
+            ->where('t.plano_id', $id)
+            ->where('i.tipo_plaga IS NOT NULL')
+            ->where('i.tipo_plaga !=', '')
+            ->orderBy('i.tipo_plaga', 'ASC')
+            ->get();
+        
+        $data['listaPlagas'] = $query->getResultArray();
 
         return view('blueprints/ver_imagen', $data);
     }

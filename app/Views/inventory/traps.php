@@ -1,6 +1,10 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<h1 class="text-3xl font-bold mb-6">Trampas</h1>
-<p class="text-lg">Control de trampas y dispositivos</p>
+<div class="bg-gradient-to-r from-blue-500 to-blue-700 rounded-xl p-6 text-white shadow-lg text-center mb-6">
+    <div class="flex flex-col items-center justify-center">
+        <h1 class="text-3xl font-bold text-white mb-2">Trampas</h1>
+        <p class="text-blue-100">Control de trampas y dispositivos</p>
+    </div>
+</div>
 <?= $this->endSection() ?> 

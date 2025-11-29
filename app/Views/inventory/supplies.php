@@ -1,6 +1,10 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<h1 class="text-3xl font-bold mb-6">Consumibles</h1>
-<p class="text-lg">Gestión de insumos y materiales</p>
+<div class="bg-gradient-to-r from-blue-500 to-blue-700 rounded-xl p-6 text-white shadow-lg text-center mb-6">
+    <div class="flex flex-col items-center justify-center">
+        <h1 class="text-3xl font-bold text-white mb-2">Consumibles</h1>
+        <p class="text-blue-100">Gestión de insumos y materiales</p>
+    </div>
+</div>
 <?= $this->endSection() ?> 

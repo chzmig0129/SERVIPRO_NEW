@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Sedes</title>
+    <title>Reporte de Plantas</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,7 +37,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Reporte de Sedes</h1>
+        <h1>Reporte de Plantas</h1>
     </div>
     
     <div class="fecha">

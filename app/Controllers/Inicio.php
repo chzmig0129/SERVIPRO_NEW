@@ -9,6 +9,9 @@ class inicio extends BaseController
 {
     public function index(): string
     {
+        // Verificar si el usuario ha iniciado sesión
+        $this->verificarSesion();
+        
         // Cargar los modelos necesarios
         $sedeModel = new SedeModel();
         $trampaModel = new TrampaModel();

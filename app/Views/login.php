@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ServiPro - Control de Plagas | Login</title>
     <style>
+        :root {
+            --primary-color: #3bb78f;
+            --primary-light: #45c89b;
+            --primary-dark: #2e9671;
+            --secondary-color: #e74c3c;
+            --text-color: #333;
+            --light-color: #f8f9fa;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -22,6 +31,10 @@
             animation: gradient 15s ease infinite;
             padding: 20px;
             overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: var(--text-color);
+            position: relative;
         }
 
         @keyframes gradient {
@@ -331,6 +344,19 @@
         @keyframes fadeOut {
             to { opacity: 0; }
         }
+
+        /* Estilo para el mensaje de error de sesión */
+        .error-message {
+            background-color: #ffe0e0;
+            color: #e74c3c;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-left: 4px solid #e74c3c;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
 <body>
@@ -355,26 +381,33 @@
             <i class="fas fa-bug"></i>
         </div>
         <h1>Bienvenidos a ServiPro</h1>
-<form id="loginForm">
-    <div class="input-group">
-        <label for="usuario">Usuario</label>
-        <input 
-            type="text" 
-            id="usuario" 
-            name="usuario" 
-            placeholder="Ingresa tu usuario"
-            required>
-    </div>
-    <div class="input-group">
-        <label for="password">Contraseña</label>
-        <input 
-            type="password" 
-            id="password" 
-            name="password" 
-            placeholder="Ingresa tu contraseña"
-            required>
-    </div>
-</form>
+        
+        <!-- Área para mostrar mensajes de error de sesión -->
+        <?php if(session()->getFlashdata('error')): ?>
+        <div class="error-message">
+            <?= session()->getFlashdata('error') ?>
+        </div>
+        <?php endif; ?>
+        
+        <form id="loginForm" action="<?= base_url('authenticate') ?>" method="post">
+            <div class="input-group">
+                <label for="usuario">Usuario</label>
+                <input 
+                    type="text" 
+                    id="usuario" 
+                    name="usuario" 
+                    placeholder="Ingresa tu usuario"
+                    required>
+            </div>
+            <div class="input-group">
+                <label for="password">Contraseña</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="Ingresa tu contraseña"
+                    required>
+            </div>
 
             <div class="forgot-password">
                 <a href="#" id="forgotPassword">¿Olvidaste tu contraseña?</a>
@@ -438,22 +471,90 @@
         // Manejar el envío del formulario
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            processLogin_original();
+        });
+        
+        // También agregamos un evento directamente al botón como respaldo
+        document.querySelector('.login-button').addEventListener('click', function(e) {
+            e.preventDefault();
+            processLogin_original();
+        });
+        
+        // Función de login que verifica el usuario en la base de datos usando el server
+        function processLogin_original() {
+            const usuario = document.getElementById('usuario').value;
+            const password = document.getElementById('password').value;
+            
+            // Validación básica
+            if (!usuario || !password) {
+                alert('Por favor, completa todos los campos');
+                return;
+            }
             
             const button = document.querySelector('.login-button');
             button.innerHTML = '<span style="display: inline-block; animation: pulse 1s infinite;">Procesando...</span>';
             button.style.pointerEvents = 'none';
             
-            setTimeout(() => {
-                button.innerHTML = '<span>¡Bienvenido!</span>';
-                button.style.background = '#2ecc71';
+            // Enviar datos al servidor
+            fetch('<?= base_url('authenticate') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'usuario': usuario,
+                    'password': password
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Guardar información de sesión en localStorage
+                    localStorage.setItem('servipro_user', JSON.stringify({
+                        nombre: data.user.nombre,
+                        correo: data.user.correo,
+                        logged_in: true
+                    }));
+                    
+                    // Login exitoso
+                    button.innerHTML = '<span>¡Bienvenido!</span>';
+                    button.style.background = '#2ecc71';
+                    
+                    setTimeout(() => {
+                        // Redireccionar al dashboard principal
+                        window.location.href = '<?= base_url("Inicio") ?>';
+                    }, 1000);
+                } else {
+                    // Error de autenticación
+                    button.innerHTML = '<span>Error</span>';
+                    button.style.background = '#e74c3c';
+                    
+                    setTimeout(() => {
+                        button.innerHTML = '<span>Iniciar Sesión</span>';
+                        button.style.pointerEvents = 'auto';
+                        button.style.background = '#3bb78f';
+                        alert(data.message || 'Usuario o contraseña incorrectos');
+                    }, 1000);
+                }
+            })
+            .catch(error => {
+                console.error('Error de autenticación:', error);
+                button.innerHTML = '<span>Error</span>';
+                button.style.background = '#e74c3c';
                 
                 setTimeout(() => {
                     button.innerHTML = '<span>Iniciar Sesión</span>';
                     button.style.pointerEvents = 'auto';
                     button.style.background = '#3bb78f';
-                }, 2000);
-            }, 1500);
-        });
+                    alert('Error de conexión. Por favor, inténtalo de nuevo.');
+                }, 1000);
+            });
+        }
 
         // Efecto de spray al hacer clic
         document.addEventListener('click', function(e) {
@@ -502,9 +603,9 @@
 
         // Enlaces interactivos
         document.getElementById('forgotPassword').addEventListener('click', function(e) {
-    e.preventDefault();
-    window.location.href = 'Inicio'; // Reemplaza con la URL de tu dashboard
-});
+            e.preventDefault();
+            alert('Función de recuperación de contraseña en desarrollo');
+        });
 
         document.getElementById('registerLink').addEventListener('click', function(e) {
             e.preventDefault();

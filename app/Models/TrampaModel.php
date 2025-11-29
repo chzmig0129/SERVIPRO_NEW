@@ -8,69 +8,60 @@ class TrampaModel extends Model
 {
     protected $table      = 'trampas'; // Nombre de la tabla
     protected $primaryKey = 'id';     // Clave primaria
-
+  
     protected $allowedFields = [
-        'id_trampa', 'sede_id', 'plano_id', 'tipo', 'ubicacion', 
-        'coordenada_x', 'coordenada_y', 'fecha_instalacion', 'estado'
+        'id_trampa', 'sede_id', 'plano_id','nombre', 'tipo', 'ubicacion', 
+        'coordenada_x', 'coordenada_y', 'fecha_instalacion'
     ]; // Campos permitidos
     
     // Definir hooks para procesar datos antes de insertar
-    protected $beforeInsert = ['generarIdTrampa'];
+    protected $beforeInsert = ['inicializarNombre'];
     
     /**
-     * Genera un ID único para cada trampa antes de insertarla
+     * Inicializa el campo nombre con el valor de id_trampa si no se proporciona
      * 
      * @param array $data Datos a insertar
-     * @return array Datos modificados con el ID único
+     * @return array Datos modificados
      */
-    protected function generarIdTrampa(array $data)
+    protected function inicializarNombre(array $data)
     {
-        // Si ya se proporcionó un id_trampa, no lo sobrescribimos
-        if (!empty($data['data']['id_trampa'])) {
-            return $data;
+        // Si no se proporcionó un nombre, usar el id_trampa como nombre inicial
+        if (empty($data['data']['nombre']) && !empty($data['data']['id_trampa'])) {
+            $data['data']['nombre'] = $data['data']['id_trampa'];
         }
-        
-        // Generar un ID único para la trampa
-        $data['data']['id_trampa'] = $this->generarCodigoUnico();
         
         return $data;
     }
     
     /**
-     * Genera un código único de 4 dígitos para la trampa
+     * Busca una trampa por su id_trampa (identificador único)
      * 
-     * @return string Código único generado de 4 dígitos
+     * @param string $idTrampa ID de la trampa a buscar
+     * @return array|null Datos de la trampa o null si no existe
      */
-    private function generarCodigoUnico()
+    public function buscarPorIdTrampa($idTrampa)
     {
-        // Obtener el último ID numérico
-        $ultimoId = $this->obtenerUltimoNumeroSecuencial();
-        
-        // Incrementar en 1 y asegurar que sea de 4 dígitos
-        $nuevoId = $ultimoId + 1;
-        $idFormateado = str_pad($nuevoId, 4, '0', STR_PAD_LEFT);
-        
-        return $idFormateado;
+        return $this->where('id_trampa', $idTrampa)->first();
     }
     
     /**
-     * Obtiene el último número secuencial usado
+     * Actualiza el nombre de una trampa existente (cuando se mueve de lugar)
      * 
-     * @return int Último número secuencial
+     * @param string $idTrampa ID de la trampa a actualizar
+     * @param string $nuevoNombre Nuevo nombre para la trampa
+     * @param array $otrosDatos Otros campos a actualizar (ubicacion, coordenadas, etc.)
+     * @return bool True si se actualizó correctamente
      */
-    private function obtenerUltimoNumeroSecuencial()
+    public function actualizarNombreTrampa($idTrampa, $nuevoNombre, $otrosDatos = [])
     {
-        // Buscar el último id_trampa numérico
-        $ultimaTrampa = $this->select('id_trampa')
-                             ->orderBy('id', 'DESC')
-                             ->first();
+        $trampa = $this->buscarPorIdTrampa($idTrampa);
         
-        if (empty($ultimaTrampa)) {
-            return 0;
+        if (!$trampa) {
+            return false;
         }
         
-        // Convertir a entero, si no es numérico retornar 0
-        $ultimoId = (int) $ultimaTrampa['id_trampa'];
-        return $ultimoId > 0 ? $ultimoId : 0;
+        $datosActualizar = array_merge(['nombre' => $nuevoNombre], $otrosDatos);
+        
+        return $this->update($trampa['id'], $datosActualizar);
     }
 }

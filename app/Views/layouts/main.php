@@ -4,28 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Control de Plagas' ?></title>
+    
+    <!-- Script de verificación de sesión -->
+    <script>
+        // Verificar si el usuario ha iniciado sesión
+        function verificarSesion() {
+            const userInfo = localStorage.getItem('servipro_user');
+            if (!userInfo) {
+                // Si no hay información de usuario en localStorage, redirigir al login
+                window.location.href = '<?= base_url() ?>';
+                return false;
+            }
+            
+            try {
+                const user = JSON.parse(userInfo);
+                if (!user.logged_in) {
+                    // Si no tiene la propiedad logged_in, redirigir al login
+                    window.location.href = '<?= base_url() ?>';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Error al verificar sesión:', error);
+                window.location.href = '<?= base_url() ?>';
+                return false;
+            }
+        }
+        
+        // Ejecutar la verificación al cargar la página
+        verificarSesion();
+    </script>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="<?=base_url()?>css/styles.css?v=1.0">
+    
+    <!-- Bibliotecas para exportación -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+    
+    <?= $this->renderSection('styles') ?>
 </head>
 <body class="bg-gray-100">
-    <!-- Botón para toggle del sidebar -->
-    <button id="sidebar-toggle" class="fixed top-4 left-6 lg:left-[270px] p-2 bg-white rounded-lg shadow-md hover:bg-gray-100 z-50 transition-all duration-300">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu">
-            <line x1="4" y1="12" x2="20" y2="12"/>
-            <line x1="4" y1="6" x2="20" y2="6"/>
-            <line x1="4" y1="18" x2="20" y2="18"/>
-        </svg>
-    </button>
+    <!-- Sidebar -->
+    <?= $this->include('partials/sidebar') ?>
 
-    <div class="min-h-screen flex">
-        <!-- Sidebar -->
-        <?= $this->include('partials/sidebar') ?>
-
-        <!-- Contenido principal -->
-        <main class="flex-1 p-6 transition-all duration-300" id="main-content">
+    <!-- Contenido principal -->
+    <div class="lg:pl-72">
+        <main class="p-6" id="main-content">
             <?= $this->renderSection('content') ?>
         </main>
     </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
 
     <!-- Scripts -->
     <script>
@@ -43,43 +86,8 @@
             mobileSidebar.style.transform = 'translateX(-100%)';
             mobileSidebarOverlay.style.display = 'none';
         });
-
-        const sidebar = document.querySelector('aside');
-        const mainContent = document.getElementById('main-content');
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-        let sidebarVisible = true;
-
-        // Función para actualizar el padding del contenido principal
-        function updateMainContentPadding() {
-            if (window.innerWidth >= 1024) { // lg breakpoint
-                mainContent.style.paddingLeft = sidebarVisible ? '288px' : '24px'; // 288px = 72rem (lg:pl-72)
-            } else {
-                mainContent.style.paddingLeft = '24px'; // 24px = 6 (p-6)
-            }
-        }
-
-        // Inicializar el padding
-        updateMainContentPadding();
-
-        // Actualizar cuando se redimensiona la ventana
-        window.addEventListener('resize', updateMainContentPadding);
-
-        sidebarToggle.addEventListener('click', () => {
-            sidebarVisible = !sidebarVisible;
-            
-            if (sidebarVisible) {
-                sidebar.classList.remove('-translate-x-full');
-                sidebar.classList.add('translate-x-0');
-                sidebarToggle.classList.add('lg:left-[270px]');
-                sidebarToggle.classList.remove('left-6');
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                sidebar.classList.remove('translate-x-0');
-                sidebarToggle.classList.remove('lg:left-[270px]');
-                sidebarToggle.classList.add('left-6');
-            }
-            updateMainContentPadding();
-        });
     </script>
+
+    <?= $this->renderSection('scripts') ?>
 </body>
 </html> 

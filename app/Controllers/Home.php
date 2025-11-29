@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Models\SedeModel;
 use App\Models\TrampaModel;
 use App\Models\PlanoModel;
+use App\Models\UsuarioModel;
 
 class Home extends BaseController
 {
@@ -126,5 +127,154 @@ class Home extends BaseController
         }
         
         return $output;
+    }
+
+    public function authenticate()
+    {
+        try {
+            // Obtener datos del formulario
+            $usuario = $this->request->getPost('usuario');
+            $password = $this->request->getPost('password');
+
+            // Validaciones básicas
+            if (empty($usuario) || empty($password)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Usuario y contraseña son requeridos'
+                ]);
+            }
+            
+            // Cargar el modelo de usuarios
+            $usuarioModel = new UsuarioModel();
+            
+            // Verificar si el usuario existe por correo
+            $user = $usuarioModel->where('correo', $usuario)->first();
+            
+            // Si no lo encuentra por correo, verificar por nombre de usuario
+            if (!$user) {
+                $user = $usuarioModel->where('nombre', $usuario)->first();
+            }
+            
+            // Si no se encuentra el usuario
+            if (!$user) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado'
+                ]);
+            }
+            
+            // Verificar contraseña
+            if (!isset($user['password']) || $user['password'] != $password) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Contraseña incorrecta'
+                ]);
+            }
+            
+            // Si todo está correcto, iniciar sesión
+            $session = session();
+            $userData = [
+                'id' => $user['id'],
+                'nombre' => $user['nombre'],
+                'correo' => $user['correo'] ?? '',
+                'logged_in' => true
+            ];
+            $session->set($userData);
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => '¡Bienvenido!',
+                'user' => $userData
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error en authenticate: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error en el servidor'
+            ]);
+        }
+    }
+
+    public function crear_usuario_prueba()
+    {
+        try {
+            // Conectar a la base de datos
+            $db = \Config\Database::connect();
+            
+            // Verificar si existe la tabla usuarios
+            $tableExists = $db->tableExists('usuarios');
+            
+            if (!$tableExists) {
+                // Crear la tabla usuarios
+                $forge = \Config\Database::forge();
+                
+                $fields = [
+                    'id' => [
+                        'type' => 'INT',
+                        'constraint' => 11,
+                        'unsigned' => true,
+                        'auto_increment' => true,
+                    ],
+                    'nombre' => [
+                        'type' => 'VARCHAR',
+                        'constraint' => 100,
+                    ],
+                    'correo' => [
+                        'type' => 'VARCHAR',
+                        'constraint' => 100,
+                    ],
+                    'password' => [
+                        'type' => 'VARCHAR',
+                        'constraint' => 255,
+                    ],
+                ];
+                
+                $forge->addField($fields);
+                $forge->addKey('id', true);
+                $forge->createTable('usuarios', true);
+                
+                echo "Tabla usuarios creada correctamente.<br>";
+            } else {
+                echo "La tabla usuarios ya existe.<br>";
+            }
+            
+            // Crear usuario de prueba
+            $usuarioModel = new UsuarioModel();
+            
+            // Verificar si el usuario admin ya existe
+            $admin = $usuarioModel->where('correo', 'admin@servipro.com')->first();
+            
+            if (!$admin) {
+                $data = [
+                    'nombre' => 'Administrador',
+                    'correo' => 'admin@servipro.com',
+                    'password' => 'admin123'
+                ];
+                
+                $usuarioModel->insert($data);
+                echo "Usuario de prueba creado correctamente.<br>";
+                echo "Correo: admin@servipro.com<br>";
+                echo "Contraseña: admin123<br>";
+            } else {
+                echo "El usuario de prueba ya existe.<br>";
+                echo "Correo: admin@servipro.com<br>";
+                echo "Contraseña: admin123<br>";
+            }
+            
+            return "¡Listo! Ahora puedes iniciar sesión con el usuario de prueba.";
+            
+        } catch (\Exception $e) {
+            return "Error: " . $e->getMessage();
+        }
+    }
+
+    /**
+     * Cierra la sesión del usuario y redirige al login
+     */
+    public function logout()
+    {
+        $session = session();
+        $session->destroy();
+        return redirect()->to('/');
     }
 }

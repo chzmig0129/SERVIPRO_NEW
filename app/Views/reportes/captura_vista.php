@@ -151,12 +151,12 @@
             <?php 
             // Colores según tipo de trampa
             $colorMap = [
-                'Pegajosa' => 'blue',
-                'Luz UV' => 'purple',
-                'Cebos' => 'green',
-                'Jaula' => 'brown',
-                'Electrónica' => 'orange',
-                'Feromonas' => 'pink'
+                'Pegajosa' => '#3B82F6',
+                'Luz UV' => '#1E3A8A',
+                'Cebos' => '#1D4ED8',
+                'Jaula' => '#2563EB',
+                'Electrónica' => '#1E40AF',
+                'Feromonas' => '#1D4ED8'
             ];
             
             // Agregar marcadores de trampas

@@ -3,15 +3,17 @@
 <?= $this->section('content') ?>
 <div class="space-y-6">
     <!-- Encabezado -->
-    <div class="flex flex-col gap-4">
-        <h1 class="text-3xl font-bold">Personal</h1>
-        <p class="text-gray-500">Gestión de empleados y técnicos por sede</p>
+    <div class="bg-gradient-to-r from-blue-500 to-blue-700 rounded-xl p-6 text-white shadow-lg text-center mb-6">
+        <div class="flex flex-col items-center justify-center">
+            <h1 class="text-3xl font-bold text-white mb-2">Personal</h1>
+            <p class="text-blue-100">Gestión de empleados y técnicos por sede</p>
+        </div>
     </div>
 
     <!-- Controles -->
     <div class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <!-- Selector de Sede -->
-        <select id="location-select" class="w-full md:w-64 p-2 border border-gray-300 rounded-lg bg-white">
+        <select id="location-select" class="w-full md:w-64 p-2 border border-white rounded-lg bg-white text-blue-700 font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
             <option value="">Seleccionar Sede</option>
             <option value="1">Sede Central</option>
             <option value="2">Sede Norte</option>
