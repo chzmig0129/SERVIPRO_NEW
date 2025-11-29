@@ -4,12 +4,16 @@ namespace App\Controllers;
 use App\Models\SedeModel;
 use App\Models\TrampaModel;
 use App\Models\IncidenciaModel;
+use App\Models\UmbralModel;
 use CodeIgniter\I18n\Time;
 
 class Locations extends BaseController
 {
     public function index(): string
     {
+        // Verificar si el usuario ha iniciado sesión
+        $this->verificarSesion();
+        
         // Agregar logs para depuración
         log_message('debug', 'Iniciando carga de sedes');
         
@@ -53,6 +57,23 @@ class Locations extends BaseController
         $data['totalCapturas'] = 0;
         $data['efectividad'] = 0;
         $data['capturasPorMes'] = [];
+        
+        // Obtener filtros de fecha para gráficas
+        $fechaInicio = $this->request->getGet('fecha_inicio');
+        $fechaFin = $this->request->getGet('fecha_fin');
+        
+        // Agregar las fechas a los datos para la vista
+        $data['fechaInicio'] = $fechaInicio;
+        $data['fechaFin'] = $fechaFin;
+        
+        // Preparar condición de fecha para las consultas
+        $condicionFecha = '';
+        if (!empty($fechaInicio) && !empty($fechaFin)) {
+            // El formato de fechaInicio y fechaFin debe ser YYYY-MM-DD
+            // Creamos la condición SQL para filtrar por fecha
+            $condicionFecha = " AND i.fecha BETWEEN '{$fechaInicio} 00:00:00' AND '{$fechaFin} 23:59:59'";
+            log_message('debug', 'Filtro de fecha aplicado: ' . $condicionFecha);
+        }
 
         try {
             // Obtener el total de trampas para la sede
@@ -61,26 +82,80 @@ class Locations extends BaseController
 
             // Obtener el detalle de las trampas (nombre, tipo y ubicación)
             $query = $db->table('trampas')
-                ->select('id, nombre, tipo, ubicacion')
+                ->select('id, nombre, tipo, ubicacion, fecha_instalacion, plano_id')
                 ->where('sede_id', $sedeSeleccionada)
                 ->get();
             $data['trampasDetalle'] = $query->getResultArray();
 
+            // Base query para incidencias con filtro de fecha
+            $baseQuery = "sede_id = {$sedeSeleccionada}";
+            if (!empty($condicionFecha)) {
+                $baseQuery .= $condicionFecha;
+            }
+            
             // Obtener el total de incidencias agrupadas por tipo_incidencia y tipo_plaga
-            $query = $db->table('incidencias')
-                ->select('tipo_incidencia,tipo_insecto, tipo_plaga, SUM(cantidad_organismos) as cantidad_organismos, COUNT(*) as total')
-                ->where('sede_id', $sedeSeleccionada)
-                ->groupBy(['tipo_incidencia', 'tipo_plaga'])
-                ->get();
+            if (empty($condicionFecha)) {
+                // Sin filtro de fecha
+                $query = $db->table('incidencias')
+                    ->select('tipo_incidencia, tipo_insecto, tipo_plaga, SUM(cantidad_organismos) as cantidad_organismos, COUNT(*) as total')
+                    ->where('sede_id', $sedeSeleccionada)
+                    ->groupBy(['tipo_incidencia', 'tipo_plaga'])
+                    ->get();
+            } else {
+                // Con filtro de fecha
+                $query = $db->query("
+                    SELECT tipo_incidencia, tipo_insecto, tipo_plaga, 
+                           SUM(cantidad_organismos) as cantidad_organismos, 
+                           COUNT(*) as total
+                    FROM incidencias i
+                    WHERE sede_id = {$sedeSeleccionada} {$condicionFecha}
+                    GROUP BY tipo_incidencia, tipo_plaga
+                ");
+            }
             $data['totalIncidenciasPorTipo'] = $query->getResultArray();
 
+            // Obtener todas las incidencias sin agrupar para la tabla "Detalle de Incidencias"
+            // Incluir JOIN con trampas para obtener ID de trampa y tipo de trampa
+            // Usar INNER JOIN para asegurar que solo se muestren incidencias con trampas válidas de la sede
+            if (empty($condicionFecha)) {
+                // Sin filtro de fecha
+                $query = $db->table('incidencias i')
+                    ->select('i.id, i.tipo_incidencia, i.tipo_insecto, i.tipo_plaga, i.cantidad_organismos, i.fecha, t.id_trampa, t.tipo as tipo_trampa')
+                    ->join('trampas t', 'i.id_trampa = t.id', 'inner')
+                    ->where('i.sede_id', $sedeSeleccionada)
+                    ->where('t.sede_id', $sedeSeleccionada) // Asegurar que la trampa pertenece a la sede seleccionada
+                    ->orderBy('i.fecha', 'DESC')
+                    ->get();
+            } else {
+                // Con filtro de fecha
+                $query = $db->query("
+                    SELECT i.id, i.tipo_incidencia, i.tipo_insecto, i.tipo_plaga, i.cantidad_organismos, i.fecha, 
+                           t.id_trampa, t.tipo as tipo_trampa
+                    FROM incidencias i
+                    INNER JOIN trampas t ON i.id_trampa = t.id
+                    WHERE i.sede_id = {$sedeSeleccionada} 
+                    AND t.sede_id = {$sedeSeleccionada}
+                    {$condicionFecha}
+                    ORDER BY i.fecha DESC
+                ");
+            }
+            $data['todasLasIncidencias'] = $query->getResultArray();
+
             // Obtener el total de capturas (solo incidencias de tipo "Captura")
-            $query = $db->table('incidencias i')
-                ->select('COUNT(*) as totalCapturas')
-                ->join('trampas t', 'i.id_trampa = t.id')
-                ->where('t.sede_id', $sedeSeleccionada)
-                ->where('i.tipo_incidencia', 'Captura')
-                ->get();
+            $capturaQuery = "
+                SELECT COUNT(*) as totalCapturas
+                FROM incidencias i
+                JOIN trampas t ON i.id_trampa = t.id
+                WHERE i.sede_id = {$sedeSeleccionada}
+                AND i.tipo_incidencia = 'Captura'
+            ";
+            
+            // Agregar filtro de fecha si existe
+            if (!empty($condicionFecha)) {
+                $capturaQuery .= $condicionFecha;
+            }
+            
+            $query = $db->query($capturaQuery);
             $result = $query->getRow();
             $data['totalCapturas'] = $result->totalCapturas ?? 0;
 
@@ -90,25 +165,67 @@ class Locations extends BaseController
             }
 
             // Obtener las capturas por mes
-            $query = $db->table('incidencias i')
-                ->select("DATE_FORMAT(i.fecha, '%Y-%m') as mes, i.tipo_plaga, COUNT(*) as total")
-                ->join('trampas t', 'i.id_trampa = t.id')
-                ->where('t.sede_id', $sedeSeleccionada)
-                ->groupBy(["mes", "i.tipo_plaga"])
-                ->orderBy("mes", "ASC")
-                ->get();
+            $incidenciasPorTipoPlagaQuery = "
+                SELECT DATE_FORMAT(i.fecha, '%Y-%m') as mes, i.tipo_plaga, COUNT(*) as total
+                FROM incidencias i
+                JOIN trampas t ON i.id_trampa = t.id
+                WHERE i.sede_id = {$sedeSeleccionada}
+            ";
             
+            // Agregar filtro de fecha si existe
+            if (!empty($condicionFecha)) {
+                $incidenciasPorTipoPlagaQuery .= $condicionFecha;
+            }
+            
+            $incidenciasPorTipoPlagaQuery .= "
+                GROUP BY mes, i.tipo_plaga
+                ORDER BY mes ASC
+            ";
+            
+            $query = $db->query($incidenciasPorTipoPlagaQuery);
             $data['incidenciasPorTipoPlaga'] = $query->getResultArray();
             
-            $query = $db->table('incidencias i')
-                ->select("DATE_FORMAT(i.fecha, '%Y-%m') as mes, i.tipo_incidencia, COUNT(*) as total")
-                ->join('trampas t', 'i.id_trampa = t.id')
-                ->where('t.sede_id', $sedeSeleccionada)
-                ->groupBy(["mes", "i.tipo_incidencia"])
-                ->orderBy("mes", "ASC")
-                ->get();
-
+            $incidenciasPorTipoIncidenciaQuery = "
+                SELECT DATE_FORMAT(i.fecha, '%Y-%m') as mes, i.tipo_incidencia, COUNT(*) as total
+                FROM incidencias i
+                JOIN trampas t ON i.id_trampa = t.id
+                WHERE i.sede_id = {$sedeSeleccionada}
+            ";
+            
+            // Agregar filtro de fecha si existe
+            if (!empty($condicionFecha)) {
+                $incidenciasPorTipoIncidenciaQuery .= $condicionFecha;
+            }
+            
+            $incidenciasPorTipoIncidenciaQuery .= "
+                GROUP BY mes, i.tipo_incidencia
+                ORDER BY mes ASC
+            ";
+            
+            $query = $db->query($incidenciasPorTipoIncidenciaQuery);
             $data['incidenciasPorTipoIncidencia'] = $query->getResultArray();
+
+            // Obtener lista de plagas para el selector de filtro
+            $listaPlagasQuery = "
+                SELECT DISTINCT(i.tipo_plaga) as plaga
+                FROM incidencias i
+                JOIN trampas t ON i.id_trampa = t.id
+                WHERE i.sede_id = {$sedeSeleccionada}
+                AND i.tipo_plaga IS NOT NULL
+                AND i.tipo_plaga != ''
+            ";
+            
+            // Agregar filtro de fecha si existe
+            if (!empty($condicionFecha)) {
+                $listaPlagasQuery .= $condicionFecha;
+            }
+            
+            $listaPlagasQuery .= "
+                ORDER BY i.tipo_plaga ASC
+            ";
+            
+            $query = $db->query($listaPlagasQuery);
+            $data['listaPlagas'] = $query->getResultArray();
             
             // Obtener el nombre de la sede seleccionada
             $sedeSeleccionadaNombre = "";
@@ -145,23 +262,11 @@ class Locations extends BaseController
 
             $data['planos'] = $planos;
             
-            // Obtener lista de plagas para el selector de filtro
-            $query = $db->table('incidencias i')
-                ->select('DISTINCT(i.tipo_plaga) as plaga')
-                ->join('trampas t', 'i.id_trampa = t.id')
-                ->where('t.sede_id', $sedeSeleccionada)
-                ->where('i.tipo_plaga IS NOT NULL')
-                ->where('i.tipo_plaga !=', '')
-                ->orderBy('i.tipo_plaga', 'ASC')
-                ->get();
-            
-            $data['listaPlagas'] = $query->getResultArray();
-            
             // Obtener lista de meses disponibles para filtro
             $query = $db->table('incidencias i')
                 ->select("DISTINCT(DATE_FORMAT(i.fecha, '%Y-%m')) as mes_valor, DATE_FORMAT(i.fecha, '%Y-%m') as mes_fecha")
                 ->join('trampas t', 'i.id_trampa = t.id')
-                ->where('t.sede_id', $sedeSeleccionada)
+                ->where('i.sede_id', $sedeSeleccionada)
                 ->orderBy('i.fecha', 'DESC')
                 ->get();
             
@@ -208,71 +313,142 @@ class Locations extends BaseController
             
             $data['plagaSeleccionada'] = $plagaSeleccionada;
             
-            // Consulta para obtener las plagas con mayor presencia en la sede (filtrada por mes si está seleccionado)
-            $builder = $db->table('incidencias i')
-                ->select('i.tipo_plaga, SUM(i.cantidad_organismos) as total_organismos')
-                ->join('trampas t', 'i.id_trampa = t.id')
-                ->where('t.sede_id', $sedeSeleccionada);
-                
+            // Consulta para obtener las plagas con mayor presencia en la sede (filtrada por mes y fecha si está seleccionado)
+            $plagasMayorPresenciaQuery = "
+                SELECT i.tipo_plaga, SUM(i.cantidad_organismos) as total_organismos
+                FROM incidencias i
+                JOIN trampas t ON i.id_trampa = t.id
+                WHERE i.sede_id = {$sedeSeleccionada}
+            ";
+            
             // Aplicar filtro de mes si está seleccionado
             if (!empty($mesSeleccionado)) {
-                $builder->where("DATE_FORMAT(i.fecha, '%Y-%m')", $mesSeleccionado);
+                $plagasMayorPresenciaQuery .= " AND DATE_FORMAT(i.fecha, '%Y-%m') = '{$mesSeleccionado}'";
             }
             
-            $query = $builder->groupBy('i.tipo_plaga')
-                ->orderBy('total_organismos', 'DESC')
-                ->get();
+            // Aplicar filtro de fecha si existe
+            if (!empty($condicionFecha)) {
+                $plagasMayorPresenciaQuery .= $condicionFecha;
+            }
             
+            $plagasMayorPresenciaQuery .= "
+                GROUP BY i.tipo_plaga
+                ORDER BY total_organismos DESC
+            ";
+            
+            $query = $db->query($plagasMayorPresenciaQuery);
             $data['plagasMayorPresencia'] = $query->getResultArray();
             
             // Consulta para obtener las áreas con mayor incidencia de la plaga seleccionada
             if (!empty($plagaSeleccionada)) {
-                $query = $db->table('incidencias i')
-                    ->select('t.ubicacion, SUM(i.cantidad_organismos) as total_organismos')
-                    ->join('trampas t', 'i.id_trampa = t.id')
-                    ->where('t.sede_id', $sedeSeleccionada)
-                    ->where('i.tipo_plaga', $plagaSeleccionada)
-                    ->groupBy('t.ubicacion')
-                    ->orderBy('total_organismos', 'DESC')
-                    ->get();
+                $areasMayorIncidenciaQuery = "
+                    SELECT t.ubicacion, SUM(i.cantidad_organismos) as total_organismos
+                    FROM incidencias i
+                    JOIN trampas t ON i.id_trampa = t.id
+                    WHERE i.sede_id = {$sedeSeleccionada}
+                    AND i.tipo_plaga = '{$plagaSeleccionada}'
+                ";
                 
+                // Aplicar filtro de fecha si existe
+                if (!empty($condicionFecha)) {
+                    $areasMayorIncidenciaQuery .= $condicionFecha;
+                }
+                
+                $areasMayorIncidenciaQuery .= "
+                    GROUP BY t.ubicacion
+                    ORDER BY total_organismos DESC
+                ";
+                
+                $query = $db->query($areasMayorIncidenciaQuery);
                 $data['areasMayorIncidencia'] = $query->getResultArray();
             } else {
                 $data['areasMayorIncidencia'] = [];
             }
             
-            // Consulta para obtener las trampas con mayor captura por tipo de plaga (con ID de trampa)
+            // Consulta para obtener todas las capturas de trampas (para el filtro dinámico)
+            $todasTrampasCapturaQuery = "
+                SELECT t.id as id_trampa, t.nombre as trampa_nombre, t.ubicacion, i.tipo_plaga, COUNT(*) as total_capturas, SUM(i.cantidad_organismos) as cantidad_total
+                FROM incidencias i
+                JOIN trampas t ON i.id_trampa = t.id
+                WHERE i.sede_id = {$sedeSeleccionada}
+                AND i.tipo_incidencia = 'Captura'
+                AND i.tipo_plaga IS NOT NULL
+                AND i.tipo_plaga != ''
+            ";
+            
+            // Aplicar filtro de fecha si existe
+            if (!empty($condicionFecha)) {
+                $todasTrampasCapturaQuery .= $condicionFecha;
+            }
+            
+            $todasTrampasCapturaQuery .= "
+                GROUP BY t.id, t.nombre, t.ubicacion, i.tipo_plaga
+                ORDER BY cantidad_total DESC, total_capturas DESC
+            ";
+            
+            $query = $db->query($todasTrampasCapturaQuery);
+            $data['todasTrampasCaptura'] = $query->getResultArray();
+
+            // Consulta para obtener trampas con mayor captura por plaga seleccionada
             if (!empty($plagaSeleccionada)) {
-                $query = $db->table('incidencias i')
-                    ->select('t.id as trampa_id, CONCAT("Trampa #", t.id) as trampa_nombre, SUM(i.cantidad_organismos) as total_capturas')
-                    ->join('trampas t', 'i.id_trampa = t.id')
-                    ->where('t.sede_id', $sedeSeleccionada)
-                    ->where('i.tipo_plaga', $plagaSeleccionada)
-                    ->where('i.tipo_incidencia', 'Captura')
-                    ->groupBy('t.id')
-                    ->orderBy('total_capturas', 'DESC')
-                    ->limit(30) // Limitar a 30 trampas para mejor visualización
-                    ->get();
+                $trampasMayorCapturaQuery = "
+                    SELECT t.id as id_trampa, t.nombre as trampa_nombre, t.ubicacion, COUNT(*) as total_capturas, SUM(i.cantidad_organismos) as cantidad_total
+                    FROM incidencias i
+                    JOIN trampas t ON i.id_trampa = t.id
+                    WHERE i.sede_id = {$sedeSeleccionada}
+                    AND i.tipo_plaga = '{$plagaSeleccionada}'
+                ";
                 
+                // Aplicar filtro de fecha si existe
+                if (!empty($condicionFecha)) {
+                    $trampasMayorCapturaQuery .= $condicionFecha;
+                }
+                
+                $trampasMayorCapturaQuery .= "
+                    GROUP BY t.id, t.nombre, t.ubicacion
+                    ORDER BY cantidad_total DESC, total_capturas DESC
+                    LIMIT 10
+                ";
+                
+                $query = $db->query($trampasMayorCapturaQuery);
                 $data['trampasMayorCaptura'] = $query->getResultArray();
             } else {
                 $data['trampasMayorCaptura'] = [];
             }
             
-            // Consulta para obtener áreas que presentaron capturas con diferentes plagas
-            $query = $db->table('incidencias i')
-                ->select('t.ubicacion, i.tipo_plaga, COUNT(*) as total_capturas')
-                ->join('trampas t', 'i.id_trampa = t.id')
-                ->where('t.sede_id', $sedeSeleccionada)
-                ->where('i.tipo_incidencia', 'Captura')
-                ->where('i.tipo_plaga IS NOT NULL')
-                ->where('i.tipo_plaga !=', '')
-                ->groupBy(['t.ubicacion', 'i.tipo_plaga'])
-                ->orderBy('t.ubicacion', 'ASC')
-                ->orderBy('i.tipo_plaga', 'ASC')
-                ->get();
+            // Consulta para obtener áreas con capturas por plaga
+            $areasCapturasPorPlagaQuery = "
+                SELECT t.ubicacion, i.tipo_plaga, COUNT(*) as total, SUM(i.cantidad_organismos) as cantidad_total
+                FROM incidencias i
+                JOIN trampas t ON i.id_trampa = t.id
+                WHERE i.sede_id = {$sedeSeleccionada}
+                AND i.tipo_incidencia = 'Captura'
+                AND i.tipo_plaga IS NOT NULL
+                AND i.tipo_plaga != ''
+            ";
             
+            // Aplicar filtro de fecha si existe
+            if (!empty($condicionFecha)) {
+                $areasCapturasPorPlagaQuery .= $condicionFecha;
+            }
+            
+            $areasCapturasPorPlagaQuery .= "
+                GROUP BY t.ubicacion, i.tipo_plaga
+                ORDER BY cantidad_total DESC, total DESC
+            ";
+            
+            $query = $db->query($areasCapturasPorPlagaQuery);
             $data['areasCapturasPorPlaga'] = $query->getResultArray();
+            
+            // Agregar información sobre el filtro de fecha aplicado a la vista
+            $data['filtroFechaAplicado'] = !empty($condicionFecha);
+            $data['mensajeFiltroFecha'] = '';
+            
+            if (!empty($fechaInicio) && !empty($fechaFin)) {
+                $fechaInicioFormateada = date('d/m/Y', strtotime($fechaInicio));
+                $fechaFinFormateada = date('d/m/Y', strtotime($fechaFin));
+                $data['mensajeFiltroFecha'] = "Mostrando datos del {$fechaInicioFormateada} al {$fechaFinFormateada}";
+            }
             
         } catch (\Exception $e) {
             log_message('error', 'Error al procesar datos de sede: ' . $e->getMessage());
@@ -594,7 +770,7 @@ class Locations extends BaseController
             $builder = $db->table('incidencias i')
                 ->select('i.tipo_plaga, SUM(i.cantidad_organismos) as total_organismos')
                 ->join('trampas t', 'i.id_trampa = t.id')
-                ->where('t.sede_id', $sedeId);
+                ->where('i.sede_id', $sedeId);
                 
             // Aplicar filtro de mes si está seleccionado
             if (!empty($mesSeleccionado)) {
@@ -609,36 +785,113 @@ class Locations extends BaseController
             
             // Consulta para obtener las áreas con mayor incidencia de la plaga seleccionada
             if (!empty($plagaSeleccionada)) {
-                $query = $db->table('incidencias i')
-                    ->select('t.ubicacion, SUM(i.cantidad_organismos) as total_organismos')
-                    ->join('trampas t', 'i.id_trampa = t.id')
-                    ->where('t.sede_id', $sedeId)
-                    ->where('i.tipo_plaga', $plagaSeleccionada)
-                    ->groupBy('t.ubicacion')
-                    ->orderBy('total_organismos', 'DESC')
-                    ->get();
+                $areasMayorIncidenciaQuery = "
+                    SELECT t.ubicacion, SUM(i.cantidad_organismos) as total_organismos
+                    FROM incidencias i
+                    JOIN trampas t ON i.id_trampa = t.id
+                    WHERE i.sede_id = {$sedeId}
+                    AND i.tipo_plaga = '{$plagaSeleccionada}'
+                ";
                 
+                // Aplicar filtro de fecha si existe
+                if (!empty($condicionFecha)) {
+                    $areasMayorIncidenciaQuery .= $condicionFecha;
+                }
+                
+                $areasMayorIncidenciaQuery .= "
+                    GROUP BY t.ubicacion
+                    ORDER BY total_organismos DESC
+                ";
+                
+                $query = $db->query($areasMayorIncidenciaQuery);
                 $data['areasMayorIncidencia'] = $query->getResultArray();
             } else {
                 $data['areasMayorIncidencia'] = [];
             }
             
-            // Consulta para obtener las trampas con mayor captura por tipo de plaga
+            // Consulta para obtener todas las capturas de trampas (para el filtro dinámico)
+            $todasTrampasCapturaQuery = "
+                SELECT t.id as id_trampa, t.nombre as trampa_nombre, t.ubicacion, i.tipo_plaga, COUNT(*) as total_capturas, SUM(i.cantidad_organismos) as cantidad_total
+                FROM incidencias i
+                JOIN trampas t ON i.id_trampa = t.id
+                WHERE i.sede_id = {$sedeId}
+                AND i.tipo_incidencia = 'Captura'
+                AND i.tipo_plaga IS NOT NULL
+                AND i.tipo_plaga != ''
+            ";
+            
+            // Aplicar filtro de fecha si existe
+            if (!empty($condicionFecha)) {
+                $todasTrampasCapturaQuery .= $condicionFecha;
+            }
+            
+            $todasTrampasCapturaQuery .= "
+                GROUP BY t.id, t.nombre, t.ubicacion, i.tipo_plaga
+                ORDER BY cantidad_total DESC, total_capturas DESC
+            ";
+            
+            $query = $db->query($todasTrampasCapturaQuery);
+            $data['todasTrampasCaptura'] = $query->getResultArray();
+
+            // Consulta para obtener trampas con mayor captura por plaga seleccionada
             if (!empty($plagaSeleccionada)) {
-                $query = $db->table('incidencias i')
-                    ->select('t.id as trampa_id, CONCAT("Trampa #", t.id) as trampa_nombre, SUM(i.cantidad_organismos) as total_capturas')
-                    ->join('trampas t', 'i.id_trampa = t.id')
-                    ->where('t.sede_id', $sedeId)
-                    ->where('i.tipo_plaga', $plagaSeleccionada)
-                    ->where('i.tipo_incidencia', 'Captura')
-                    ->groupBy('t.id')
-                    ->orderBy('total_capturas', 'DESC')
-                    ->limit(30) // Limitar a 30 trampas para mejor visualización
-                    ->get();
+                $trampasMayorCapturaQuery = "
+                    SELECT t.id as id_trampa, t.nombre as trampa_nombre, t.ubicacion, COUNT(*) as total_capturas, SUM(i.cantidad_organismos) as cantidad_total
+                    FROM incidencias i
+                    JOIN trampas t ON i.id_trampa = t.id
+                    WHERE i.sede_id = {$sedeId}
+                    AND i.tipo_plaga = '{$plagaSeleccionada}'
+                ";
                 
+                // Aplicar filtro de fecha si existe
+                if (!empty($condicionFecha)) {
+                    $trampasMayorCapturaQuery .= $condicionFecha;
+                }
+                
+                $trampasMayorCapturaQuery .= "
+                    GROUP BY t.id, t.nombre, t.ubicacion
+                    ORDER BY cantidad_total DESC, total_capturas DESC
+                    LIMIT 10
+                ";
+                
+                $query = $db->query($trampasMayorCapturaQuery);
                 $data['trampasMayorCaptura'] = $query->getResultArray();
             } else {
                 $data['trampasMayorCaptura'] = [];
+            }
+            
+            // Consulta para obtener áreas con capturas por plaga
+            $areasCapturasPorPlagaQuery = "
+                SELECT t.ubicacion, i.tipo_plaga, COUNT(*) as total, SUM(i.cantidad_organismos) as cantidad_total
+                FROM incidencias i
+                JOIN trampas t ON i.id_trampa = t.id
+                WHERE i.sede_id = {$sedeId}
+                AND i.tipo_incidencia = 'Captura'
+                AND i.tipo_plaga IS NOT NULL
+                AND i.tipo_plaga != ''
+            ";
+            
+            // Aplicar filtro de fecha si existe
+            if (!empty($condicionFecha)) {
+                $areasCapturasPorPlagaQuery .= $condicionFecha;
+            }
+            
+            $areasCapturasPorPlagaQuery .= "
+                GROUP BY t.ubicacion, i.tipo_plaga
+                ORDER BY cantidad_total DESC, total DESC
+            ";
+            
+            $query = $db->query($areasCapturasPorPlagaQuery);
+            $data['areasCapturasPorPlaga'] = $query->getResultArray();
+            
+            // Agregar información sobre el filtro de fecha aplicado a la vista
+            $data['filtroFechaAplicado'] = !empty($condicionFecha);
+            $data['mensajeFiltroFecha'] = '';
+            
+            if (!empty($fechaInicio) && !empty($fechaFin)) {
+                $fechaInicioFormateada = date('d/m/Y', strtotime($fechaInicio));
+                $fechaFinFormateada = date('d/m/Y', strtotime($fechaFin));
+                $data['mensajeFiltroFecha'] = "Mostrando datos del {$fechaInicioFormateada} al {$fechaFinFormateada}";
             }
             
             // Crear gráfico de Plagas con Mayor Presencia
@@ -752,7 +1005,7 @@ class Locations extends BaseController
                 $valores = [];
                 
                 foreach ($data['trampasMayorCaptura'] as $item) {
-                    $labels[] = $item['trampa_nombre'];
+                    $labels[] = $item['id_trampa'] . ' (' . $item['ubicacion'] . ')';
                     $valores[] = (int)$item['total_capturas'];
                 }
                 
@@ -804,27 +1057,64 @@ class Locations extends BaseController
                 
                 // Llenar la matriz con los datos de capturas
                 foreach ($data['areasCapturasPorPlaga'] as $item) {
-                    $capturasPorUbicacionYPlaga[$item['ubicacion']][$item['tipo_plaga']] = (int)$item['total_capturas'];
+                    $capturasPorUbicacionYPlaga[$item['ubicacion']][$item['tipo_plaga']] = (int)$item['cantidad_total'];
                 }
                 
-                // Crear la imagen para el gráfico de barras apiladas
-                $img = $this->createStackedBarChartImage(
-                    $ubicaciones,
-                    $plagas,
+                // Crear gráfico
+                $imagenAreasCapturasPlaga = $this->createStackedBarChartImage(
+                    array_keys($capturasPorUbicacionYPlaga),  // Ubicaciones
+                    array_values(array_unique(array_reduce(array_keys($capturasPorUbicacionYPlaga), function ($carry, $ubicacion) use ($capturasPorUbicacionYPlaga) {
+                        return array_merge($carry, array_keys($capturasPorUbicacionYPlaga[$ubicacion]));
+                    }, []))),  // Tipos de plagas
                     $capturasPorUbicacionYPlaga,
-                    'ÁREAS QUE PRESENTARON CAPTURAS',
-                    $width,
-                    $height
+                    'ÁREAS QUE PRESENTARON CAPTURAS'
                 );
                 
-                // Convertir a base64 para incluir en el PDF
+                // Convertir imagen a dataURL base64
                 ob_start();
-                imagepng($img);
+                imagepng($imagenAreasCapturasPlaga);
                 $imageData = ob_get_clean();
-                $data['areasCapturasPorPlagaImagen'] = base64_encode($imageData);
+                $dataURL = 'data:image/png;base64,' . base64_encode($imageData);
+                $data['imagenAreasCapturasPlaga'] = $dataURL;
                 
-                // Liberar memoria
-                imagedestroy($img);
+                // Gráfico: Trampas con Mayor Captura (si hay plaga seleccionada)
+                $data['imagenTrampasMayorCaptura'] = '';
+                if (!empty($data['trampasMayorCaptura'])) {
+                    // Preparar datos para el gráfico
+                    $nombreTrampas = [];
+                    $totalCapturasPorTrampa = [];
+                    
+                    foreach ($data['trampasMayorCaptura'] as $trampa) {
+                        $nombreTrampas[] = $trampa['id_trampa'] . ' (' . $trampa['ubicacion'] . ')';
+                        $totalCapturasPorTrampa[] = (int)$trampa['total_capturas'];
+                    }
+                    
+                    // Limitar a 10 trampas para mejor visualización
+                    if (count($nombreTrampas) > 10) {
+                        $nombreTrampas = array_slice($nombreTrampas, 0, 10);
+                        $totalCapturasPorTrampa = array_slice($totalCapturasPorTrampa, 0, 10);
+                    }
+                    
+                    // Crear gráfico
+                    $imagenTrampasMayorCaptura = $this->createBarChartImage(
+                        $nombreTrampas,
+                        $totalCapturasPorTrampa,
+                        'TRAMPAS QUE PRESENTAN MAYOR CAPTURA DE ' . strtoupper($data['plagaSeleccionada']),
+                        'rgba(54, 162, 235, 0.8)',
+                        750,
+                        400
+                    );
+                    
+                    // Convertir imagen a dataURL base64
+                    ob_start();
+                    imagepng($imagenTrampasMayorCaptura);
+                    $imageData = ob_get_clean();
+                    $dataURL = 'data:image/png;base64,' . base64_encode($imageData);
+                    $data['imagenTrampasMayorCaptura'] = $dataURL;
+                    
+                    // Liberar memoria
+                    imagedestroy($imagenTrampasMayorCaptura);
+                }
             }
             
             // Obtener notas de los gráficos desde la BD
@@ -841,27 +1131,74 @@ class Locations extends BaseController
             
             $data['notas'] = $notas;
             
-            // Obtener áreas que presentaron capturas con diferentes plagas
-            $query = $db->table('incidencias i')
-                ->select('t.ubicacion, i.tipo_plaga, COUNT(*) as total_capturas')
-                ->join('trampas t', 'i.id_trampa = t.id')
-                ->where('t.sede_id', $sedeId)
-                ->where('i.tipo_incidencia', 'Captura')
-                ->where('i.tipo_plaga IS NOT NULL')
-                ->where('i.tipo_plaga !=', '')
-                ->groupBy(['t.ubicacion', 'i.tipo_plaga'])
-                ->orderBy('t.ubicacion', 'ASC')
-                ->orderBy('i.tipo_plaga', 'ASC')
-                ->get();
-            
-            $data['areasCapturasPorPlaga'] = $query->getResultArray();
-            
             // Generar el PDF
             return view('locations/pdf_report', $data);
             
         } catch (\Exception $e) {
             log_message('error', 'Error al generar PDF: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error al generar PDF: ' . $e->getMessage());
+        }
+    }
+    
+    public function getDatosComparacionMeses()
+    {
+        try {
+            $sedeId = $this->request->getPost('sede_id');
+            $mesesJson = $this->request->getPost('meses');
+            $plagasFiltroJson = $this->request->getPost('plagas_filtro');
+            
+            $meses = json_decode($mesesJson, true);
+            $plagasFiltro = json_decode($plagasFiltroJson, true);
+            
+            if (!$sedeId || !$meses || !is_array($meses)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Parámetros inválidos'
+                ]);
+            }
+            
+            $db = \Config\Database::connect();
+            $datos = [];
+            
+            foreach ($meses as $mes) {
+                // Obtener plagas con mayor presencia para este mes específico
+                $builder = $db->table('incidencias i')
+                    ->select('i.tipo_plaga, SUM(i.cantidad_organismos) as total_organismos')
+                    ->join('trampas t', 'i.id_trampa = t.id')
+                    ->where('i.sede_id', $sedeId)
+                    ->where("DATE_FORMAT(i.fecha, '%Y-%m')", $mes)
+                    ->where('i.tipo_plaga IS NOT NULL')
+                    ->where('i.tipo_plaga !=', '');
+                
+                // Agregar filtro de plagas si se especifica
+                if (!empty($plagasFiltro) && is_array($plagasFiltro)) {
+                    $builder->whereIn('i.tipo_plaga', $plagasFiltro);
+                }
+                
+                $builder->groupBy('i.tipo_plaga')
+                    ->orderBy('total_organismos', 'DESC');
+                
+                $query = $builder->get();
+                $plagasDelMes = $query->getResultArray();
+                
+                $datos[] = [
+                    'mes' => $mes,
+                    'plagas' => $plagasDelMes
+                ];
+            }
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'datos' => $datos,
+                'plagas_filtro' => $plagasFiltro
+            ]);
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Error en getDatosComparacionMeses: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error al obtener datos: ' . $e->getMessage()
+            ]);
         }
     }
 }
