@@ -85,6 +85,7 @@ $routes->post('blueprints/guardar_plano', 'Blueprints::guardar_plano');
 $routes->post('blueprints/guardar_estado', 'Blueprints::guardar_estado');
 $routes->post('blueprints/guardar_trampa', 'Blueprints::guardar_trampa');
 $routes->post('blueprints/guardar_incidencia', 'Blueprints::guardar_incidencia');
+$routes->post('blueprints/actualizar_incidencia', 'Blueprints::actualizar_incidencia');
 $routes->post('blueprints/actualizar_id_trampa', 'Blueprints::actualizar_id_trampa');
 
 // Rutas para el historial de movimientos

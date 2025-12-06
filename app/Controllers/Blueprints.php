@@ -55,14 +55,50 @@ class Blueprints extends BaseController
         // Obtener planos de la sede
         $planos = $planoModel->where('sede_id', $id)->findAll();
 
-        // Procesar las previsualizaciones de los planos
+        // Obtener el conteo de incidencias por plano
+        $db = \Config\Database::connect();
+        $trampaModel = new \App\Models\TrampaModel();
+        $incidenciaModel = new \App\Models\IncidenciaModel();
+        
+        // Procesar las previsualizaciones de los planos y agregar conteo de incidencias
         foreach ($planos as &$plano) {
             $plano['preview_image'] = $this->getPreviewImage($plano);
+            
+            // Obtener las trampas del plano
+            $trampas = $trampaModel->where('plano_id', $plano['id'])->findAll();
+            
+            // Contar las incidencias de las trampas de este plano
+            // IMPORTANTE: Usar EXACTAMENTE la misma lógica que en viewplano() para mantener consistencia
+            // Filtrar por: trampa pertenece al plano Y trampa tiene sede_id del plano Y incidencia tiene mismo sede_id que trampa
+            $conteoIncidencias = 0;
+            if (!empty($trampas)) {
+                $trampaIds = array_column($trampas, 'id');
+                // Usar la misma consulta que en viewplano() pero para contar
+                // Esta es la consulta exacta de viewplano() pero con COUNT(*)
+                $query = $db->query("
+                    SELECT COUNT(*) as total
+                    FROM incidencias i
+                    INNER JOIN trampas t ON i.id_trampa = t.id
+                    WHERE i.id_trampa IN (" . implode(',', $trampaIds) . ")
+                    AND t.sede_id = ?
+                    AND i.sede_id = t.sede_id
+                ", [$plano['sede_id']]);
+                $result = $query->getRow();
+                $conteoIncidencias = $result ? (int)$result->total : 0;
+            }
+            
+            $plano['conteo_incidencias'] = $conteoIncidencias;
         }
+
+        // Calcular totales para la sede
+        $totalPlanos = count($planos);
+        $totalIncidencias = array_sum(array_column($planos, 'conteo_incidencias'));
 
         $data = [
             'sede' => $sede,
-            'planos' => $planos
+            'planos' => $planos,
+            'total_planos' => $totalPlanos,
+            'total_incidencias' => $totalIncidencias
         ];
 
         return view('blueprints/view', $data);
@@ -155,10 +191,41 @@ class Blueprints extends BaseController
         // Obtener las trampas desde la base de datos (fuente de verdad)
         $trampas = $trampaModel->where('plano_id', $id)->findAll();
 
+        // Obtener las incidencias de las trampas de este plano
+        // IMPORTANTE: Solo mostrar incidencias donde la trampa pertenece a la misma sede del plano
+        // y donde la incidencia y la trampa tienen el mismo sede_id (mismo criterio que el dashboard)
+        $incidenciaModel = new \App\Models\IncidenciaModel();
+        $incidencias = [];
+        
+        if (!empty($trampas)) {
+            $trampaIds = array_column($trampas, 'id');
+            $db = \Config\Database::connect();
+            
+            // Obtener incidencias con información de la trampa asociada
+            // Filtrar por: trampa pertenece al plano Y trampa tiene sede_id del plano Y incidencia tiene mismo sede_id que trampa
+            // IMPORTANTE: Usar el mismo criterio que el dashboard (i.sede_id = t.sede_id)
+            $query = $db->query("
+                SELECT i.id, i.fecha, i.tipo_plaga, i.tipo_insecto, i.cantidad_organismos, 
+                       i.tipo_incidencia, i.notas, i.inspector, i.sede_id, i.id_trampa as incidencia_trampa_id,
+                       COALESCE(NULLIF(t.id_trampa, ''), CAST(t.id AS CHAR)) as id_trampa, 
+                       t.nombre as trampa_nombre, 
+                       t.ubicacion as trampa_ubicacion
+                FROM incidencias i
+                INNER JOIN trampas t ON i.id_trampa = t.id
+                WHERE i.id_trampa IN (" . implode(',', $trampaIds) . ")
+                AND t.sede_id = ?
+                AND i.sede_id = t.sede_id
+                ORDER BY i.fecha DESC
+            ", [$plano['sede_id']]);
+            
+            $incidencias = $query->getResultArray();
+        }
+
         $data = [
             'plano' => $plano,
             'sede' => $sede,
-            'trampas' => $trampas // Agregar trampas desde BD
+            'trampas' => $trampas, // Agregar trampas desde BD
+            'incidencias' => $incidencias // Agregar incidencias del plano
         ];
 
         return view('blueprints/viewplano', $data);
@@ -647,6 +714,79 @@ class Blueprints extends BaseController
         }
     }
 
+    public function actualizar_incidencia()
+    {
+        // Verificar si la solicitud es AJAX
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Solicitud no válida']);
+        }
+        
+        // Obtener los datos del POST
+        $incidenciaId = $this->request->getPost('incidencia_id');
+        $tipoPlaga = $this->request->getPost('tipo_plaga_editar');
+        
+        if (!$incidenciaId || !$tipoPlaga) {
+            return $this->response->setJSON([
+                'success' => false, 
+                'message' => 'Datos incompletos'
+            ]);
+        }
+        
+        // Obtener los valores de los campos del formulario
+        $tipoInsecto = $this->request->getPost('tipo_insecto_editar');
+        $tipoIncidencia = $this->request->getPost('tipo_incidencia_editar');
+        $cantidadOrganismos = $this->request->getPost('cantidad_organismos_editar') ?: null;
+        $notas = $this->request->getPost('notas_editar');
+        $inspector = $this->request->getPost('inspector_editar');
+        
+        // Verificar que se haya proporcionado una fecha
+        $fechaIncidencia = $this->request->getPost('fecha_incidencia_editar');
+        if (!$fechaIncidencia) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Debe proporcionar una fecha para la incidencia']);
+        }
+        
+        try {
+            // Cargar el modelo de incidencias
+            $incidenciaModel = new \App\Models\IncidenciaModel();
+            
+            // Verificar que la incidencia existe
+            $incidencia = $incidenciaModel->find($incidenciaId);
+            if (!$incidencia) {
+                return $this->response->setJSON(['success' => false, 'message' => 'No se encontró la incidencia especificada']);
+            }
+            
+            // Formatear la fecha de incidencia para MySQL (YYYY-MM-DD HH:MM:SS)
+            $fechaFormateada = date('Y-m-d H:i:s', strtotime($fechaIncidencia));
+            
+            // Preparar los datos para actualizar
+            $data = [
+                'fecha' => $fechaFormateada,
+                'tipo_plaga' => $tipoPlaga,
+                'tipo_insecto' => $tipoInsecto,
+                'cantidad_organismos' => $cantidadOrganismos,
+                'tipo_incidencia' => $tipoIncidencia,
+                'notas' => $notas,
+                'inspector' => $inspector ?? 'Sistema'
+            ];
+            
+            // Actualizar la incidencia
+            $incidenciaModel->update($incidenciaId, $data);
+            log_message('info', 'Incidencia actualizada con ID: ' . $incidenciaId);
+            
+            return $this->response->setJSON([
+                'success' => true, 
+                'message' => 'Incidencia actualizada correctamente',
+                'incidencia_id' => $incidenciaId
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error al actualizar incidencia: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false, 
+                'message' => 'Error al actualizar la incidencia: ' . $e->getMessage()
+            ]);
+        }
+    }
+
     /**
      * Obtiene todas las zonas únicas para un plano específico
      * 
@@ -777,4 +917,5 @@ class Blueprints extends BaseController
 
         return view('blueprints/ver_imagen', $data);
     }
+
 } 

@@ -319,6 +319,50 @@
     .reportes-btn-group .btn {
         margin-right: 5px;
     }
+
+    /* Estilos para la tabla de incidencias */
+    .tabla-incidencias {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .tabla-incidencias th {
+        position: sticky;
+        top: 0;
+        background-color: #f9fafb;
+        z-index: 10;
+    }
+    
+    .tabla-incidencias-container {
+        max-height: 600px;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+    
+    /* Estilos para el scroll en la tabla del modal */
+    #listaIncidenciasModal > div {
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e0 #f7fafc;
+    }
+    
+    #listaIncidenciasModal > div::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    #listaIncidenciasModal > div::-webkit-scrollbar-track {
+        background: #f7fafc;
+        border-radius: 4px;
+    }
+    
+    #listaIncidenciasModal > div::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 4px;
+    }
+    
+    #listaIncidenciasModal > div::-webkit-scrollbar-thumb:hover {
+        background: #a0aec0;
+    }
 </style>
 
 <div class="space-y-6">
@@ -485,6 +529,317 @@
             </div>
         </div>
     </div>
+
+    <!-- Tabla de Incidencias del Plano -->
+    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold">Incidencias del Plano</h3>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-500">Total: <span id="totalIncidencias"><?= isset($incidencias) ? count($incidencias) : 0 ?></span></span>
+                <div id="botonesModoEdicion" class="hidden flex items-center gap-2">
+                    <button id="btnGuardarTodos" onclick="guardarTodosLosCambios()" 
+                            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Guardar Todos los Cambios
+                    </button>
+                    <button id="btnDesactivarModoEdicion" onclick="confirmarDesactivarModoEdicion()" 
+                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Desactivar Modo Edición
+                    </button>
+                </div>
+                <button id="btnModoEdicion" onclick="toggleModoEdicion()" 
+                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span id="textoModoEdicion">Activar Modo Edición</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Filtros de la tabla -->
+        <?php if (isset($incidencias) && !empty($incidencias)): ?>
+        <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div class="flex items-center gap-2 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <span class="text-sm font-semibold text-gray-700">Filtros</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Filtro por ID de Trampa -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">ID de Trampa</label>
+                    <input type="text" id="filtroIdTrampa" 
+                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                           placeholder="Buscar por ID..."
+                           onkeyup="aplicarFiltros()">
+                </div>
+                
+                <!-- Filtro por Tipo de Plaga -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Tipo de Plaga</label>
+                    <select id="filtroTipoPlaga" 
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                            onchange="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <?php
+                        // Obtener tipos de plaga únicos de las incidencias
+                        $tiposPlaga = [];
+                        foreach ($incidencias as $inc) {
+                            if (!empty($inc['tipo_plaga']) && !in_array($inc['tipo_plaga'], $tiposPlaga)) {
+                                $tiposPlaga[] = $inc['tipo_plaga'];
+                            }
+                        }
+                        sort($tiposPlaga);
+                        foreach ($tiposPlaga as $tipo) {
+                            $tipoDisplay = ucwords(str_replace('_', ' ', $tipo));
+                            echo '<option value="' . esc($tipo) . '">' . esc($tipoDisplay) . '</option>';
+                        }
+                        ?>
+                    </select>
+                </div>
+                
+                <!-- Filtro por Tipo de Incidencia -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Tipo de Incidencia</label>
+                    <select id="filtroTipoIncidencia" 
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                            onchange="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option value="Captura">Captura</option>
+                        <option value="Hallazgo">Hallazgo</option>
+                    </select>
+                </div>
+                
+                <!-- Filtro por Tipo de Insecto -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Tipo de Insecto</label>
+                    <select id="filtroTipoInsecto" 
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                            onchange="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option value="Volador">Volador</option>
+                        <option value="Rastrero">Rastrero</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+                <button onclick="limpiarFiltros()" 
+                        class="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Limpiar filtros
+                </button>
+                <span class="text-xs text-gray-500">
+                    Mostrando: <span id="incidenciasVisibles"><?= isset($incidencias) ? count($incidencias) : 0 ?></span> de <?= isset($incidencias) ? count($incidencias) : 0 ?>
+                </span>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <?php if (isset($incidencias) && !empty($incidencias)): ?>
+            <div class="tabla-incidencias-container">
+                <table class="tabla-incidencias w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">ID Trampa</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Plaga</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Incidencia</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Insecto</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Cantidad de Organismos</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Fecha de Incidencia</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Inspector</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap min-w-[200px]">Notas Adicionales</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="tbodyIncidencias">
+                        <?php foreach ($incidencias as $incidencia): ?>
+                            <?php 
+                            // Preparar datos para JavaScript
+                            $fechaFormateada = '';
+                            if (!empty($incidencia['fecha'])) {
+                                $fecha = new \DateTime($incidencia['fecha']);
+                                $fechaFormateada = $fecha->format('Y-m-d\TH:i');
+                            }
+                            $idTrampa = !empty($incidencia['id_trampa']) ? $incidencia['id_trampa'] : ($incidencia['id_trampa'] ?? 'N/A');
+                            ?>
+                            <tr class="hover:bg-gray-50 transition-colors" data-incidencia-id="<?= $incidencia['id'] ?>" data-original-data='<?= json_encode([
+                                'tipo_plaga' => $incidencia['tipo_plaga'] ?? '',
+                                'tipo_incidencia' => $incidencia['tipo_incidencia'] ?? 'Captura',
+                                'tipo_insecto' => $incidencia['tipo_insecto'] ?? 'Volador',
+                                'cantidad_organismos' => $incidencia['cantidad_organismos'] ?? '',
+                                'fecha' => $fechaFormateada,
+                                'inspector' => $incidencia['inspector'] ?? '',
+                                'notas' => $incidencia['notas'] ?? ''
+                            ]) ?>'>
+                                <!-- ID Trampa (solo lectura) -->
+                                <td class="px-4 py-3 border-b border-gray-100 whitespace-nowrap">
+                                    <span class="font-medium text-gray-900"><?= esc($idTrampa) ?></span>
+                                </td>
+                                
+                                <!-- Tipo de Plaga (editable) -->
+                                <td class="px-4 py-3 border-b border-gray-100 text-gray-700 whitespace-nowrap" data-tipo-plaga="<?= esc($incidencia['tipo_plaga'] ?? '') ?>">
+                                    <span class="display-mode"><?php 
+                                        $tipoPlagaDisplay = $incidencia['tipo_plaga'] ?? 'N/A';
+                                        if ($tipoPlagaDisplay !== 'N/A') {
+                                            // Formatear para mostrar: mayúscula inicial y reemplazar guiones bajos con espacios
+                                            $tipoPlagaDisplay = ucwords(str_replace('_', ' ', $tipoPlagaDisplay));
+                                        }
+                                        echo esc($tipoPlagaDisplay);
+                                    ?></span>
+                                    <select class="edit-mode hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                                            data-field="tipo_plaga">
+                                        <option value="">Seleccione un tipo</option>
+                                        <option value="mosca" <?= ($incidencia['tipo_plaga'] ?? '') === 'mosca' ? 'selected' : '' ?>>Mosca</option>
+                                        <option value="mosca_domestica" <?= ($incidencia['tipo_plaga'] ?? '') === 'mosca_domestica' ? 'selected' : '' ?>>Mosca Doméstica</option>
+                                        <option value="mosca_fruta" <?= ($incidencia['tipo_plaga'] ?? '') === 'mosca_fruta' ? 'selected' : '' ?>>Mosca De La Fruta</option>
+                                        <option value="mosca_drenaje" <?= ($incidencia['tipo_plaga'] ?? '') === 'mosca_drenaje' ? 'selected' : '' ?>>Mosca De Drenaje</option>
+                                        <option value="mosca_metalica" <?= ($incidencia['tipo_plaga'] ?? '') === 'mosca_metalica' ? 'selected' : '' ?>>Moscas Metálicas</option>
+                                        <option value="mosca_forida" <?= ($incidencia['tipo_plaga'] ?? '') === 'mosca_forida' ? 'selected' : '' ?>>Mosca Forida</option>
+                                        <option value="palomilla_almacen" <?= ($incidencia['tipo_plaga'] ?? '') === 'palomilla_almacen' ? 'selected' : '' ?>>Palomillas De Almacén</option>
+                                        <option value="otras_palomillas" <?= ($incidencia['tipo_plaga'] ?? '') === 'otras_palomillas' ? 'selected' : '' ?>>Otras Palomillas</option>
+                                        <option value="gorgojo" <?= ($incidencia['tipo_plaga'] ?? '') === 'gorgojo' ? 'selected' : '' ?>>Gorgojos</option>
+                                        <option value="otros_escarabajos" <?= ($incidencia['tipo_plaga'] ?? '') === 'otros_escarabajos' ? 'selected' : '' ?>>Otros Escarabajos</option>
+                                        <option value="abeja" <?= ($incidencia['tipo_plaga'] ?? '') === 'abeja' ? 'selected' : '' ?>>Abejas</option>
+                                        <option value="avispa" <?= ($incidencia['tipo_plaga'] ?? '') === 'avispa' ? 'selected' : '' ?>>Avispas</option>
+                                        <option value="mosquito" <?= ($incidencia['tipo_plaga'] ?? '') === 'mosquito' ? 'selected' : '' ?>>Mosquitos</option>
+                                        <option value="cucaracha" <?= ($incidencia['tipo_plaga'] ?? '') === 'cucaracha' ? 'selected' : '' ?>>Cucaracha</option>
+                                        <option value="hormiga" <?= ($incidencia['tipo_plaga'] ?? '') === 'hormiga' ? 'selected' : '' ?>>Hormiga</option>
+                                        <option value="roedor" <?= ($incidencia['tipo_plaga'] ?? '') === 'roedor' ? 'selected' : '' ?>>Roedor</option>
+                                        <option value="Arañas" <?= ($incidencia['tipo_plaga'] ?? '') === 'Arañas' ? 'selected' : '' ?>>Arañas</option>
+                                        <option value="Lagartija" <?= ($incidencia['tipo_plaga'] ?? '') === 'Lagartija' ? 'selected' : '' ?>>Lagartijas</option>
+                                        <option value="otro" <?= !in_array($incidencia['tipo_plaga'] ?? '', ['mosca', 'mosca_domestica', 'mosca_fruta', 'mosca_drenaje', 'mosca_metalica', 'mosca_forida', 'palomilla_almacen', 'otras_palomillas', 'gorgojo', 'otros_escarabajos', 'abeja', 'avispa', 'mosquito', 'cucaracha', 'hormiga', 'roedor', 'Arañas', 'Lagartija']) && !empty($incidencia['tipo_plaga']) ? 'selected' : '' ?>>Otro (especificar)</option>
+                                    </select>
+                                    <div class="edit-mode hidden w-full">
+                                        <input type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm tipo-plaga-personalizado" 
+                                               data-field="tipo_plaga_personalizado" 
+                                               placeholder="Especifique el tipo de plaga"
+                                               value="<?= !in_array($incidencia['tipo_plaga'] ?? '', ['mosca', 'mosca_domestica', 'mosca_fruta', 'mosca_drenaje', 'mosca_metalica', 'mosca_forida', 'palomilla_almacen', 'otras_palomillas', 'gorgojo', 'otros_escarabajos', 'abeja', 'avispa', 'mosquito', 'cucaracha', 'hormiga', 'roedor', 'Arañas', 'Lagartija']) && !empty($incidencia['tipo_plaga']) ? esc($incidencia['tipo_plaga']) : '' ?>"
+                                               style="display: none;">
+                                    </div>
+                                </td>
+                                
+                                <!-- Tipo de Incidencia (editable) -->
+                                <td class="px-4 py-3 border-b border-gray-100 whitespace-nowrap" data-tipo-incidencia="<?= esc($incidencia['tipo_incidencia'] ?? '') ?>">
+                                    <span class="display-mode inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= ($incidencia['tipo_incidencia'] ?? '') === 'Captura' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' ?>">
+                                        <?= esc($incidencia['tipo_incidencia'] ?? 'N/A') ?>
+                                    </span>
+                                    <select class="edit-mode hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                                            data-field="tipo_incidencia">
+                                        <option value="Captura" <?= ($incidencia['tipo_incidencia'] ?? '') === 'Captura' ? 'selected' : '' ?>>Captura</option>
+                                        <option value="Hallazgo" <?= ($incidencia['tipo_incidencia'] ?? '') === 'Hallazgo' ? 'selected' : '' ?>>Hallazgo</option>
+                                    </select>
+                                </td>
+                                
+                                <!-- Tipo de Insecto (editable) -->
+                                <td class="px-4 py-3 border-b border-gray-100 text-gray-700 whitespace-nowrap" data-tipo-insecto="<?= esc($incidencia['tipo_insecto'] ?? '') ?>">
+                                    <span class="display-mode"><?= esc($incidencia['tipo_insecto'] ?? 'N/A') ?></span>
+                                    <select class="edit-mode hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                                            data-field="tipo_insecto">
+                                        <option value="Volador" <?= ($incidencia['tipo_insecto'] ?? '') === 'Volador' ? 'selected' : '' ?>>Volador</option>
+                                        <option value="Rastrero" <?= ($incidencia['tipo_insecto'] ?? '') === 'Rastrero' ? 'selected' : '' ?>>Rastrero</option>
+                                    </select>
+                                </td>
+                                
+                                <!-- Cantidad de Organismos (editable) -->
+                                <td class="px-4 py-3 border-b border-gray-100 text-gray-700 whitespace-nowrap text-center">
+                                    <span class="display-mode">
+                                        <?php 
+                                        $cantidad = $incidencia['cantidad_organismos'] ?? null;
+                                        if ($cantidad !== null && $cantidad !== '') {
+                                            echo '<span class="font-semibold text-blue-600">' . esc($cantidad) . '</span>';
+                                        } else {
+                                            echo '<span class="text-gray-400">-</span>';
+                                        }
+                                        ?>
+                                    </span>
+                                    <input type="number" class="edit-mode hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm text-center" 
+                                           data-field="cantidad_organismos" 
+                                           min="1" 
+                                           value="<?= esc($incidencia['cantidad_organismos'] ?? '') ?>">
+                                </td>
+                                
+                                <!-- Fecha de Incidencia (editable) -->
+                                <td class="px-4 py-3 border-b border-gray-100 text-gray-700 whitespace-nowrap">
+                                    <span class="display-mode">
+                                        <?php 
+                                        if (!empty($incidencia['fecha'])) {
+                                            $fecha = new \DateTime($incidencia['fecha']);
+                                            // Formatear fecha con nombre del mes en español
+                                            $meses = [
+                                                1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril',
+                                                5 => 'mayo', 6 => 'junio', 7 => 'julio', 8 => 'agosto',
+                                                9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'
+                                            ];
+                                            $dia = $fecha->format('j'); // Día sin cero inicial
+                                            $mes = (int)$fecha->format('n'); // Mes numérico sin cero inicial
+                                            $anio = $fecha->format('Y');
+                                            $hora = $fecha->format('H:i');
+                                            echo $dia . ' de ' . ucfirst($meses[$mes]) . ' de ' . $anio . ', ' . $hora;
+                                        } else {
+                                            echo 'N/A';
+                                        }
+                                        ?>
+                                    </span>
+                                    <input type="datetime-local" class="edit-mode hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                                           data-field="fecha_incidencia" 
+                                           value="<?= esc($fechaFormateada) ?>">
+                                </td>
+                                
+                                <!-- Inspector (editable) -->
+                                <td class="px-4 py-3 border-b border-gray-100 text-gray-700 whitespace-nowrap">
+                                    <span class="display-mode"><?= esc($incidencia['inspector'] ?? 'N/A') ?></span>
+                                    <input type="text" class="edit-mode hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                                           data-field="inspector" 
+                                           placeholder="Nombre del inspector"
+                                           value="<?= esc($incidencia['inspector'] ?? '') ?>">
+                                </td>
+                                
+                                <!-- Notas Adicionales (editable) -->
+                                <td class="px-4 py-3 border-b border-gray-100 text-gray-700">
+                                    <div class="display-mode max-w-xs" title="<?= esc($incidencia['notas'] ?? '') ?>">
+                                        <?= esc($incidencia['notas'] ?? 'Sin notas') ?>
+                                    </div>
+                                    <textarea class="edit-mode hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                                              data-field="notas" 
+                                              rows="2"
+                                              placeholder="Notas adicionales"><?= esc($incidencia['notas'] ?? '') ?></textarea>
+                                </td>
+                                
+                                <!-- Acciones (solo mostrar en modo visualización) -->
+                                <td class="px-4 py-3 border-b border-gray-100 whitespace-nowrap">
+                                    <div class="display-mode">
+                                        <button onclick="editarIncidencia(<?= $incidencia['id'] ?>)" 
+                                                class="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            Editar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="text-center py-8 text-gray-500">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p class="mt-2">No hay incidencias registradas para este plano.</p>
+            </div>
+        <?php endif; ?>
+    </div>
 </div>
 
 <!-- Agregar los inputs ocultos -->
@@ -494,8 +849,9 @@
 <!-- Modal para Agregar Incidencia -->
 <div id="modalIncidencia" class="fixed inset-0 bg-black bg-opacity-50 hidden" style="z-index: 10000;">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div class="p-6">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden" style="width: 90%; max-width: 1152px;">
+            <div class="overflow-y-auto overflow-x-hidden" style="max-height: calc(90vh - 0px);">
+                <div class="p-6">
                 <h3 class="text-lg font-semibold mb-2">Registrar Incidencia</h3>
                 <div id="trampaInfo" class="mb-4 p-3 bg-gray-100 rounded-md">
                     <p class="text-sm"><strong>ID de Trampa:</strong> <span id="trampaDbIdDisplay">-</span></p>
@@ -537,7 +893,7 @@
                                 placeholder="Ingrese el tipo de plaga">
                         </div>
                         <input type="hidden" name="tipo_plaga" id="tipo_plaga" required>
-                        <div id="cantidad_organismos_container" style="display: none;">
+                        <div id="cantidad_organismos_container">
                             <label class="block text-sm font-medium text-gray-700">Cantidad de Organismos</label>
                             <input type="number" name="cantidad_organismos" id="cantidad_organismos" min="1" 
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -591,10 +947,160 @@
                         </button>
                     </div>
                 </form>
-                <!-- Lista de incidencias agregadas -->
-                <div id="listaIncidenciasModal" class="mt-6">
-                    <h4 class="font-semibold mb-2">Incidencias agregadas:</h4>
-                    <ul id="incidenciasAgregadas" class="space-y-2"></ul>
+            </div>
+            <!-- Tabla de incidencias agregadas -->
+            <div id="listaIncidenciasModal" class="px-6 pb-6">
+                <h4 class="font-semibold mb-3 text-lg">Incidencias agregadas: <span id="contadorIncidencias">0</span></h4>
+                <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                    <table id="tablaIncidenciasAgregadas" class="w-full text-sm" style="min-width: 1000px;">
+                        <thead class="bg-gray-50 sticky top-0">
+                            <tr>
+                                <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Plaga</th>
+                                <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Incidencia</th>
+                                <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Insecto</th>
+                                <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Cantidad de Organismos</th>
+                                <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Fecha de Incidencia</th>
+                                <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Inspector</th>
+                                <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap min-w-[200px]">Notas Adicionales</th>
+                                <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incidenciasAgregadas" class="bg-white divide-y divide-gray-200">
+                            <tr id="filaVacia">
+                                <td colspan="8" class="px-4 py-8 text-center text-gray-400">
+                                    No hay incidencias agregadas.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Editar Incidencia -->
+<div id="modalEditarIncidencia" class="fixed inset-0 bg-black bg-opacity-50 hidden" style="z-index: 10000;">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold mb-2">Editar Incidencia</h3>
+                <div id="trampaInfoEditar" class="mb-4 p-3 bg-gray-100 rounded-md">
+                    <p class="text-sm text-gray-600"></p>
+                </div>
+                <form id="formEditarIncidencia">
+                    <input type="hidden" name="incidencia_id" id="incidencia_id_editar">
+                    <input type="hidden" name="trampa_id_editar" id="trampa_id_editar">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tipo de Plaga</label>
+                            <select name="tipo_plaga_select_editar" id="tipo_plaga_select_editar"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">Seleccione un tipo</option>
+                                <option value="mosca">Mosca</option>
+                                <option value="mosca_domestica">Mosca doméstica</option>
+                                <option value="mosca_fruta">Mosca de la fruta</option>
+                                <option value="mosca_drenaje">Mosca de drenaje</option>
+                                <option value="mosca_metalica">Moscas metálicas</option>
+                                <option value="mosca_forida">Mosca forida</option>
+                                <option value="palomilla_almacen">Palomillas de almacén</option>
+                                <option value="otras_palomillas">Otras palomillas</option>
+                                <option value="gorgojo">Gorgojos</option>
+                                <option value="otros_escarabajos">Otros escarabajos</option>
+                                <option value="abeja">Abejas</option>
+                                <option value="avispa">Avispas</option>
+                                <option value="mosquito">Mosquitos</option>
+                                <option value="cucaracha">Cucaracha</option>
+                                <option value="hormiga">Hormiga</option>
+                                <option value="roedor">Roedor</option>
+                                <option value="Arañas">Arañas</option>
+                                <option value="Lagartija">Lagartijas</option>
+                                <option value="otro">Otro (especificar)</option>
+                            </select>
+                        </div>
+                        <div id="tipo_plaga_personalizado_container_editar" style="display: none;">
+                            <label class="block text-sm font-medium text-gray-700">Especifique el tipo de plaga</label>
+                            <input type="text" name="tipo_plaga_personalizado_editar" id="tipo_plaga_personalizado_editar" 
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="Ingrese el tipo de plaga">
+                        </div>
+                        <input type="hidden" name="tipo_plaga_editar" id="tipo_plaga_editar" required>
+                        <div id="cantidad_organismos_container_editar" style="display: none;">
+                            <label class="block text-sm font-medium text-gray-700">Cantidad de Organismos</label>
+                            <input type="number" name="cantidad_organismos_editar" id="cantidad_organismos_editar" min="1" 
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="Ingrese la cantidad">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tipo de Incidencia</label>
+                            <select name="tipo_incidencia_editar" id="tipo_incidencia_editar"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="Captura">Captura</option>
+                                <option value="Hallazgo">Hallazgo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tipo de Insecto</label>
+                            <select name="tipo_insecto_editar" id="tipo_insecto_editar"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="Volador">Volador</option>
+                                <option value="Rastrero">Rastrero</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Fecha de Incidencia</label>
+                            <input type="datetime-local" name="fecha_incidencia_editar" id="fecha_incidencia_editar" required
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Inspector</label>
+                            <input type="text" name="inspector_editar" id="inspector_editar"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="Nombre del inspector">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Notas Adicionales</label>
+                            <textarea name="notas_editar" id="notas_editar" rows="3"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" onclick="closeEditarIncidenciaModal()"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                            Cancelar
+                        </button>
+                        <button type="button" id="btnGuardarIncidenciaEditar"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación para Desactivar Modo Edición -->
+<div id="modalConfirmarDesactivar" class="fixed inset-0 bg-black bg-opacity-50 hidden" style="z-index: 10000;">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold mb-4 text-gray-900">¿Desactivar Modo Edición?</h3>
+                <p class="text-gray-600 mb-6">
+                    Si desactivas el modo edición sin guardar, se perderán todos los cambios realizados.
+                    ¿Estás seguro de que deseas continuar?
+                </p>
+                <div class="flex justify-end space-x-3">
+                    <button onclick="cerrarModalConfirmarDesactivar()" 
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                        Cancelar
+                    </button>
+                    <button onclick="desactivarModoEdicionConfirmado()" 
+                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md">
+                        Desactivar sin Guardar
+                    </button>
                 </div>
             </div>
         </div>
@@ -917,7 +1423,8 @@
         function mostrarMensaje(mensaje, tipo) {
             // Crear elemento de alerta
             const alerta = document.createElement('div');
-            alerta.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${tipo === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`;
+            alerta.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${tipo === 'success' ? 'bg-green-500' : tipo === 'error' ? 'bg-red-500' : 'bg-blue-500'} text-white`;
+            alerta.style.zIndex = '10001'; // Por encima del modal (z-index 10000)
             alerta.textContent = mensaje;
             
             // Agregar al DOM
@@ -1975,12 +2482,11 @@
                 document.getElementById('tipo_plaga_personalizado').removeAttribute('required');
             }
             
-            // Mostrar/ocultar el campo de cantidad de organismos
+            // Mostrar el campo de cantidad de organismos siempre
+            cantidadContainer.style.display = 'block';
             if (this.value) {
-                cantidadContainer.style.display = 'block';
                 document.getElementById('cantidad_organismos').setAttribute('required', 'required');
             } else {
-                cantidadContainer.style.display = 'none';
                 document.getElementById('cantidad_organismos').removeAttribute('required');
             }
         });
@@ -2458,14 +2964,18 @@
             
             /* Estilos para todos los modales - asegurar que estén por encima de las trampas */
             #modalIncidencia,
+            #modalEditarIncidencia,
             #modalEditarId,
-            #modalZonaTrampa {
+            #modalZonaTrampa,
+            #modalConfirmarDesactivar {
                 z-index: 10000 !important; /* Asegurar que estén por encima de todo */
             }
             
             #modalIncidencia .bg-white,
+            #modalEditarIncidencia .bg-white,
             #modalEditarId .bg-white,
-            #modalZonaTrampa .bg-white {
+            #modalZonaTrampa .bg-white,
+            #modalConfirmarDesactivar .bg-white {
                 position: relative;
                 z-index: 10001; /* Asegurar que el contenido del modal esté por encima del fondo */
             }
@@ -3096,25 +3606,306 @@
         // --- INICIO: Lógica para incidencias múltiples ---
         let incidenciasTemp = [];
 
+        function formatearTipoPlaga(tipoPlaga) {
+            if (!tipoPlaga) return 'N/A';
+            return tipoPlaga.split('_').map(palabra => 
+                palabra.charAt(0).toUpperCase() + palabra.slice(1)
+            ).join(' ');
+        }
+        
+        function formatearFecha(fecha) {
+            if (!fecha) return 'N/A';
+            try {
+                // Normalizar el formato de fecha (puede venir como "YYYY-MM-DD HH:MM:SS" o "YYYY-MM-DDTHH:MM")
+                let fechaStr = fecha.toString().replace(' ', 'T');
+                if (!fechaStr.includes('T')) {
+                    fechaStr = fechaStr + 'T00:00';
+                }
+                // Asegurar que tenga segundos si no los tiene
+                if (fechaStr.split(':').length === 2) {
+                    fechaStr = fechaStr + ':00';
+                }
+                
+                const fechaObj = new Date(fechaStr);
+                if (isNaN(fechaObj.getTime())) {
+                    return fecha; // Si no se puede parsear, devolver el valor original
+                }
+                
+                const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+                              'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+                const dia = fechaObj.getDate();
+                const mes = meses[fechaObj.getMonth()];
+                const anio = fechaObj.getFullYear();
+                const hora = fechaObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                return `${dia} de ${mes} de ${anio}, ${hora}`;
+            } catch (e) {
+                return fecha;
+            }
+        }
+        
         function renderizarListaIncidencias() {
-            const ul = document.getElementById('incidenciasAgregadas');
-            ul.innerHTML = '';
+            const tbody = document.getElementById('incidenciasAgregadas');
+            const contador = document.getElementById('contadorIncidencias');
+            const filaVacia = document.getElementById('filaVacia');
+            
+            tbody.innerHTML = '';
+            
             if (incidenciasTemp.length === 0) {
-                ul.innerHTML = '<li class="text-gray-400">No hay incidencias agregadas.</li>';
+                tbody.innerHTML = '<tr id="filaVacia"><td colspan="8" class="px-4 py-8 text-center text-gray-400">No hay incidencias agregadas.</td></tr>';
+                contador.textContent = '0';
                 return;
             }
+            
+            contador.textContent = incidenciasTemp.length;
+            
             incidenciasTemp.forEach((inc, idx) => {
-                const li = document.createElement('li');
-                li.className = 'flex items-center justify-between bg-gray-50 rounded px-2 py-1';
-                li.innerHTML = `
-                    <span>
-                        <b>${inc.tipo_plaga || inc.tipo_plaga_select}</b> - ${inc.tipo_incidencia} - ${inc.tipo_insecto} - ${inc.fecha_incidencia} - ${inc.inspector || ''}
-                    </span>
-                    <button type="button" class="text-red-600 hover:text-red-800 ml-2" onclick="eliminarIncidenciaDeLista(${idx})"><i class="fas fa-trash-alt"></i></button>
+                const tipoPlaga = inc.tipo_plaga || inc.tipo_plaga_select || '';
+                const tipoPlagaDisplay = formatearTipoPlaga(tipoPlaga);
+                const fechaDisplay = formatearFecha(inc.fecha_incidencia);
+                // Formatear fecha para input datetime-local (YYYY-MM-DDTHH:MM)
+                let fechaFormateada = '';
+                if (inc.fecha_incidencia) {
+                    let fechaStr = inc.fecha_incidencia.toString().replace(' ', 'T');
+                    // Si tiene formato completo, tomar solo los primeros 16 caracteres (YYYY-MM-DDTHH:MM)
+                    if (fechaStr.length >= 16) {
+                        fechaFormateada = fechaStr.substring(0, 16);
+                    } else if (fechaStr.length === 10) {
+                        // Si solo tiene la fecha, agregar hora por defecto
+                        fechaFormateada = fechaStr + 'T00:00';
+                    } else {
+                        fechaFormateada = fechaStr;
+                    }
+                }
+                
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition-colors';
+                tr.setAttribute('data-indice', idx);
+                tr.innerHTML = `
+                    <!-- Tipo de Plaga -->
+                    <td class="px-4 py-3 border-b border-gray-100 text-gray-700 whitespace-nowrap">
+                        <span class="display-mode-${idx}">${tipoPlagaDisplay}</span>
+                        <select class="edit-mode-${idx} hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                                data-field="tipo_plaga" data-indice="${idx}">
+                            <option value="">Seleccione un tipo</option>
+                            <option value="mosca" ${tipoPlaga === 'mosca' ? 'selected' : ''}>Mosca</option>
+                            <option value="mosca_domestica" ${tipoPlaga === 'mosca_domestica' ? 'selected' : ''}>Mosca Doméstica</option>
+                            <option value="mosca_fruta" ${tipoPlaga === 'mosca_fruta' ? 'selected' : ''}>Mosca De La Fruta</option>
+                            <option value="mosca_drenaje" ${tipoPlaga === 'mosca_drenaje' ? 'selected' : ''}>Mosca De Drenaje</option>
+                            <option value="mosca_metalica" ${tipoPlaga === 'mosca_metalica' ? 'selected' : ''}>Moscas Metálicas</option>
+                            <option value="mosca_forida" ${tipoPlaga === 'mosca_forida' ? 'selected' : ''}>Mosca Forida</option>
+                            <option value="palomilla_almacen" ${tipoPlaga === 'palomilla_almacen' ? 'selected' : ''}>Palomillas De Almacén</option>
+                            <option value="otras_palomillas" ${tipoPlaga === 'otras_palomillas' ? 'selected' : ''}>Otras Palomillas</option>
+                            <option value="gorgojo" ${tipoPlaga === 'gorgojo' ? 'selected' : ''}>Gorgojos</option>
+                            <option value="otros_escarabajos" ${tipoPlaga === 'otros_escarabajos' ? 'selected' : ''}>Otros Escarabajos</option>
+                            <option value="abeja" ${tipoPlaga === 'abeja' ? 'selected' : ''}>Abejas</option>
+                            <option value="avispa" ${tipoPlaga === 'avispa' ? 'selected' : ''}>Avispas</option>
+                            <option value="mosquito" ${tipoPlaga === 'mosquito' ? 'selected' : ''}>Mosquitos</option>
+                            <option value="cucaracha" ${tipoPlaga === 'cucaracha' ? 'selected' : ''}>Cucaracha</option>
+                            <option value="hormiga" ${tipoPlaga === 'hormiga' ? 'selected' : ''}>Hormiga</option>
+                            <option value="roedor" ${tipoPlaga === 'roedor' ? 'selected' : ''}>Roedor</option>
+                            <option value="Arañas" ${tipoPlaga === 'Arañas' ? 'selected' : ''}>Arañas</option>
+                            <option value="Lagartija" ${tipoPlaga === 'Lagartija' ? 'selected' : ''}>Lagartijas</option>
+                            <option value="otro" ${!['mosca', 'mosca_domestica', 'mosca_fruta', 'mosca_drenaje', 'mosca_metalica', 'mosca_forida', 'palomilla_almacen', 'otras_palomillas', 'gorgojo', 'otros_escarabajos', 'abeja', 'avispa', 'mosquito', 'cucaracha', 'hormiga', 'roedor', 'Arañas', 'Lagartija'].includes(tipoPlaga) && tipoPlaga ? 'selected' : ''}>Otro (especificar)</option>
+                        </select>
+                        <input type="text" class="edit-mode-${idx} hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm tipo-plaga-personalizado-${idx}" 
+                               data-field="tipo_plaga_personalizado" data-indice="${idx}"
+                               placeholder="Especifique el tipo de plaga"
+                               value="${!['mosca', 'mosca_domestica', 'mosca_fruta', 'mosca_drenaje', 'mosca_metalica', 'mosca_forida', 'palomilla_almacen', 'otras_palomillas', 'gorgojo', 'otros_escarabajos', 'abeja', 'avispa', 'mosquito', 'cucaracha', 'hormiga', 'roedor', 'Arañas', 'Lagartija'].includes(tipoPlaga) && tipoPlaga ? tipoPlaga : ''}"
+                               style="display: none;">
+                    </td>
+                    
+                    <!-- Tipo de Incidencia -->
+                    <td class="px-4 py-3 border-b border-gray-100 whitespace-nowrap">
+                        <span class="display-mode-${idx} inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${inc.tipo_incidencia === 'Captura' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${inc.tipo_incidencia || 'N/A'}</span>
+                        <select class="edit-mode-${idx} hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                                data-field="tipo_incidencia" data-indice="${idx}">
+                            <option value="Captura" ${inc.tipo_incidencia === 'Captura' ? 'selected' : ''}>Captura</option>
+                            <option value="Hallazgo" ${inc.tipo_incidencia === 'Hallazgo' ? 'selected' : ''}>Hallazgo</option>
+                        </select>
+                    </td>
+                    
+                    <!-- Tipo de Insecto -->
+                    <td class="px-4 py-3 border-b border-gray-100 text-gray-700 whitespace-nowrap">
+                        <span class="display-mode-${idx}">${inc.tipo_insecto || 'N/A'}</span>
+                        <select class="edit-mode-${idx} hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                                data-field="tipo_insecto" data-indice="${idx}">
+                            <option value="Volador" ${inc.tipo_insecto === 'Volador' ? 'selected' : ''}>Volador</option>
+                            <option value="Rastrero" ${inc.tipo_insecto === 'Rastrero' ? 'selected' : ''}>Rastrero</option>
+                        </select>
+                    </td>
+                    
+                    <!-- Cantidad de Organismos -->
+                    <td class="px-4 py-3 border-b border-gray-100 text-gray-700 whitespace-nowrap text-center">
+                        <span class="display-mode-${idx}">
+                            ${inc.cantidad_organismos ? `<span class="font-semibold text-blue-600">${inc.cantidad_organismos}</span>` : '<span class="text-gray-400">-</span>'}
+                        </span>
+                        <input type="number" class="edit-mode-${idx} hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm text-center" 
+                               data-field="cantidad_organismos" data-indice="${idx}"
+                               min="1" 
+                               value="${inc.cantidad_organismos || ''}">
+                    </td>
+                    
+                    <!-- Fecha de Incidencia -->
+                    <td class="px-4 py-3 border-b border-gray-100 text-gray-700 whitespace-nowrap">
+                        <span class="display-mode-${idx}">${fechaDisplay}</span>
+                        <input type="datetime-local" class="edit-mode-${idx} hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                               data-field="fecha_incidencia" data-indice="${idx}"
+                               value="${fechaFormateada}">
+                    </td>
+                    
+                    <!-- Inspector -->
+                    <td class="px-4 py-3 border-b border-gray-100 text-gray-700 whitespace-nowrap">
+                        <span class="display-mode-${idx}">${inc.inspector || 'N/A'}</span>
+                        <input type="text" class="edit-mode-${idx} hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                               data-field="inspector" data-indice="${idx}"
+                               placeholder="Nombre del inspector"
+                               value="${inc.inspector || ''}">
+                    </td>
+                    
+                    <!-- Notas Adicionales -->
+                    <td class="px-4 py-3 border-b border-gray-100 text-gray-700">
+                        <div class="display-mode-${idx} max-w-xs" title="${inc.notas || ''}">${inc.notas || 'Sin notas'}</div>
+                        <textarea class="edit-mode-${idx} hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
+                                  data-field="notas" data-indice="${idx}"
+                                  rows="2"
+                                  placeholder="Notas adicionales">${inc.notas || ''}</textarea>
+                    </td>
+                    
+                    <!-- Acciones -->
+                    <td class="px-4 py-3 border-b border-gray-100 whitespace-nowrap">
+                        <div class="display-mode-${idx} flex items-center gap-2">
+                            <button onclick="editarIncidenciaEnCola(${idx})" 
+                                    class="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Editar
+                            </button>
+                            <button onclick="eliminarIncidenciaDeLista(${idx})" 
+                                    class="text-red-600 hover:text-red-800 font-medium text-sm flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Eliminar
+                            </button>
+                        </div>
+                        <div class="edit-mode-${idx} hidden flex items-center gap-2">
+                            <button onclick="guardarIncidenciaEnCola(${idx})" 
+                                    class="text-green-600 hover:text-green-800 font-medium text-sm flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Guardar
+                            </button>
+                            <button onclick="cancelarEdicionEnCola(${idx})" 
+                                    class="text-red-600 hover:text-red-800 font-medium text-sm flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Cancelar
+                            </button>
+                        </div>
+                    </td>
                 `;
-                ul.appendChild(li);
+                tbody.appendChild(tr);
+                
+                // Configurar evento para el select de tipo de plaga
+                setTimeout(() => {
+                    const selectTipoPlaga = tr.querySelector(`select[data-field="tipo_plaga"][data-indice="${idx}"]`);
+                    const inputPersonalizado = tr.querySelector(`.tipo-plaga-personalizado-${idx}`);
+                    
+                    if (selectTipoPlaga && inputPersonalizado) {
+                        selectTipoPlaga.addEventListener('change', function() {
+                            if (this.value === 'otro') {
+                                inputPersonalizado.style.display = 'block';
+                                inputPersonalizado.setAttribute('required', 'required');
+                            } else {
+                                inputPersonalizado.style.display = 'none';
+                                inputPersonalizado.removeAttribute('required');
+                            }
+                        });
+                    }
+                }, 100);
             });
         }
+        
+        // Función para editar incidencia en la cola
+        window.editarIncidenciaEnCola = function(idx) {
+            const fila = document.querySelector(`tr[data-indice="${idx}"]`);
+            if (!fila) return;
+            
+            // Ocultar elementos de visualización
+            fila.querySelectorAll(`.display-mode-${idx}`).forEach(el => el.classList.add('hidden'));
+            // Mostrar elementos de edición
+            fila.querySelectorAll(`.edit-mode-${idx}`).forEach(el => el.classList.remove('hidden'));
+            
+            // Manejar tipo de plaga personalizado
+            const selectTipoPlaga = fila.querySelector(`select[data-field="tipo_plaga"][data-indice="${idx}"]`);
+            const inputPersonalizado = fila.querySelector(`.tipo-plaga-personalizado-${idx}`);
+            
+            if (selectTipoPlaga && inputPersonalizado) {
+                const tipoPlaga = incidenciasTemp[idx].tipo_plaga || incidenciasTemp[idx].tipo_plaga_select || '';
+                if (!['mosca', 'mosca_domestica', 'mosca_fruta', 'mosca_drenaje', 'mosca_metalica', 'mosca_forida', 'palomilla_almacen', 'otras_palomillas', 'gorgojo', 'otros_escarabajos', 'abeja', 'avispa', 'mosquito', 'cucaracha', 'hormiga', 'roedor', 'Arañas', 'Lagartija'].includes(tipoPlaga) && tipoPlaga) {
+                    selectTipoPlaga.value = 'otro';
+                    inputPersonalizado.style.display = 'block';
+                }
+            }
+        };
+        
+        // Función para guardar cambios en incidencia de la cola
+        window.guardarIncidenciaEnCola = function(idx) {
+            const fila = document.querySelector(`tr[data-indice="${idx}"]`);
+            if (!fila || !incidenciasTemp[idx]) return;
+            
+            const campos = fila.querySelectorAll(`[data-field][data-indice="${idx}"]`);
+            const incidencia = incidenciasTemp[idx];
+            
+            campos.forEach(campo => {
+                const fieldName = campo.getAttribute('data-field');
+                if (fieldName === 'tipo_plaga') {
+                    const selectTipoPlaga = fila.querySelector(`select[data-field="tipo_plaga"][data-indice="${idx}"]`);
+                    const inputPersonalizado = fila.querySelector(`.tipo-plaga-personalizado-${idx}`);
+                    
+                    if (selectTipoPlaga.value === 'otro' && inputPersonalizado && inputPersonalizado.value) {
+                        incidencia.tipo_plaga = inputPersonalizado.value;
+                        incidencia.tipo_plaga_select = 'otro';
+                    } else {
+                        incidencia.tipo_plaga = selectTipoPlaga.value;
+                        incidencia.tipo_plaga_select = selectTipoPlaga.value;
+                    }
+                } else if (fieldName === 'fecha_incidencia') {
+                    // Convertir datetime-local a formato correcto
+                    const fechaValue = campo.value;
+                    if (fechaValue) {
+                        incidencia.fecha_incidencia = fechaValue.replace('T', ' ') + ':00';
+                    }
+                } else {
+                    incidencia[fieldName] = campo.value;
+                }
+            });
+            
+            // Ocultar elementos de edición
+            fila.querySelectorAll(`.edit-mode-${idx}`).forEach(el => el.classList.add('hidden'));
+            // Mostrar elementos de visualización
+            fila.querySelectorAll(`.display-mode-${idx}`).forEach(el => el.classList.remove('hidden'));
+            
+            // Re-renderizar para actualizar los valores mostrados
+            renderizarListaIncidencias();
+        };
+        
+        // Función para cancelar edición en cola
+        window.cancelarEdicionEnCola = function(idx) {
+            const fila = document.querySelector(`tr[data-indice="${idx}"]`);
+            if (!fila) return;
+            
+            // Ocultar elementos de edición
+            fila.querySelectorAll(`.edit-mode-${idx}`).forEach(el => el.classList.add('hidden'));
+            // Mostrar elementos de visualización
+            fila.querySelectorAll(`.display-mode-${idx}`).forEach(el => el.classList.remove('hidden'));
+            
+            // Re-renderizar para restaurar valores originales
+            renderizarListaIncidencias();
+        };
 
         // Hacer global la función para que funcione el botón eliminar
         window.eliminarIncidenciaDeLista = function(idx) {
@@ -3141,7 +3932,7 @@
             renderizarListaIncidencias();
             form.reset();
             document.getElementById('tipo_plaga_personalizado_container').style.display = 'none';
-            document.getElementById('cantidad_organismos_container').style.display = 'none';
+            document.getElementById('cantidad_organismos_container').style.display = 'block';
             document.getElementById('tipo_plaga_personalizado').removeAttribute('required');
             document.getElementById('cantidad_organismos').removeAttribute('required');
         });
@@ -3194,6 +3985,635 @@
             renderizarListaIncidencias();
             oldCloseIncidenciaModal();
         };
+        
+        // Funciones para editar incidencias
+        window.editarIncidencia = function(incidenciaId) {
+            // Buscar la incidencia en los datos cargados
+            const incidencia = <?= json_encode($incidencias ?? []) ?>.find(i => i.id == incidenciaId);
+            
+            if (!incidencia) {
+                mostrarMensaje('No se encontró la incidencia', 'error');
+                return;
+            }
+            
+            // Llenar el formulario con los datos de la incidencia
+            document.getElementById('incidencia_id_editar').value = incidencia.id;
+            document.getElementById('trampa_id_editar').value = incidencia.id_trampa;
+            
+            // Mostrar información de la trampa
+            const trampaInfo = document.getElementById('trampaInfoEditar');
+            trampaInfo.innerHTML = `<p class="text-sm text-gray-600"><strong>ID de Trampa:</strong> ${incidencia.id_trampa || 'N/A'}<br><strong>Ubicación:</strong> ${incidencia.trampa_ubicacion || 'N/A'}</p>`;
+            
+            // Tipo de plaga
+            const tipoPlaga = incidencia.tipo_plaga || '';
+            const tipoPlagaSelect = document.getElementById('tipo_plaga_select_editar');
+            const tipoPlagaHidden = document.getElementById('tipo_plaga_editar');
+            const tipoPlagaPersonalizado = document.getElementById('tipo_plaga_personalizado_editar');
+            const tipoPlagaPersonalizadoContainer = document.getElementById('tipo_plaga_personalizado_container_editar');
+            
+            // Verificar si el tipo de plaga está en las opciones
+            let encontrado = false;
+            for (let option of tipoPlagaSelect.options) {
+                if (option.value === tipoPlaga) {
+                    tipoPlagaSelect.value = tipoPlaga;
+                    tipoPlagaHidden.value = tipoPlaga;
+                    encontrado = true;
+                    tipoPlagaPersonalizadoContainer.style.display = 'none';
+                    break;
+                }
+            }
+            
+            if (!encontrado && tipoPlaga) {
+                // Si no está en las opciones, usar "otro" y poner el valor en el campo personalizado
+                tipoPlagaSelect.value = 'otro';
+                tipoPlagaPersonalizado.value = tipoPlaga;
+                tipoPlagaHidden.value = tipoPlaga;
+                tipoPlagaPersonalizadoContainer.style.display = 'block';
+            }
+            
+            // Tipo de incidencia
+            document.getElementById('tipo_incidencia_editar').value = incidencia.tipo_incidencia || 'Captura';
+            
+            // Tipo de insecto
+            document.getElementById('tipo_insecto_editar').value = incidencia.tipo_insecto || 'Volador';
+            
+            // Fecha - convertir al formato datetime-local
+            if (incidencia.fecha) {
+                const fecha = new Date(incidencia.fecha);
+                const fechaLocal = new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                document.getElementById('fecha_incidencia_editar').value = fechaLocal;
+            }
+            
+            // Inspector
+            document.getElementById('inspector_editar').value = incidencia.inspector || '';
+            
+            // Notas
+            document.getElementById('notas_editar').value = incidencia.notas || '';
+            
+            // Cantidad de organismos
+            const cantidadContainer = document.getElementById('cantidad_organismos_container_editar');
+            const cantidadInput = document.getElementById('cantidad_organismos_editar');
+            if (incidencia.cantidad_organismos) {
+                cantidadInput.value = incidencia.cantidad_organismos;
+                cantidadContainer.style.display = 'block';
+            } else {
+                cantidadContainer.style.display = 'block';
+            }
+            
+            // Mostrar el modal
+            document.getElementById('modalEditarIncidencia').classList.remove('hidden');
+        };
+        
+        window.closeEditarIncidenciaModal = function() {
+            document.getElementById('modalEditarIncidencia').classList.add('hidden');
+            // Limpiar el formulario
+            document.getElementById('formEditarIncidencia').reset();
+            document.getElementById('tipo_plaga_personalizado_container_editar').style.display = 'none';
+        };
+        
+        // Manejar cambio del select de tipo de plaga en el modal de edición
+        document.getElementById('tipo_plaga_select_editar').addEventListener('change', function() {
+            const tipoPlagaPersonalizadoContainer = document.getElementById('tipo_plaga_personalizado_container_editar');
+            const cantidadContainer = document.getElementById('cantidad_organismos_container_editar');
+            const tipoPlagaHidden = document.getElementById('tipo_plaga_editar');
+            
+            tipoPlagaHidden.value = this.value;
+            
+            if (this.value === 'otro') {
+                tipoPlagaPersonalizadoContainer.style.display = 'block';
+                document.getElementById('tipo_plaga_personalizado_editar').setAttribute('required', 'required');
+                tipoPlagaHidden.value = '';
+            } else {
+                tipoPlagaPersonalizadoContainer.style.display = 'none';
+                document.getElementById('tipo_plaga_personalizado_editar').removeAttribute('required');
+            }
+            
+            if (this.value) {
+                cantidadContainer.style.display = 'block';
+                document.getElementById('cantidad_organismos_editar').setAttribute('required', 'required');
+            } else {
+                cantidadContainer.style.display = 'none';
+                document.getElementById('cantidad_organismos_editar').removeAttribute('required');
+            }
+        });
+        
+        // Actualizar campo oculto cuando se escribe en el campo personalizado
+        document.getElementById('tipo_plaga_personalizado_editar').addEventListener('input', function() {
+            document.getElementById('tipo_plaga_editar').value = this.value;
+        });
+        
+        // Guardar cambios de la incidencia editada
+        document.getElementById('btnGuardarIncidenciaEditar').addEventListener('click', function() {
+            const form = document.getElementById('formEditarIncidencia');
+            const formData = new FormData(form);
+            
+            // Verificar que se haya seleccionado un tipo de plaga
+            if (!formData.get('tipo_plaga_editar')) {
+                mostrarMensaje('Debe seleccionar un tipo de plaga', 'error');
+                return;
+            }
+            
+            // Verificar que se haya proporcionado una fecha
+            if (!formData.get('fecha_incidencia_editar')) {
+                mostrarMensaje('Debe ingresar la fecha de incidencia', 'error');
+                return;
+            }
+            
+            // Deshabilitar el botón mientras se guarda
+            const btnGuardar = this;
+            btnGuardar.disabled = true;
+            btnGuardar.textContent = 'Guardando...';
+            
+            fetch('<?= base_url('blueprints/actualizar_incidencia') ?>', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarMensaje('Incidencia actualizada correctamente', 'success');
+                    closeEditarIncidenciaModal();
+                    // Recargar la página para mostrar los cambios
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    mostrarMensaje(data.message || 'Error al actualizar la incidencia', 'error');
+                    btnGuardar.disabled = false;
+                    btnGuardar.textContent = 'Guardar Cambios';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarMensaje('Error al actualizar la incidencia', 'error');
+                btnGuardar.disabled = false;
+                btnGuardar.textContent = 'Guardar Cambios';
+            });
+        });
+        
+        // Modo edición inline de la tabla de incidencias
+        let modoEdicionActivo = false;
+        
+        window.toggleModoEdicion = function() {
+            modoEdicionActivo = !modoEdicionActivo;
+            const btnModoEdicion = document.getElementById('btnModoEdicion');
+            const textoModoEdicion = document.getElementById('textoModoEdicion');
+            const filas = document.querySelectorAll('#tbodyIncidencias tr');
+            
+            if (modoEdicionActivo) {
+                // Activar modo edición
+                btnModoEdicion.classList.add('hidden');
+                document.getElementById('botonesModoEdicion').classList.remove('hidden');
+                
+                filas.forEach(fila => {
+                    // Ocultar elementos de visualización
+                    fila.querySelectorAll('.display-mode').forEach(el => el.classList.add('hidden'));
+                    // Mostrar elementos de edición
+                    fila.querySelectorAll('.edit-mode').forEach(el => el.classList.remove('hidden'));
+                    
+                    // Asegurar que el campo de fecha tenga el valor correcto
+                    const campoFecha = fila.querySelector('input[data-field="fecha_incidencia"]');
+                    if (campoFecha && !campoFecha.value) {
+                        // Si el campo está vacío, intentar obtener el valor del data-original-data
+                        const originalData = JSON.parse(fila.getAttribute('data-original-data') || '{}');
+                        if (originalData.fecha) {
+                            campoFecha.value = originalData.fecha;
+                        }
+                    }
+                    
+                    // Manejar select de tipo de plaga
+                    const selectTipoPlaga = fila.querySelector('select[data-field="tipo_plaga"]');
+                    const inputTipoPlagaPersonalizado = fila.querySelector('.tipo-plaga-personalizado');
+                    const divTipoPlagaPersonalizado = inputTipoPlagaPersonalizado ? inputTipoPlagaPersonalizado.closest('div') : null;
+                    
+                    if (selectTipoPlaga && inputTipoPlagaPersonalizado) {
+                        // Verificar si el valor actual no está en las opciones
+                        const valorActual = selectTipoPlaga.value;
+                        if (valorActual === 'otro' || (!valorActual && inputTipoPlagaPersonalizado.value)) {
+                            if (divTipoPlagaPersonalizado) {
+                                divTipoPlagaPersonalizado.style.display = 'block';
+                                inputTipoPlagaPersonalizado.style.display = 'block';
+                            }
+                            inputTipoPlagaPersonalizado.setAttribute('required', 'required');
+                        }
+                        
+                        // Remover listeners anteriores si existen
+                        const nuevoSelect = selectTipoPlaga.cloneNode(true);
+                        selectTipoPlaga.parentNode.replaceChild(nuevoSelect, selectTipoPlaga);
+                        
+                        nuevoSelect.addEventListener('change', function() {
+                            if (this.value === 'otro') {
+                                if (divTipoPlagaPersonalizado) {
+                                    divTipoPlagaPersonalizado.style.display = 'block';
+                                    inputTipoPlagaPersonalizado.style.display = 'block';
+                                }
+                                inputTipoPlagaPersonalizado.setAttribute('required', 'required');
+                            } else {
+                                if (divTipoPlagaPersonalizado) {
+                                    divTipoPlagaPersonalizado.style.display = 'none';
+                                    inputTipoPlagaPersonalizado.style.display = 'none';
+                                }
+                                inputTipoPlagaPersonalizado.removeAttribute('required');
+                            }
+                        });
+                    }
+                });
+            } else {
+                // Desactivar modo edición (esta función solo se llama desde confirmarDesactivarModoEdicionConfirmado)
+                btnModoEdicion.classList.remove('hidden');
+                document.getElementById('botonesModoEdicion').classList.add('hidden');
+                
+                filas.forEach(fila => {
+                    // Mostrar elementos de visualización
+                    fila.querySelectorAll('.display-mode').forEach(el => el.classList.remove('hidden'));
+                    // Ocultar elementos de edición
+                    fila.querySelectorAll('.edit-mode').forEach(el => el.classList.add('hidden'));
+                    
+                    // Restaurar valores originales
+                    cancelarEdicionFila(fila);
+                });
+            }
+        };
+        
+        window.guardarFilaIncidencia = function(button) {
+            const fila = button.closest('tr');
+            const incidenciaId = fila.getAttribute('data-incidencia-id');
+            const campos = fila.querySelectorAll('[data-field]');
+            
+            // Recopilar datos
+            const datos = {
+                incidencia_id: incidenciaId
+            };
+            
+            // Obtener el campo de fecha primero para validarlo
+            const campoFecha = fila.querySelector('input[data-field="fecha_incidencia"]');
+            const valorFecha = campoFecha ? campoFecha.value.trim() : '';
+            
+            campos.forEach(campo => {
+                const fieldName = campo.getAttribute('data-field');
+                if (fieldName === 'tipo_plaga') {
+                    const selectTipoPlaga = fila.querySelector('select[data-field="tipo_plaga"]');
+                    const inputPersonalizado = fila.querySelector('.tipo-plaga-personalizado');
+                    
+                    if (selectTipoPlaga.value === 'otro' && inputPersonalizado && inputPersonalizado.value) {
+                        datos['tipo_plaga_editar'] = inputPersonalizado.value;
+                    } else {
+                        datos['tipo_plaga_editar'] = selectTipoPlaga.value;
+                    }
+                } else if (fieldName === 'fecha_incidencia') {
+                    // Ya lo capturamos arriba, lo agregamos aquí
+                    datos['fecha_incidencia_editar'] = valorFecha;
+                } else {
+                    datos[fieldName + '_editar'] = campo.value;
+                }
+            });
+            
+            // Validar campos requeridos
+            if (!datos['tipo_plaga_editar'] || datos['tipo_plaga_editar'].trim() === '') {
+                mostrarMensaje('Debe seleccionar un tipo de plaga', 'error');
+                return;
+            }
+            
+            // Validar fecha - verificar que tenga un valor válido
+            if (!valorFecha || valorFecha === '' || valorFecha === 'null' || valorFecha === 'undefined') {
+                mostrarMensaje('Debe ingresar la fecha de incidencia', 'error');
+                return;
+            }
+            
+            // Asegurar que siempre se envíe como fecha_incidencia_editar
+            datos['fecha_incidencia_editar'] = valorFecha;
+            
+            // Deshabilitar botón mientras se guarda
+            button.disabled = true;
+            button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Guardando...';
+            
+            // Enviar datos
+            const formData = new FormData();
+            Object.keys(datos).forEach(key => {
+                formData.append(key, datos[key]);
+            });
+            
+            fetch('<?= base_url('blueprints/actualizar_incidencia') ?>', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarMensaje('Incidencia actualizada correctamente', 'success');
+                    // Recargar la página para mostrar los cambios
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    mostrarMensaje(data.message || 'Error al actualizar la incidencia', 'error');
+                    button.disabled = false;
+                    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Guardar';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarMensaje('Error al actualizar la incidencia', 'error');
+                button.disabled = false;
+                button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Guardar';
+            });
+        };
+        
+        window.cancelarEdicionFila = function(fila) {
+            if (!fila) return;
+            
+            // Restaurar valores originales desde data-original-data
+            const originalData = JSON.parse(fila.getAttribute('data-original-data') || '{}');
+            const campos = fila.querySelectorAll('[data-field]');
+            
+            campos.forEach(campo => {
+                const fieldName = campo.getAttribute('data-field');
+                if (fieldName === 'tipo_plaga') {
+                    const selectTipoPlaga = fila.querySelector('select[data-field="tipo_plaga"]');
+                    const inputPersonalizado = fila.querySelector('.tipo-plaga-personalizado');
+                    
+                    // Verificar si el valor original está en las opciones
+                    const valorOriginal = originalData['tipo_plaga'] || '';
+                    let encontrado = false;
+                    for (let option of selectTipoPlaga.options) {
+                        if (option.value === valorOriginal) {
+                            selectTipoPlaga.value = valorOriginal;
+                            encontrado = true;
+                            if (inputPersonalizado) {
+                                const divPersonalizado = inputPersonalizado.closest('div');
+                                if (divPersonalizado) {
+                                    divPersonalizado.style.display = 'none';
+                                    inputPersonalizado.style.display = 'none';
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    
+                    if (!encontrado && valorOriginal) {
+                        selectTipoPlaga.value = 'otro';
+                        if (inputPersonalizado) {
+                            inputPersonalizado.value = valorOriginal;
+                            const divPersonalizado = inputPersonalizado.closest('div');
+                            if (divPersonalizado) {
+                                divPersonalizado.style.display = 'block';
+                                inputPersonalizado.style.display = 'block';
+                            }
+                        }
+                    } else {
+                        const divPersonalizado = inputPersonalizado ? inputPersonalizado.closest('div') : null;
+                        if (divPersonalizado) {
+                            divPersonalizado.style.display = 'none';
+                            inputPersonalizado.style.display = 'none';
+                        }
+                    }
+                } else {
+                    const valorOriginal = originalData[fieldName] || '';
+                    if (campo.tagName === 'INPUT' || campo.tagName === 'TEXTAREA') {
+                        campo.value = valorOriginal;
+                    } else if (campo.tagName === 'SELECT') {
+                        campo.value = valorOriginal;
+                    }
+                }
+            });
+        };
+        
+        // Función para comparar valores y detectar cambios
+        function valoresDiferentes(valorActual, valorOriginal) {
+            // Normalizar valores para comparación
+            const actual = String(valorActual || '').trim();
+            const original = String(valorOriginal || '').trim();
+            return actual !== original;
+        }
+        
+        // Función para guardar todos los cambios (solo los modificados)
+        window.guardarTodosLosCambios = function() {
+            const filas = document.querySelectorAll('#tbodyIncidencias tr');
+            const cambios = [];
+            const errores = [];
+            
+            // Recopilar solo los cambios de filas modificadas
+            filas.forEach(fila => {
+                const incidenciaId = fila.getAttribute('data-incidencia-id');
+                const originalData = JSON.parse(fila.getAttribute('data-original-data') || '{}');
+                const campos = fila.querySelectorAll('[data-field]');
+                
+                // Obtener valores actuales
+                const valoresActuales = {};
+                
+                // Obtener el campo de fecha primero para validarlo
+                const campoFecha = fila.querySelector('input[data-field="fecha_incidencia"]');
+                const valorFecha = campoFecha ? campoFecha.value.trim() : '';
+                
+                // Recopilar todos los valores actuales
+                campos.forEach(campo => {
+                    const fieldName = campo.getAttribute('data-field');
+                    if (fieldName === 'tipo_plaga') {
+                        const selectTipoPlaga = fila.querySelector('select[data-field="tipo_plaga"]');
+                        const inputPersonalizado = fila.querySelector('.tipo-plaga-personalizado');
+                        
+                        if (selectTipoPlaga.value === 'otro' && inputPersonalizado && inputPersonalizado.value) {
+                            valoresActuales['tipo_plaga'] = inputPersonalizado.value;
+                        } else {
+                            valoresActuales['tipo_plaga'] = selectTipoPlaga.value;
+                        }
+                    } else if (fieldName === 'fecha_incidencia') {
+                        valoresActuales['fecha'] = valorFecha;
+                    } else {
+                        valoresActuales[fieldName] = campo.value;
+                    }
+                });
+                
+                // Validar campos requeridos (solo si hay cambios o si es necesario)
+                if (!valoresActuales['tipo_plaga'] || valoresActuales['tipo_plaga'].trim() === '') {
+                    errores.push(`Incidencia ${incidenciaId}: Debe seleccionar un tipo de plaga`);
+                    return;
+                }
+                
+                if (!valoresActuales['fecha'] || valoresActuales['fecha'] === '' || valoresActuales['fecha'] === 'null' || valoresActuales['fecha'] === 'undefined') {
+                    errores.push(`Incidencia ${incidenciaId}: Debe ingresar la fecha de incidencia`);
+                    return;
+                }
+                
+                // Detectar si hay cambios comparando con valores originales
+                let hayCambios = false;
+                const camposModificados = {};
+                
+                // Comparar cada campo
+                Object.keys(valoresActuales).forEach(key => {
+                    const valorOriginal = originalData[key] || '';
+                    const valorActual = valoresActuales[key] || '';
+                    
+                    if (valoresDiferentes(valorActual, valorOriginal)) {
+                        hayCambios = true;
+                        camposModificados[key] = valorActual;
+                    }
+                });
+                
+                // Solo agregar a cambios si hay diferencias
+                if (hayCambios) {
+                    const datos = {
+                        incidencia_id: incidenciaId,
+                        tipo_plaga_editar: valoresActuales['tipo_plaga'],
+                        tipo_incidencia_editar: valoresActuales['tipo_incidencia'] || originalData['tipo_incidencia'] || 'Captura',
+                        tipo_insecto_editar: valoresActuales['tipo_insecto'] || originalData['tipo_insecto'] || 'Volador',
+                        cantidad_organismos_editar: valoresActuales['cantidad_organismos'] || originalData['cantidad_organismos'] || null,
+                        fecha_incidencia_editar: valoresActuales['fecha'],
+                        inspector_editar: valoresActuales['inspector'] || originalData['inspector'] || '',
+                        notas_editar: valoresActuales['notas'] || originalData['notas'] || ''
+                    };
+                    cambios.push(datos);
+                }
+            });
+            
+            // Si hay errores, mostrarlos
+            if (errores.length > 0) {
+                mostrarMensaje('Hay errores en algunos registros:\n' + errores.join('\n'), 'error');
+                return;
+            }
+            
+            if (cambios.length === 0) {
+                mostrarMensaje('No hay cambios para guardar', 'info');
+                return;
+            }
+            
+            // Deshabilitar botón mientras se guarda
+            const btnGuardarTodos = document.getElementById('btnGuardarTodos');
+            const textoOriginal = btnGuardarTodos.innerHTML;
+            btnGuardarTodos.disabled = true;
+            btnGuardarTodos.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Guardando...';
+            
+            // Guardar todos los cambios en paralelo
+            const promesas = cambios.map(datos => {
+                const formData = new FormData();
+                Object.keys(datos).forEach(key => {
+                    formData.append(key, datos[key]);
+                });
+                
+                return fetch('<?= base_url('blueprints/actualizar_incidencia') ?>', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.message || 'Error al actualizar');
+                    }
+                    return data;
+                });
+            });
+            
+            Promise.all(promesas)
+                .then(results => {
+                    mostrarMensaje(`${results.length} incidencia(s) actualizada(s) correctamente de ${filas.length} total`, 'success');
+                    // Recargar la página para mostrar los cambios
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mostrarMensaje('Error al guardar algunos cambios: ' + error.message, 'error');
+                    btnGuardarTodos.disabled = false;
+                    btnGuardarTodos.innerHTML = textoOriginal;
+                });
+        };
+        
+        // Función para confirmar desactivar modo edición
+        window.confirmarDesactivarModoEdicion = function() {
+            document.getElementById('modalConfirmarDesactivar').classList.remove('hidden');
+        };
+        
+        // Función para cerrar el modal de confirmación
+        window.cerrarModalConfirmarDesactivar = function() {
+            document.getElementById('modalConfirmarDesactivar').classList.add('hidden');
+        };
+        
+        // Función para desactivar modo edición confirmado
+        window.desactivarModoEdicionConfirmado = function() {
+            cerrarModalConfirmarDesactivar();
+            modoEdicionActivo = false;
+            toggleModoEdicion();
+        };
+        
+        // Funciones para filtrar la tabla de incidencias
+        window.aplicarFiltros = function() {
+            const filtroIdTrampa = document.getElementById('filtroIdTrampa').value.toLowerCase().trim();
+            const filtroTipoPlaga = document.getElementById('filtroTipoPlaga').value;
+            const filtroTipoIncidencia = document.getElementById('filtroTipoIncidencia').value;
+            const filtroTipoInsecto = document.getElementById('filtroTipoInsecto').value;
+            
+            const filas = document.querySelectorAll('#tbodyIncidencias tr');
+            let filasVisibles = 0;
+            
+            filas.forEach(fila => {
+                let mostrar = true;
+                
+                // Filtro por ID de Trampa
+                if (filtroIdTrampa) {
+                    const idTrampa = fila.querySelector('td:first-child span').textContent.toLowerCase().trim();
+                    if (!idTrampa.includes(filtroIdTrampa)) {
+                        mostrar = false;
+                    }
+                }
+                
+                // Filtro por Tipo de Plaga
+                if (mostrar && filtroTipoPlaga) {
+                    const tipoPlagaCell = fila.querySelector('td:nth-child(2)');
+                    const tipoPlagaValue = tipoPlagaCell.getAttribute('data-tipo-plaga') || '';
+                    if (tipoPlagaValue !== filtroTipoPlaga) {
+                        mostrar = false;
+                    }
+                }
+                
+                // Filtro por Tipo de Incidencia
+                if (mostrar && filtroTipoIncidencia) {
+                    const tipoIncidenciaCell = fila.querySelector('td:nth-child(3)');
+                    const tipoIncidenciaValue = tipoIncidenciaCell.getAttribute('data-tipo-incidencia') || '';
+                    if (tipoIncidenciaValue !== filtroTipoIncidencia) {
+                        mostrar = false;
+                    }
+                }
+                
+                // Filtro por Tipo de Insecto
+                if (mostrar && filtroTipoInsecto) {
+                    const tipoInsectoCell = fila.querySelector('td:nth-child(4)');
+                    const tipoInsectoValue = tipoInsectoCell.getAttribute('data-tipo-insecto') || '';
+                    if (tipoInsectoValue !== filtroTipoInsecto) {
+                        mostrar = false;
+                    }
+                }
+                
+                // Mostrar u ocultar fila
+                if (mostrar) {
+                    fila.style.display = '';
+                    filasVisibles++;
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+            
+            // Actualizar contador
+            document.getElementById('incidenciasVisibles').textContent = filasVisibles;
+        };
+        
+        window.limpiarFiltros = function() {
+            document.getElementById('filtroIdTrampa').value = '';
+            document.getElementById('filtroTipoPlaga').value = '';
+            document.getElementById('filtroTipoIncidencia').value = '';
+            document.getElementById('filtroTipoInsecto').value = '';
+            aplicarFiltros();
+        };
+        
         // Render inicial
         renderizarListaIncidencias();
         // --- FIN: Lógica para incidencias múltiples ---

@@ -94,22 +94,28 @@ class Locations extends BaseController
             }
             
             // Obtener el total de incidencias agrupadas por tipo_incidencia y tipo_plaga
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             if (empty($condicionFecha)) {
                 // Sin filtro de fecha
-                $query = $db->table('incidencias')
-                    ->select('tipo_incidencia, tipo_insecto, tipo_plaga, SUM(cantidad_organismos) as cantidad_organismos, COUNT(*) as total')
-                    ->where('sede_id', $sedeSeleccionada)
-                    ->groupBy(['tipo_incidencia', 'tipo_plaga'])
+                $query = $db->table('incidencias i')
+                    ->select('i.tipo_incidencia, i.tipo_insecto, i.tipo_plaga, SUM(i.cantidad_organismos) as cantidad_organismos, COUNT(*) as total')
+                    ->join('trampas t', 'i.id_trampa = t.id', 'inner')
+                    ->where('i.sede_id', $sedeSeleccionada)
+                    ->where('t.sede_id', $sedeSeleccionada) // Asegurar que la trampa pertenece a la sede seleccionada
+                    ->groupBy(['i.tipo_incidencia', 'i.tipo_plaga'])
                     ->get();
             } else {
                 // Con filtro de fecha
                 $query = $db->query("
-                    SELECT tipo_incidencia, tipo_insecto, tipo_plaga, 
-                           SUM(cantidad_organismos) as cantidad_organismos, 
+                    SELECT i.tipo_incidencia, i.tipo_insecto, i.tipo_plaga, 
+                           SUM(i.cantidad_organismos) as cantidad_organismos, 
                            COUNT(*) as total
                     FROM incidencias i
-                    WHERE sede_id = {$sedeSeleccionada} {$condicionFecha}
-                    GROUP BY tipo_incidencia, tipo_plaga
+                    INNER JOIN trampas t ON i.id_trampa = t.id
+                    WHERE i.sede_id = {$sedeSeleccionada} 
+                    AND t.sede_id = {$sedeSeleccionada}
+                    {$condicionFecha}
+                    GROUP BY i.tipo_incidencia, i.tipo_plaga
                 ");
             }
             $data['totalIncidenciasPorTipo'] = $query->getResultArray();
@@ -142,11 +148,13 @@ class Locations extends BaseController
             $data['todasLasIncidencias'] = $query->getResultArray();
 
             // Obtener el total de capturas (solo incidencias de tipo "Captura")
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             $capturaQuery = "
                 SELECT COUNT(*) as totalCapturas
                 FROM incidencias i
-                JOIN trampas t ON i.id_trampa = t.id
+                INNER JOIN trampas t ON i.id_trampa = t.id
                 WHERE i.sede_id = {$sedeSeleccionada}
+                AND t.sede_id = {$sedeSeleccionada}
                 AND i.tipo_incidencia = 'Captura'
             ";
             
@@ -165,11 +173,13 @@ class Locations extends BaseController
             }
 
             // Obtener las capturas por mes
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             $incidenciasPorTipoPlagaQuery = "
                 SELECT DATE_FORMAT(i.fecha, '%Y-%m') as mes, i.tipo_plaga, COUNT(*) as total
                 FROM incidencias i
-                JOIN trampas t ON i.id_trampa = t.id
+                INNER JOIN trampas t ON i.id_trampa = t.id
                 WHERE i.sede_id = {$sedeSeleccionada}
+                AND t.sede_id = {$sedeSeleccionada}
             ";
             
             // Agregar filtro de fecha si existe
@@ -188,8 +198,9 @@ class Locations extends BaseController
             $incidenciasPorTipoIncidenciaQuery = "
                 SELECT DATE_FORMAT(i.fecha, '%Y-%m') as mes, i.tipo_incidencia, COUNT(*) as total
                 FROM incidencias i
-                JOIN trampas t ON i.id_trampa = t.id
+                INNER JOIN trampas t ON i.id_trampa = t.id
                 WHERE i.sede_id = {$sedeSeleccionada}
+                AND t.sede_id = {$sedeSeleccionada}
             ";
             
             // Agregar filtro de fecha si existe
@@ -206,11 +217,13 @@ class Locations extends BaseController
             $data['incidenciasPorTipoIncidencia'] = $query->getResultArray();
 
             // Obtener lista de plagas para el selector de filtro
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             $listaPlagasQuery = "
                 SELECT DISTINCT(i.tipo_plaga) as plaga
                 FROM incidencias i
-                JOIN trampas t ON i.id_trampa = t.id
+                INNER JOIN trampas t ON i.id_trampa = t.id
                 WHERE i.sede_id = {$sedeSeleccionada}
+                AND t.sede_id = {$sedeSeleccionada}
                 AND i.tipo_plaga IS NOT NULL
                 AND i.tipo_plaga != ''
             ";
@@ -263,10 +276,12 @@ class Locations extends BaseController
             $data['planos'] = $planos;
             
             // Obtener lista de meses disponibles para filtro
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             $query = $db->table('incidencias i')
                 ->select("DISTINCT(DATE_FORMAT(i.fecha, '%Y-%m')) as mes_valor, DATE_FORMAT(i.fecha, '%Y-%m') as mes_fecha")
-                ->join('trampas t', 'i.id_trampa = t.id')
+                ->join('trampas t', 'i.id_trampa = t.id', 'inner')
                 ->where('i.sede_id', $sedeSeleccionada)
+                ->where('t.sede_id', $sedeSeleccionada) // Asegurar que la trampa pertenece a la sede seleccionada
                 ->orderBy('i.fecha', 'DESC')
                 ->get();
             
@@ -314,11 +329,13 @@ class Locations extends BaseController
             $data['plagaSeleccionada'] = $plagaSeleccionada;
             
             // Consulta para obtener las plagas con mayor presencia en la sede (filtrada por mes y fecha si está seleccionado)
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             $plagasMayorPresenciaQuery = "
                 SELECT i.tipo_plaga, SUM(i.cantidad_organismos) as total_organismos
                 FROM incidencias i
-                JOIN trampas t ON i.id_trampa = t.id
+                INNER JOIN trampas t ON i.id_trampa = t.id
                 WHERE i.sede_id = {$sedeSeleccionada}
+                AND t.sede_id = {$sedeSeleccionada}
             ";
             
             // Aplicar filtro de mes si está seleccionado
@@ -340,12 +357,14 @@ class Locations extends BaseController
             $data['plagasMayorPresencia'] = $query->getResultArray();
             
             // Consulta para obtener las áreas con mayor incidencia de la plaga seleccionada
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             if (!empty($plagaSeleccionada)) {
                 $areasMayorIncidenciaQuery = "
                     SELECT t.ubicacion, SUM(i.cantidad_organismos) as total_organismos
                     FROM incidencias i
-                    JOIN trampas t ON i.id_trampa = t.id
+                    INNER JOIN trampas t ON i.id_trampa = t.id
                     WHERE i.sede_id = {$sedeSeleccionada}
+                    AND t.sede_id = {$sedeSeleccionada}
                     AND i.tipo_plaga = '{$plagaSeleccionada}'
                 ";
                 
@@ -366,11 +385,13 @@ class Locations extends BaseController
             }
             
             // Consulta para obtener todas las capturas de trampas (para el filtro dinámico)
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             $todasTrampasCapturaQuery = "
                 SELECT t.id as id_trampa, t.nombre as trampa_nombre, t.ubicacion, i.tipo_plaga, COUNT(*) as total_capturas, SUM(i.cantidad_organismos) as cantidad_total
                 FROM incidencias i
-                JOIN trampas t ON i.id_trampa = t.id
+                INNER JOIN trampas t ON i.id_trampa = t.id
                 WHERE i.sede_id = {$sedeSeleccionada}
+                AND t.sede_id = {$sedeSeleccionada}
                 AND i.tipo_incidencia = 'Captura'
                 AND i.tipo_plaga IS NOT NULL
                 AND i.tipo_plaga != ''
@@ -390,12 +411,14 @@ class Locations extends BaseController
             $data['todasTrampasCaptura'] = $query->getResultArray();
 
             // Consulta para obtener trampas con mayor captura por plaga seleccionada
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             if (!empty($plagaSeleccionada)) {
                 $trampasMayorCapturaQuery = "
                     SELECT t.id as id_trampa, t.nombre as trampa_nombre, t.ubicacion, COUNT(*) as total_capturas, SUM(i.cantidad_organismos) as cantidad_total
                     FROM incidencias i
-                    JOIN trampas t ON i.id_trampa = t.id
+                    INNER JOIN trampas t ON i.id_trampa = t.id
                     WHERE i.sede_id = {$sedeSeleccionada}
+                    AND t.sede_id = {$sedeSeleccionada}
                     AND i.tipo_plaga = '{$plagaSeleccionada}'
                 ";
                 
@@ -417,11 +440,13 @@ class Locations extends BaseController
             }
             
             // Consulta para obtener áreas con capturas por plaga
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             $areasCapturasPorPlagaQuery = "
                 SELECT t.ubicacion, i.tipo_plaga, COUNT(*) as total, SUM(i.cantidad_organismos) as cantidad_total
                 FROM incidencias i
-                JOIN trampas t ON i.id_trampa = t.id
+                INNER JOIN trampas t ON i.id_trampa = t.id
                 WHERE i.sede_id = {$sedeSeleccionada}
+                AND t.sede_id = {$sedeSeleccionada}
                 AND i.tipo_incidencia = 'Captura'
                 AND i.tipo_plaga IS NOT NULL
                 AND i.tipo_plaga != ''
@@ -767,10 +792,12 @@ class Locations extends BaseController
             $data['totalTrampasSede'] = $builder->countAllResults(false);
             
             // Obtener las plagas con mayor presencia (filtrada por mes si está seleccionado)
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             $builder = $db->table('incidencias i')
                 ->select('i.tipo_plaga, SUM(i.cantidad_organismos) as total_organismos')
-                ->join('trampas t', 'i.id_trampa = t.id')
-                ->where('i.sede_id', $sedeId);
+                ->join('trampas t', 'i.id_trampa = t.id', 'inner')
+                ->where('i.sede_id', $sedeId)
+                ->where('t.sede_id', $sedeId);
                 
             // Aplicar filtro de mes si está seleccionado
             if (!empty($mesSeleccionado)) {
@@ -784,12 +811,14 @@ class Locations extends BaseController
             $data['plagasMayorPresencia'] = $query->getResultArray();
             
             // Consulta para obtener las áreas con mayor incidencia de la plaga seleccionada
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             if (!empty($plagaSeleccionada)) {
                 $areasMayorIncidenciaQuery = "
                     SELECT t.ubicacion, SUM(i.cantidad_organismos) as total_organismos
                     FROM incidencias i
-                    JOIN trampas t ON i.id_trampa = t.id
+                    INNER JOIN trampas t ON i.id_trampa = t.id
                     WHERE i.sede_id = {$sedeId}
+                    AND t.sede_id = {$sedeId}
                     AND i.tipo_plaga = '{$plagaSeleccionada}'
                 ";
                 
@@ -810,11 +839,13 @@ class Locations extends BaseController
             }
             
             // Consulta para obtener todas las capturas de trampas (para el filtro dinámico)
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             $todasTrampasCapturaQuery = "
                 SELECT t.id as id_trampa, t.nombre as trampa_nombre, t.ubicacion, i.tipo_plaga, COUNT(*) as total_capturas, SUM(i.cantidad_organismos) as cantidad_total
                 FROM incidencias i
-                JOIN trampas t ON i.id_trampa = t.id
+                INNER JOIN trampas t ON i.id_trampa = t.id
                 WHERE i.sede_id = {$sedeId}
+                AND t.sede_id = {$sedeId}
                 AND i.tipo_incidencia = 'Captura'
                 AND i.tipo_plaga IS NOT NULL
                 AND i.tipo_plaga != ''
@@ -834,12 +865,14 @@ class Locations extends BaseController
             $data['todasTrampasCaptura'] = $query->getResultArray();
 
             // Consulta para obtener trampas con mayor captura por plaga seleccionada
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             if (!empty($plagaSeleccionada)) {
                 $trampasMayorCapturaQuery = "
                     SELECT t.id as id_trampa, t.nombre as trampa_nombre, t.ubicacion, COUNT(*) as total_capturas, SUM(i.cantidad_organismos) as cantidad_total
                     FROM incidencias i
-                    JOIN trampas t ON i.id_trampa = t.id
+                    INNER JOIN trampas t ON i.id_trampa = t.id
                     WHERE i.sede_id = {$sedeId}
+                    AND t.sede_id = {$sedeId}
                     AND i.tipo_plaga = '{$plagaSeleccionada}'
                 ";
                 
@@ -861,11 +894,13 @@ class Locations extends BaseController
             }
             
             // Consulta para obtener áreas con capturas por plaga
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             $areasCapturasPorPlagaQuery = "
                 SELECT t.ubicacion, i.tipo_plaga, COUNT(*) as total, SUM(i.cantidad_organismos) as cantidad_total
                 FROM incidencias i
-                JOIN trampas t ON i.id_trampa = t.id
+                INNER JOIN trampas t ON i.id_trampa = t.id
                 WHERE i.sede_id = {$sedeId}
+                AND t.sede_id = {$sedeId}
                 AND i.tipo_incidencia = 'Captura'
                 AND i.tipo_plaga IS NOT NULL
                 AND i.tipo_plaga != ''
@@ -1162,10 +1197,12 @@ class Locations extends BaseController
             
             foreach ($meses as $mes) {
                 // Obtener plagas con mayor presencia para este mes específico
+                // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
                 $builder = $db->table('incidencias i')
                     ->select('i.tipo_plaga, SUM(i.cantidad_organismos) as total_organismos')
-                    ->join('trampas t', 'i.id_trampa = t.id')
+                    ->join('trampas t', 'i.id_trampa = t.id', 'inner')
                     ->where('i.sede_id', $sedeId)
+                    ->where('t.sede_id', $sedeId)
                     ->where("DATE_FORMAT(i.fecha, '%Y-%m')", $mes)
                     ->where('i.tipo_plaga IS NOT NULL')
                     ->where('i.tipo_plaga !=', '');

@@ -52,9 +52,21 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
             </a>
-            <div>
-                <h1 class="text-3xl font-bold"><?= $sede['nombre'] ?></h1>
-                <p class="text-gray-500"><?= $sede['direccion'] ?></p>
+            <div class="flex items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold"><?= $sede['nombre'] ?></h1>
+                    <p class="text-gray-500"><?= $sede['direccion'] ?></p>
+                </div>
+                <div class="flex items-center gap-4 ml-4 pl-4 border-l border-gray-300">
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600 font-medium">Total Planos</p>
+                        <p class="text-2xl font-bold text-blue-600"><?= number_format($total_planos ?? 0) ?></p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600 font-medium">Total Incidencias</p>
+                        <p class="text-2xl font-bold text-green-600"><?= number_format($total_incidencias ?? 0) ?></p>
+                    </div>
+                </div>
             </div>
         </div>
         <button onclick="openModal()" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
@@ -95,8 +107,16 @@
                 <div class="plano-content">
                     <h3 class="text-lg font-semibold"><?= $plano['nombre'] ?></h3>
                     <p class="text-gray-500 text-sm mt-2"><?= $plano['descripcion'] ?></p>
-                    <div class="mt-4 text-sm text-gray-500">
-                        Creado: <?= date('d/m/Y H:i', strtotime($plano['fecha_creacion'])) ?>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            Creado: <?= date('d/m/Y H:i', strtotime($plano['fecha_creacion'])) ?>
+                        </div>
+                        <div class="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span><?= isset($plano['conteo_incidencias']) ? $plano['conteo_incidencias'] : 0 ?> incidencia<?= (isset($plano['conteo_incidencias']) && $plano['conteo_incidencias'] != 1) ? 's' : '' ?></span>
+                        </div>
                     </div>
                     <div class="mt-4 plano-actions">
                         <a href="<?= base_url('blueprints/viewplano/' . $plano['id']) ?>" 
