@@ -110,6 +110,97 @@ function formatearFechaEspanol($fecha) {
     </div>
     <?php endif; ?>
 
+    <!-- Repositorio de Planes de Acción y Documentos -->
+    <?php if(!empty($sedeSeleccionada)): ?>
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Repositorio de Planes de Acción y Documentos</h2>
+        </div>
+        
+        <!-- Últimos 3 documentos -->
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold text-gray-700 mb-3">Últimos documentos</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <?php 
+                // Por ahora, datos de ejemplo - se reemplazarán con datos reales del backend
+                $ultimosDocumentos = isset($ultimosDocumentos) ? $ultimosDocumentos : [];
+                $documentosMostrar = array_slice($ultimosDocumentos, 0, 3);
+                
+                if(empty($documentosMostrar)): ?>
+                    <div class="col-span-3 text-center py-8 text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p>No hay documentos disponibles</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach($documentosMostrar as $documento): ?>
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-gray-800 text-sm mb-1 truncate">
+                                        <?= esc($documento['titulo'] ?? 'Sin título') ?>
+                                    </h4>
+                                    <p class="text-xs text-gray-500 mb-2">
+                                        <?= esc($tipoMostrar ?? 'Documento') ?>
+                                    </p>
+                                    <p class="text-xs text-gray-400">
+                                        <?= !empty($documento['created_at']) ? date('d/m/Y', strtotime($documento['created_at'])) : 'Sin fecha' ?>
+                                    </p>
+                                </div>
+                                <div class="ml-2">
+                                    <?php 
+                                    // Mapear tipos de documentos a etiquetas más amigables
+                                    $tiposLabels = [
+                                        'plan_accion' => 'Plan de Acción',
+                                        'documento' => 'Documento',
+                                        'reporte' => 'Reporte',
+                                        'otro' => 'Otro'
+                                    ];
+                                    $tipoMostrar = isset($tiposLabels[$documento['tipo']]) ? $tiposLabels[$documento['tipo']] : $documento['tipo'];
+                                    
+                                    $extension = !empty($documento['nombre_archivo']) ? strtolower(pathinfo($documento['nombre_archivo'], PATHINFO_EXTENSION)) : '';
+                                    $icono = 'file';
+                                    $color = 'text-gray-500';
+                                    
+                                    if(in_array($extension, ['pdf'])) {
+                                        $icono = 'file-pdf';
+                                        $color = 'text-red-500';
+                                    } elseif(in_array($extension, ['doc', 'docx'])) {
+                                        $icono = 'file-word';
+                                        $color = 'text-blue-500';
+                                    } elseif(in_array($extension, ['ppt', 'pptx'])) {
+                                        $icono = 'file-presentation';
+                                        $color = 'text-orange-500';
+                                    } elseif(in_array($extension, ['xls', 'xlsx'])) {
+                                        $icono = 'file-excel';
+                                        $color = 'text-green-500';
+                                    }
+                                    ?>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 <?= $color ?>" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <!-- Botón para ver repositorio completo -->
+        <div class="flex justify-end">
+            <a href="<?= base_url('repositorio') ?>?sede_id=<?= $sedeSeleccionada ?>" 
+               class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm hover:shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Ver Repositorio Completo
+            </a>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Grid de resumen -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <!-- Tarjeta: Total de Trampas -->

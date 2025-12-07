@@ -5,6 +5,7 @@ use App\Models\SedeModel;
 use App\Models\TrampaModel;
 use App\Models\IncidenciaModel;
 use App\Models\UmbralModel;
+use App\Models\RepositorioDocumentoModel;
 use CodeIgniter\I18n\Time;
 
 class Locations extends BaseController
@@ -478,6 +479,19 @@ class Locations extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error al procesar datos de sede: ' . $e->getMessage());
             $data['mensaje_error'] = "Error al procesar datos de la sede: " . $e->getMessage();
+        }
+
+        // Obtener los últimos 3 documentos del repositorio para la sede seleccionada
+        if (!empty($sedeSeleccionada)) {
+            try {
+                $documentoModel = new RepositorioDocumentoModel();
+                $data['ultimosDocumentos'] = $documentoModel->obtenerUltimosDocumentos($sedeSeleccionada, 3);
+            } catch (\Exception $e) {
+                log_message('error', 'Error al obtener documentos del repositorio: ' . $e->getMessage());
+                $data['ultimosDocumentos'] = [];
+            }
+        } else {
+            $data['ultimosDocumentos'] = [];
         }
 
         return view('locations/index', $data);

@@ -32,6 +32,13 @@ $routes->post('quejas/actualizar-estado', 'QuejasController::actualizarEstado');
 $routes->get('locations', 'Locations::index');
 $routes->post('locations/getDatosComparacionMeses', 'Locations::getDatosComparacionMeses');
 $routes->post('locations/getTrampasPorPlano', 'Locations::getTrampasPorPlano');
+
+// Rutas del módulo de repositorio de planes de acción y documentos
+$routes->get('repositorio', 'RepositorioController::index');
+$routes->post('repositorio/subir', 'RepositorioController::subir');
+$routes->get('repositorio/descargar/(:num)', 'RepositorioController::descargar/$1');
+$routes->post('repositorio/eliminar/(:num)', 'RepositorioController::eliminar/$1');
+$routes->delete('repositorio/eliminar/(:num)', 'RepositorioController::eliminar/$1');
 $routes->get('Inicio', 'Inicio::index');
 $routes->get('blueprints', 'Blueprints::index');
 $routes->get('incidents', 'Incidents::index');
