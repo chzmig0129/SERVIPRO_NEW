@@ -405,7 +405,18 @@ function formatearFechaEspanol($fecha) {
             
             <!-- Filtros principales -->
             <div class="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
+                    <div class="flex flex-col">
+                        <label for="filtro-plano-incidencias" class="text-sm font-medium text-gray-700 mb-1">Filtrar por plano:</label>
+                        <select id="filtro-plano-incidencias" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 w-full">
+                            <option value="">Todos los planos</option>
+                            <?php if (!empty($planos)): ?>
+                                <?php foreach ($planos as $plano): ?>
+                                    <option value="<?= $plano['id'] ?>"><?= esc($plano['nombre']) ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
                     <div class="flex flex-col">
                         <label for="filtro-id-trampa-incidencias" class="text-sm font-medium text-gray-700 mb-1">Filtrar por ID trampa:</label>
                         <select id="filtro-id-trampa-incidencias" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 w-full">
@@ -518,7 +529,7 @@ function formatearFechaEspanol($fecha) {
                     </thead>
                     <tbody>
                         <?php foreach ($todasLasIncidencias as $incidencia): ?>
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-gray-50" data-plano="<?= htmlspecialchars($incidencia['plano_id'] ?? ''); ?>">
                                 <td class="py-3 px-4 border"><?= htmlspecialchars($incidencia['id_trampa'] ?? 'N/A'); ?></td>
                                 <td class="py-3 px-4 border"><?= htmlspecialchars(normalizarNombre($incidencia['tipo_trampa'] ?? 'N/A')); ?></td>
                                 <td class="py-3 px-4 border"><?= htmlspecialchars($incidencia['tipo_incidencia']); ?></td>
@@ -5005,11 +5016,33 @@ document.addEventListener('DOMContentLoaded', function() {
         // Elementos para filtros de incidencias
         const filtroFechaInicioIncidencias = document.getElementById('filtro-fecha-inicio-incidencias');
         const filtroFechaFinIncidencias = document.getElementById('filtro-fecha-fin-incidencias');
+        const filtroPlanoIncidencias = document.getElementById('filtro-plano-incidencias');
         const filtroIdTrampaIncidencias = document.getElementById('filtro-id-trampa-incidencias');
         const filtroTipoTrampaIncidencias = document.getElementById('filtro-tipo-trampa-incidencias');
         const filtroInsecto = document.getElementById('filtro-insecto');
         const contadorIncidencias = document.getElementById('contador-incidencias');
         const limpiarFiltrosIncidencias = document.getElementById('limpiar-filtros-incidencias');
+        
+        // Obtener el ID de la sede desde la URL, el selector de sede, o PHP
+        const urlParams = new URLSearchParams(window.location.search);
+        const sedeSelector = document.getElementById('sede-selector');
+        
+        // Función para obtener el sedeId actual
+        function obtenerSedeId() {
+            const sedeIdFromUrl = urlParams.get('sede_id');
+            const sedeIdFromSelector = sedeSelector ? sedeSelector.value : null;
+            const sedeIdFromPHP = '<?= isset($sedeSeleccionada) ? $sedeSeleccionada : "" ?>';
+            return sedeIdFromUrl || sedeIdFromSelector || sedeIdFromPHP || '';
+        }
+        
+        let sedeId = obtenerSedeId();
+        
+        // Actualizar sedeId cuando cambie el selector de sede
+        if (sedeSelector) {
+            sedeSelector.addEventListener('change', function() {
+                sedeId = obtenerSedeId();
+            });
+        }
         
         // Inicializar fechas con valores predeterminados
         // Fecha de inicio: 30 días atrás
@@ -5042,8 +5075,87 @@ document.addEventListener('DOMContentLoaded', function() {
             filasIncidencias = tablaIncidencias.querySelectorAll('tbody tr');
         }
         
+        // Función para actualizar las trampas según el plano seleccionado
+        function actualizarTrampasPorPlano(planoId) {
+            if (!filtroIdTrampaIncidencias) return;
+            
+            // Obtener el sedeId actualizado
+            const currentSedeId = obtenerSedeId();
+            
+            // Verificar que sedeId esté disponible
+            if (!currentSedeId || currentSedeId === '') {
+                console.error('sedeId no está disponible');
+                filtroIdTrampaIncidencias.innerHTML = '<option value="">Error: Sede no seleccionada</option>';
+                filtroIdTrampaIncidencias.disabled = false;
+                return;
+            }
+            
+            // Guardar el valor actualmente seleccionado
+            const valorActual = filtroIdTrampaIncidencias.value;
+            
+            // Mostrar indicador de carga
+            filtroIdTrampaIncidencias.disabled = true;
+            filtroIdTrampaIncidencias.innerHTML = '<option value="">Cargando...</option>';
+            
+            // Log para depuración
+            console.log('Cargando trampas para plano:', planoId, 'sede:', currentSedeId);
+            
+            // Hacer petición AJAX para obtener las trampas del plano
+            fetch('<?= base_url("locations/getTrampasPorPlano") ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `plano_id=${planoId || ''}&sede_id=${currentSedeId}`
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Limpiar el select
+                    filtroIdTrampaIncidencias.innerHTML = '<option value="">Todas las trampas</option>';
+                    
+                    // Agregar las trampas del plano
+                    if (data.trampas && data.trampas.length > 0) {
+                        data.trampas.forEach(idTrampa => {
+                            if (idTrampa) { // Verificar que no sea null o vacío
+                                const option = document.createElement('option');
+                                option.value = idTrampa;
+                                option.textContent = idTrampa;
+                                filtroIdTrampaIncidencias.appendChild(option);
+                            }
+                        });
+                    }
+                    
+                    // Restaurar el valor seleccionado si aún existe
+                    if (valorActual && Array.from(filtroIdTrampaIncidencias.options).some(opt => opt.value === valorActual)) {
+                        filtroIdTrampaIncidencias.value = valorActual;
+                    } else {
+                        filtroIdTrampaIncidencias.value = '';
+                    }
+                } else {
+                    console.error('Error al cargar trampas:', data.message);
+                    filtroIdTrampaIncidencias.innerHTML = '<option value="">Error al cargar: ' + (data.message || 'Error desconocido') + '</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error en la petición:', error);
+                filtroIdTrampaIncidencias.innerHTML = '<option value="">Error al cargar: ' + error.message + '</option>';
+            })
+            .finally(() => {
+                filtroIdTrampaIncidencias.disabled = false;
+                // Aplicar filtros después de actualizar las trampas
+                aplicarFiltrosIncidencias();
+            });
+        }
+        
         // Aplicar filtros a la tabla de incidencias
         function aplicarFiltrosIncidencias() {
+            const planoSeleccionado = filtroPlanoIncidencias ? filtroPlanoIncidencias.value : '';
             const idTrampaSeleccionado = filtroIdTrampaIncidencias ? filtroIdTrampaIncidencias.value : '';
             const tipoTrampaSeleccionado = filtroTipoTrampaIncidencias ? filtroTipoTrampaIncidencias.value : '';
             const insectoSeleccionado = filtroInsecto ? filtroInsecto.value : '';
@@ -5126,8 +5238,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     fecha = new Date(0); // Fecha inválida
                 }
                 
+                // Obtener el plano_id de la fila
+                const planoIdFila = fila.dataset.plano || '';
+                
                 // Verificar si cumple con todos los filtros
                 // Comparar el texto normalizado de la tabla con el texto normalizado del select
+                const cumplePlano = !planoSeleccionado || planoIdFila === planoSeleccionado;
                 const cumpleIdTrampa = !idTrampaSeleccionado || idTrampa === idTrampaSeleccionado;
                 const cumpleTipoTrampa = !tipoTrampaSeleccionado || tipoTrampa === tipoTrampaTextoNormalizado;
                 const cumpleInsecto = !insectoSeleccionado || tipoInsecto === insectoTextoNormalizado;
@@ -5135,7 +5251,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const cumpleFechaFin = !fechaFin || fecha <= fechaFin;
                 
                 // Mostrar u ocultar según los filtros
-                if (cumpleIdTrampa && cumpleTipoTrampa && cumpleInsecto && cumpleFechaInicio && cumpleFechaFin) {
+                if (cumplePlano && cumpleIdTrampa && cumpleTipoTrampa && cumpleInsecto && cumpleFechaInicio && cumpleFechaFin) {
                     fila.style.display = '';
                     incidenciasVisibles++;
                 } else {
@@ -5220,11 +5336,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Evento para limpiar filtros de incidencias
         if (limpiarFiltrosIncidencias) {
             limpiarFiltrosIncidencias.addEventListener('click', function() {
+                if (filtroPlanoIncidencias) filtroPlanoIncidencias.value = '';
                 if (filtroIdTrampaIncidencias) filtroIdTrampaIncidencias.value = '';
                 if (filtroTipoTrampaIncidencias) filtroTipoTrampaIncidencias.value = '';
                 if (filtroInsecto) filtroInsecto.value = '';
                 if (filtroFechaInicioIncidencias) filtroFechaInicioIncidencias.value = '';
                 if (filtroFechaFinIncidencias) filtroFechaFinIncidencias.value = '';
+                
+                // Recargar todas las trampas cuando se limpia el filtro de plano
+                if (filtroPlanoIncidencias) {
+                    actualizarTrampasPorPlano('');
+                }
                 
                 // Mostrar todas las incidencias
                 filasIncidencias.forEach(fila => {
@@ -5238,6 +5360,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
+        // Event listener para el filtro de plano de incidencias
+        if (filtroPlanoIncidencias) {
+            filtroPlanoIncidencias.addEventListener('change', function() {
+                const planoId = this.value;
+                actualizarTrampasPorPlano(planoId);
+                aplicarFiltrosIncidencias();
+            });
+        }
+        
         // Agregar eventos a los filtros de trampas
         document.getElementById('filtro-tipo-trampa').addEventListener('change', aplicarFiltrosTrampas);
         document.getElementById('filtro-ubicacion').addEventListener('change', aplicarFiltrosTrampas);
@@ -5246,6 +5377,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (filtroFechaFinTrampas) filtroFechaFinTrampas.addEventListener('change', aplicarFiltrosTrampas);
         
         // Agregar eventos a los filtros de incidencias
+        // El evento del filtro de plano ya se agregó arriba
         if (filtroIdTrampaIncidencias) filtroIdTrampaIncidencias.addEventListener('change', aplicarFiltrosIncidencias);
         if (filtroTipoTrampaIncidencias) filtroTipoTrampaIncidencias.addEventListener('change', aplicarFiltrosIncidencias);
         if (filtroInsecto) filtroInsecto.addEventListener('change', aplicarFiltrosIncidencias);

@@ -231,6 +231,42 @@ class Blueprints extends BaseController
         return view('blueprints/viewplano', $data);
     }
 
+    /**
+     * Muestra la página para subir incidencias por Excel
+     */
+    public function uploadIncidenciasExcel($id = null)
+    {
+        if (!$id) {
+            return redirect()->to('/blueprints')->with('error', 'Plano no especificado');
+        }
+
+        // Cargar modelos
+        $planoModel = new PlanoModel();
+        $sedeModel = new SedeModel();
+
+        // Obtener información del plano
+        $plano = $planoModel->find($id);
+        if (!$plano) {
+            return redirect()->to('/blueprints')->with('error', 'Plano no encontrado');
+        }
+
+        // Obtener información de la sede asociada
+        $sede = $sedeModel->find($plano['sede_id']);
+        
+        // Obtener las trampas del plano
+        $trampaModel = new \App\Models\TrampaModel();
+        $trampas = $trampaModel->where('plano_id', $id)->findAll();
+
+        $data = [
+            'plano' => $plano,
+            'sede' => $sede,
+            'trampas' => $trampas,
+            'title' => 'Subida de incidencias por Excel'
+        ];
+
+        return view('blueprints/upload_incidencias_excel', $data);
+    }
+
     // Método para guardar el estado del plano (JSON)
     public function guardar_estado()
     {

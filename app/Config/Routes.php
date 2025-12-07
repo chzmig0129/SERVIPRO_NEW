@@ -31,6 +31,7 @@ $routes->post('quejas/actualizar-estado', 'QuejasController::actualizarEstado');
 
 $routes->get('locations', 'Locations::index');
 $routes->post('locations/getDatosComparacionMeses', 'Locations::getDatosComparacionMeses');
+$routes->post('locations/getTrampasPorPlano', 'Locations::getTrampasPorPlano');
 $routes->get('Inicio', 'Inicio::index');
 $routes->get('blueprints', 'Blueprints::index');
 $routes->get('incidents', 'Incidents::index');
@@ -41,7 +42,12 @@ $routes->get('staff', 'Staff::index');
 $routes->get('analytics', 'Analytics::index');
 $routes->get('blueprints/view/(:num)', 'Blueprints::view/$1');
 $routes->get('blueprints/viewplano/(:num)', 'Blueprints::viewplano/$1');
+$routes->get('blueprints/uploadIncidenciasExcel/(:num)', 'Blueprints::uploadIncidenciasExcel/$1');
 $routes->get('blueprints/verImagen/(:num)', 'Blueprints::verImagen/$1');
+
+// Rutas para Excel de Blueprints
+$routes->get('blueprints-excel/descargarPlantilla/(:num)', 'BlueprintsExcel::descargarPlantilla/$1');
+$routes->post('blueprints-excel/procesarExcel/(:num)', 'BlueprintsExcel::procesarExcel/$1');
 
 // Rutas para reportes PDF
 $routes->get('reports/pdf_trampas/(:num)', 'Reports::pdf_trampas/$1');

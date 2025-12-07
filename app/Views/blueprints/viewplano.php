@@ -393,7 +393,10 @@
                 <i class="fas fa-trash-alt"></i>
                 Limpiar Todo
             </button>
-            
+            <a href="<?= base_url('blueprints/uploadIncidenciasExcel/' . $plano['id']) ?>" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                <i class="fas fa-file-excel"></i>
+                Subida de incidencias por Excel
+            </a>
 
         </div>
     </div>

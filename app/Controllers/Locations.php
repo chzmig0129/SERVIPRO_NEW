@@ -121,12 +121,12 @@ class Locations extends BaseController
             $data['totalIncidenciasPorTipo'] = $query->getResultArray();
 
             // Obtener todas las incidencias sin agrupar para la tabla "Detalle de Incidencias"
-            // Incluir JOIN con trampas para obtener ID de trampa y tipo de trampa
+            // Incluir JOIN con trampas para obtener ID de trampa, tipo de trampa y plano_id
             // Usar INNER JOIN para asegurar que solo se muestren incidencias con trampas válidas de la sede
             if (empty($condicionFecha)) {
                 // Sin filtro de fecha
                 $query = $db->table('incidencias i')
-                    ->select('i.id, i.tipo_incidencia, i.tipo_insecto, i.tipo_plaga, i.cantidad_organismos, i.fecha, t.id_trampa, t.tipo as tipo_trampa')
+                    ->select('i.id, i.tipo_incidencia, i.tipo_insecto, i.tipo_plaga, i.cantidad_organismos, i.fecha, t.id_trampa, t.tipo as tipo_trampa, t.plano_id')
                     ->join('trampas t', 'i.id_trampa = t.id', 'inner')
                     ->where('i.sede_id', $sedeSeleccionada)
                     ->where('t.sede_id', $sedeSeleccionada) // Asegurar que la trampa pertenece a la sede seleccionada
@@ -136,7 +136,7 @@ class Locations extends BaseController
                 // Con filtro de fecha
                 $query = $db->query("
                     SELECT i.id, i.tipo_incidencia, i.tipo_insecto, i.tipo_plaga, i.cantidad_organismos, i.fecha, 
-                           t.id_trampa, t.tipo as tipo_trampa
+                           t.id_trampa, t.tipo as tipo_trampa, t.plano_id
                     FROM incidencias i
                     INNER JOIN trampas t ON i.id_trampa = t.id
                     WHERE i.sede_id = {$sedeSeleccionada} 
@@ -1235,6 +1235,70 @@ class Locations extends BaseController
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Error al obtener datos: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Obtener las trampas de un plano específico para filtrar
+     */
+    public function getTrampasPorPlano()
+    {
+        try {
+            $planoId = $this->request->getPost('plano_id');
+            $sedeId = $this->request->getPost('sede_id');
+            
+            if (empty($sedeId)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Sede ID es requerido'
+                ]);
+            }
+            
+            $db = \Config\Database::connect();
+            
+            // Si no hay plano seleccionado, obtener todas las trampas de la sede que tienen incidencias
+            if (empty($planoId)) {
+                $query = $db->query("
+                    SELECT DISTINCT t.id_trampa
+                    FROM trampas t
+                    INNER JOIN incidencias i ON i.id_trampa = t.id
+                    WHERE t.sede_id = ?
+                    AND i.sede_id = ?
+                    AND t.id_trampa IS NOT NULL
+                    AND t.id_trampa != ''
+                    ORDER BY t.id_trampa ASC
+                ", [$sedeId, $sedeId]);
+            } else {
+                // Obtener solo las trampas del plano seleccionado que tienen incidencias
+                $query = $db->query("
+                    SELECT DISTINCT t.id_trampa
+                    FROM trampas t
+                    INNER JOIN incidencias i ON i.id_trampa = t.id
+                    WHERE t.sede_id = ?
+                    AND i.sede_id = ?
+                    AND t.plano_id = ?
+                    AND t.id_trampa IS NOT NULL
+                    AND t.id_trampa != ''
+                    ORDER BY t.id_trampa ASC
+                ", [$sedeId, $sedeId, $planoId]);
+            }
+            
+            $trampas = $query->getResultArray();
+            $idsTrampas = array_filter(array_column($trampas, 'id_trampa'));
+            
+            // Si no hay trampas, retornar array vacío en lugar de error
+            return $this->response->setJSON([
+                'success' => true,
+                'trampas' => array_values($idsTrampas) // Reindexar el array
+            ]);
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Error en getTrampasPorPlano: ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error al obtener trampas: ' . $e->getMessage()
             ]);
         }
     }
