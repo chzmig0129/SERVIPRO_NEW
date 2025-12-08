@@ -116,7 +116,8 @@
                         <div class="documento-card bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow" 
                              data-tipo="<?= esc($documento['tipo'] ?? '') ?>"
                              data-titulo="<?= esc(strtolower($documento['titulo'] ?? '')) ?>"
-                             data-descripcion="<?= esc(strtolower($documento['descripcion'] ?? '')) ?>">
+                             data-descripcion="<?= esc(strtolower($documento['descripcion'] ?? '')) ?>"
+                             data-documento-id="<?= $documento['id'] ?>">
                             <div class="flex items-start justify-between mb-3">
                                 <div class="flex-1">
                                     <h3 class="font-semibold text-gray-800 mb-1">
@@ -196,6 +197,17 @@
                                         </svg>
                                         Descargar
                                     </a>
+                                    <button type="button"
+                                            id="btn-eliminar-<?= $documento['id'] ?>"
+                                            data-documento-id="<?= $documento['id'] ?>"
+                                            data-documento-titulo="<?= esc($documento['titulo'], 'attr') ?>"
+                                            onclick="eliminarDocumento(event, this)" 
+                                            class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm font-medium"
+                                            title="Eliminar documento">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -432,6 +444,124 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Función para eliminar documento
+function eliminarDocumento(event, buttonElement) {
+    try {
+        // Prevenir comportamiento por defecto
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        // Obtener datos del botón
+        const boton = buttonElement || (event ? event.target.closest('button') : null);
+        
+        if (!boton) {
+            console.error('No se pudo encontrar el botón');
+            alert('Error: No se pudo encontrar el elemento. Por favor, recarga la página.');
+            return;
+        }
+        
+        const id = boton.getAttribute('data-documento-id');
+        const titulo = boton.getAttribute('data-documento-titulo') || 'este documento';
+        
+        console.log('eliminarDocumento llamado con:', { id, titulo });
+        
+        if (!confirm('¿Estás seguro de que deseas eliminar el documento "' + titulo + '"?\n\nEsta acción no se puede deshacer.')) {
+            return;
+        }
+        
+        if (!id) {
+            console.error('No se pudo obtener el ID del documento');
+            alert('Error: No se pudo obtener el ID del documento.');
+            return;
+        }
+        
+        const originalHTML = boton.innerHTML;
+        boton.disabled = true;
+        boton.innerHTML = '<svg class="animate-spin h-4 w-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        
+        // Realizar petición de eliminación
+        const url = '<?= base_url('repositorio/eliminar') ?>/' + id;
+        console.log('Eliminando documento:', id, 'URL:', url);
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            console.log('Respuesta recibida:', response.status);
+            if (!response.ok) {
+                throw new Error('Error HTTP: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Datos recibidos:', data);
+            if (data.success) {
+                // Mostrar mensaje de éxito
+                const mensaje = document.createElement('div');
+                mensaje.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                mensaje.textContent = data.message || 'Documento eliminado correctamente';
+                document.body.appendChild(mensaje);
+                
+                // Remover el card del documento
+                const card = boton.closest('.documento-card');
+                if (card) {
+                    card.style.transition = 'opacity 0.3s';
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.remove();
+                        // Actualizar contador
+                        const total = document.querySelectorAll('.documento-card').length;
+                        const totalElement = document.getElementById('total-documentos');
+                        if (totalElement) {
+                            totalElement.textContent = total;
+                        }
+                        
+                        // Si no hay más documentos, mostrar mensaje
+                        if (total === 0) {
+                            const lista = document.getElementById('lista-documentos');
+                            if (lista) {
+                                lista.innerHTML = `
+                                    <div class="col-span-full text-center py-12 text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <p class="text-lg font-medium mb-2">No hay documentos disponibles</p>
+                                        <p class="text-sm">Comienza subiendo tu primer documento</p>
+                                    </div>
+                                `;
+                            }
+                        }
+                    }, 300);
+                }
+                
+                // Remover mensaje después de 3 segundos
+                setTimeout(() => {
+                    mensaje.remove();
+                }, 3000);
+            } else {
+                // Mostrar mensaje de error
+                alert('Error al eliminar el documento: ' + (data.message || 'Error desconocido'));
+                boton.disabled = false;
+                boton.innerHTML = originalHTML;
+            }
+        })
+        .catch(error => {
+            console.error('Error completo:', error);
+            alert('Error de conexión. Por favor, intenta nuevamente.\n\nDetalles: ' + error.message);
+            boton.disabled = false;
+            boton.innerHTML = originalHTML;
+        });
+    } catch (error) {
+        console.error('Error en eliminarDocumento:', error);
+        alert('Error inesperado: ' + error.message);
+    }
+}
 </script>
 
 <?= $this->endSection() ?>
