@@ -157,6 +157,9 @@ class Blueprints extends BaseController
             $planoModel = new PlanoModel();
             $planoId = $planoModel->insert($data, true); // El segundo parámetro true hace que retorne el ID insertado
 
+            // Registrar en auditoría
+            log_create('planos', $planoId, $data, "Se creó un nuevo plano: {$data['nombre']} para la sede ID: {$data['sede_id']}");
+
             // Redirigir a la vista del plano con mensaje de éxito
             return redirect()->to('blueprints/viewplano/' . $planoId)
                             ->with('message', 'Plano guardado correctamente.');
@@ -732,6 +735,9 @@ class Blueprints extends BaseController
             $incidenciaId = $incidenciaModel->insert($data);
             log_message('info', 'Incidencia guardada con ID: ' . $incidenciaId);
             
+            // Registrar en auditoría
+            log_create('incidencias', $incidenciaId, $data, "Se creó una incidencia: {$tipoPlaga} ({$tipoInsecto}) - Cantidad: {$cantidadOrganismos} - Inspector: {$inspector}");
+            
             // Verificar que se haya guardado correctamente
             $incidenciaGuardada = $incidenciaModel->find($incidenciaId);
             log_message('info', 'Incidencia guardada: ' . json_encode($incidenciaGuardada));
@@ -791,6 +797,9 @@ class Blueprints extends BaseController
                 return $this->response->setJSON(['success' => false, 'message' => 'No se encontró la incidencia especificada']);
             }
             
+            // Guardar datos anteriores para el log
+            $datosAnteriores = $incidencia;
+            
             // Formatear la fecha de incidencia para MySQL (YYYY-MM-DD HH:MM:SS)
             $fechaFormateada = date('Y-m-d H:i:s', strtotime($fechaIncidencia));
             
@@ -808,6 +817,9 @@ class Blueprints extends BaseController
             // Actualizar la incidencia
             $incidenciaModel->update($incidenciaId, $data);
             log_message('info', 'Incidencia actualizada con ID: ' . $incidenciaId);
+            
+            // Registrar en auditoría
+            log_update('incidencias', $incidenciaId, $datosAnteriores, $data, "Se actualizó la incidencia ID: {$incidenciaId} - {$tipoPlaga} ({$tipoInsecto})");
             
             return $this->response->setJSON([
                 'success' => true, 

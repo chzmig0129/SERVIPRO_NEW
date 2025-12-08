@@ -157,6 +157,9 @@ class Home extends BaseController
             
             // Si no se encuentra el usuario
             if (!$user) {
+                // Registrar intento de login fallido
+                log_login(0, $usuario, false);
+                
                 return $this->response->setJSON([
                     'success' => false,
                     'message' => 'Usuario no encontrado'
@@ -165,6 +168,9 @@ class Home extends BaseController
             
             // Verificar contraseña
             if (!isset($user['password']) || $user['password'] != $password) {
+                // Registrar intento de login fallido
+                log_login($user['id'], $user['nombre'], false);
+                
                 return $this->response->setJSON([
                     'success' => false,
                     'message' => 'Contraseña incorrecta'
@@ -180,6 +186,9 @@ class Home extends BaseController
                 'logged_in' => true
             ];
             $session->set($userData);
+            
+            // Registrar login exitoso
+            log_login($user['id'], $user['nombre'], true);
             
             return $this->response->setJSON([
                 'success' => true,
@@ -274,6 +283,15 @@ class Home extends BaseController
     public function logout()
     {
         $session = session();
+        
+        // Registrar logout antes de destruir la sesión
+        $usuarioId = $session->get('id');
+        $usuarioNombre = $session->get('nombre') ?? 'Usuario';
+        
+        if ($usuarioId) {
+            log_logout($usuarioId, $usuarioNombre);
+        }
+        
         $session->destroy();
         return redirect()->to('/');
     }

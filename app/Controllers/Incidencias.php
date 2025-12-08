@@ -121,6 +121,9 @@ class Incidencias extends BaseController
             // Obtener el ID de la inserción
             $incidenciaId = $evidenciaModel->getInsertID();
             
+            // Registrar en auditoría
+            log_create('evidencias', $incidenciaId, $data, "Se creó una nueva incidencia/evidencia en el plano ID: {$idPlano}");
+            
             // Retornar respuesta exitosa
             return $this->response->setJSON([
                 'success' => true,

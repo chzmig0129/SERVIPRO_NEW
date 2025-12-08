@@ -83,7 +83,7 @@ class Locations extends BaseController
 
             // Obtener el detalle de las trampas (nombre, tipo y ubicación)
             $query = $db->table('trampas')
-                ->select('id, nombre, tipo, ubicacion, fecha_instalacion, plano_id')
+                ->select('id, id_trampa, nombre, tipo, ubicacion, fecha_instalacion, plano_id')
                 ->where('sede_id', $sedeSeleccionada)
                 ->get();
             $data['trampasDetalle'] = $query->getResultArray();

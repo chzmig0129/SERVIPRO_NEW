@@ -150,10 +150,15 @@ class RepositorioController extends BaseController
 
             // Guardar en la base de datos
             if ($this->documentoModel->insert($data)) {
+                $documentoId = $this->documentoModel->getInsertID();
+                
+                // Registrar en auditoría
+                log_create('repositorio_documentos', $documentoId, $data, "Se subió un documento: {$data['titulo']} (tipo: {$data['tipo']})");
+                
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Documento subido correctamente',
-                    'documento_id' => $this->documentoModel->getInsertID()
+                    'documento_id' => $documentoId
                 ]);
             } else {
                 // Si falla la inserción, eliminar el archivo subido
@@ -226,6 +231,9 @@ class RepositorioController extends BaseController
 
             // Eliminar registro de la base de datos
             if ($this->documentoModel->delete($id)) {
+                // Registrar en auditoría
+                log_delete('repositorio_documentos', $id, $documento, "Se eliminó el documento: {$documento['titulo']}");
+                
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Documento eliminado correctamente'

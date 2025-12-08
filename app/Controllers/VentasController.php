@@ -5,9 +5,9 @@ namespace App\Controllers;
 use App\Models\VentaModel;
 use App\Models\SedeModel;
 use App\Models\UsuarioModel;
-use CodeIgniter\Controller;
+use App\Controllers\BaseController;
 
-class VentasController extends Controller
+class VentasController extends BaseController
 {
     protected $ventaModel;
     protected $sedeModel;
@@ -228,6 +228,11 @@ class VentasController extends Controller
             ];
 
             if ($this->ventaModel->insert($data)) {
+                $ventaId = $this->ventaModel->getInsertID();
+                
+                // Registrar en auditoría
+                log_create('ventas', $ventaId, $data, "Se creó una nueva venta: {$data['concepto']} por \${$data['monto']}");
+                
                 return redirect()->to('/ventas')->with('success', 'Venta registrada correctamente');
             }
 
@@ -283,6 +288,9 @@ class VentasController extends Controller
         }
 
         try {
+            // Obtener datos anteriores para el log
+            $ventaAnterior = $this->ventaModel->find($id);
+            
             $data = [
                 'concepto' => $this->request->getPost('concepto'),
                 'descripcion' => $this->request->getPost('descripcion'),
@@ -293,6 +301,9 @@ class VentasController extends Controller
             ];
 
             if ($this->ventaModel->update($id, $data)) {
+                // Registrar en auditoría
+                log_update('ventas', $id, $ventaAnterior, $data, "Se actualizó la venta ID: {$id} - {$data['concepto']}");
+                
                 return redirect()->to('/ventas')->with('success', 'Venta actualizada correctamente');
             }
 
@@ -310,7 +321,15 @@ class VentasController extends Controller
 
     public function delete($id)
     {
+        // Obtener datos de la venta antes de eliminar
+        $venta = $this->ventaModel->find($id);
+        
         if ($this->ventaModel->delete($id)) {
+            // Registrar en auditoría
+            if ($venta) {
+                log_delete('ventas', $id, $venta, "Se eliminó la venta ID: {$id} - {$venta['concepto']} por \${$venta['monto']}");
+            }
+            
             return redirect()->to('/ventas')->with('success', 'Venta eliminada correctamente');
         }
         

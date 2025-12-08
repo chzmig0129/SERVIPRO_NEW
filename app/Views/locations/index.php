@@ -400,7 +400,7 @@ function formatearFechaEspanol($fecha) {
             <table class="min-w-full bg-white border border-gray-300">
         <thead>
                     <tr class="bg-gray-100">
-                        <th class="py-3 px-4 border text-left font-semibold text-gray-700">ID</th>
+                        <th class="py-3 px-4 border text-left font-semibold text-gray-700">ID Trampa</th>
                         <th class="py-3 px-4 border text-left font-semibold text-gray-700">Tipo de Trampa</th>
                         <th class="py-3 px-4 border text-left font-semibold text-gray-700">Ubicación</th>
                         <th class="py-3 px-4 border text-left font-semibold text-gray-700">Plano</th>
@@ -418,7 +418,7 @@ function formatearFechaEspanol($fecha) {
                             data-ubicacion="<?= htmlspecialchars($trampa['ubicacion']); ?>"
                             data-plano="<?= htmlspecialchars($trampa['plano_id'] ?? ''); ?>"
                             data-fecha="<?= htmlspecialchars($trampa['fecha_instalacion'] ?? date('Y-m-d')); ?>">
-                            <td class="py-3 px-4 border"><?= $trampa['id']; ?></td>
+                            <td class="py-3 px-4 border"><?= htmlspecialchars($trampa['id_trampa'] ?? $trampa['id'] ?? 'N/A'); ?></td>
                             <td class="py-3 px-4 border"><?= normalizarNombre($trampa['tipo']); ?></td>
                             <td class="py-3 px-4 border"><?= $trampa['ubicacion']; ?></td>
                             <td class="py-3 px-4 border">

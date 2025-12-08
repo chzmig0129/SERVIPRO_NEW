@@ -51,9 +51,14 @@ class SedesController extends BaseController
             // Guardar los datos en la base de datos
             $sedeModel = new SedeModel();
             $sedeModel->insert($data);
+            
+            $sedeId = $sedeModel->getInsertID();
 
             // Log de éxito
-            log_message('info', 'Sede guardada correctamente con ID: ' . $sedeModel->getInsertID());
+            log_message('info', 'Sede guardada correctamente con ID: ' . $sedeId);
+            
+            // Registrar en auditoría
+            log_create('sedes', $sedeId, $data, "Se creó una nueva sede: {$data['nombre']}");
 
             return redirect()->to('Inicio')
                             ->with('message', 'Sede guardada correctamente.');
@@ -374,6 +379,9 @@ class SedesController extends BaseController
                 return redirect()->back()->with('error', 'Sede no encontrada.');
             }
 
+            // Guardar estado anterior para el log
+            $estadoAnterior = $sede['estatus'] ?? 'N/A';
+            
             // Cambiar el estatus a 0 (deshabilitado)
             // Usar skipValidation para omitir las reglas de validación que esperan strings
             $resultado = $sedeModel->skipValidation(true)->update($id, ['estatus' => 0]);
@@ -391,7 +399,10 @@ class SedesController extends BaseController
                 }
             }
             
-            log_message('info', 'Sede deshabilitada correctamente. ID: ' . $id . ', Estatus anterior: ' . ($sede['estatus'] ?? 'N/A'));
+            log_message('info', 'Sede deshabilitada correctamente. ID: ' . $id . ', Estatus anterior: ' . $estadoAnterior);
+            
+            // Registrar en auditoría
+            log_status_change('sedes', $id, (string)$estadoAnterior, '0', "Se deshabilitó la sede: {$sede['nombre']}");
 
             // Redirigir según desde dónde se llamó
             $referer = $this->request->getHeaderLine('Referer');

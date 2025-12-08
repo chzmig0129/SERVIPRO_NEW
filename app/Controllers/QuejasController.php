@@ -4,9 +4,9 @@ namespace App\Controllers;
 
 use App\Models\QuejaModel;
 use App\Models\SedeModel;
-use CodeIgniter\Controller;
+use App\Controllers\BaseController;
 
-class QuejasController extends Controller
+class QuejasController extends BaseController
 {
     protected $quejaModel;
     protected $sedeModel;
@@ -276,6 +276,11 @@ class QuejasController extends Controller
             log_message('info', 'Intentando insertar datos: ' . print_r($data, true));
 
             if ($this->quejaModel->insert($data)) {
+                $quejaId = $this->quejaModel->getInsertID();
+                
+                // Registrar en auditoría
+                log_create('quejas', $quejaId, $data, "Se creó una nueva queja: {$data['insecto']} en {$data['ubicacion']}");
+                
                 return redirect()->to('/quejas')->with('success', 'Queja registrada correctamente');
             }
 
@@ -341,6 +346,9 @@ class QuejasController extends Controller
         }
 
         try {
+            // Obtener datos anteriores para el log
+            $quejaAnterior = $this->quejaModel->find($id);
+            
             $data = [
                 'fecha' => date('Y-m-d', strtotime($this->request->getPost('fecha'))),
                 'insecto' => $this->request->getPost('insecto'),
@@ -355,12 +363,11 @@ class QuejasController extends Controller
             // Manejar archivo si se subió uno nuevo
             if ($archivo && $archivo->isValid()) {
                 // Obtener la queja actual para eliminar el archivo anterior
-                $quejaActual = $this->quejaModel->find($id);
-                if ($quejaActual && !empty($quejaActual['archivo'])) {
-                    $archivoAnterior = FCPATH . 'uploads/quejas/' . $quejaActual['archivo'];
+                if ($quejaAnterior && !empty($quejaAnterior['archivo'])) {
+                    $archivoAnterior = FCPATH . 'uploads/quejas/' . $quejaAnterior['archivo'];
                     if (file_exists($archivoAnterior)) {
                         unlink($archivoAnterior);
-                        log_message('info', 'Archivo anterior eliminado: ' . $quejaActual['archivo']);
+                        log_message('info', 'Archivo anterior eliminado: ' . $quejaAnterior['archivo']);
                     }
                 }
                 
@@ -373,6 +380,9 @@ class QuejasController extends Controller
             }
 
             if ($this->quejaModel->update($id, $data)) {
+                // Registrar en auditoría
+                log_update('quejas', $id, $quejaAnterior, $data, "Se actualizó la queja ID: {$id}");
+                
                 return redirect()->to('/quejas')->with('success', 'Queja actualizada correctamente');
             }
 
@@ -387,7 +397,15 @@ class QuejasController extends Controller
 
     public function delete($id)
     {
+        // Obtener datos de la queja antes de eliminar
+        $queja = $this->quejaModel->find($id);
+        
         if ($this->quejaModel->delete($id)) {
+            // Registrar en auditoría
+            if ($queja) {
+                log_delete('quejas', $id, $queja, "Se eliminó la queja ID: {$id} - {$queja['insecto']} en {$queja['ubicacion']}");
+            }
+            
             return redirect()->to('/quejas')->with('success', 'Queja eliminada correctamente');
         }
 
@@ -431,6 +449,10 @@ class QuejasController extends Controller
                 ]);
             }
             
+            // Obtener datos anteriores
+            $queja = $this->quejaModel->find($quejaId);
+            $estadoAnterior = $queja['estado_queja'] ?? 'N/A';
+            
             // Actualizar el estado en la base de datos
             $actualizado = $this->quejaModel->update($quejaId, [
                 'estado_queja' => $nuevoEstado,
@@ -438,6 +460,9 @@ class QuejasController extends Controller
             ]);
             
             if ($actualizado) {
+                // Registrar en auditoría
+                log_status_change('quejas', $quejaId, $estadoAnterior, $nuevoEstado, "Se cambió el estado de la queja ID: {$quejaId} de {$estadoAnterior} a {$nuevoEstado}");
+                
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Estado de la queja actualizado correctamente'
