@@ -82,6 +82,9 @@ class EvidenciaController extends BaseController
             $evidenciaId = $evidenciaModel->insert($data);
             
             if ($evidenciaId) {
+                // Registrar en auditoría
+                log_create('evidencias', $evidenciaId, $data, "Se creó una nueva evidencia en {$zonaUbicacion} - {$descripcion}");
+                
                 $response['success'] = true;
                 $response['message'] = 'Evidencia guardada correctamente';
                 $response['evidencia_id'] = $evidenciaId;
@@ -189,6 +192,9 @@ class EvidenciaController extends BaseController
             $result = $evidenciaModel->update($evidenciaId, $data);
             
             if ($result) {
+                // Registrar en auditoría
+                log_update('evidencias', $evidenciaId, $evidencia, $data, "Se actualizó la evidencia ID: {$evidenciaId}");
+                
                 $response['success'] = true;
                 $response['message'] = 'Evidencia actualizada correctamente';
             } else {
@@ -233,6 +239,9 @@ class EvidenciaController extends BaseController
             $result = $evidenciaModel->delete($id);
             
             if ($result) {
+                // Registrar en auditoría
+                log_delete('evidencias', $id, $evidencia, "Se eliminó la evidencia ID: {$id} - {$evidencia['ubicacion']}");
+                
                 $response['success'] = true;
                 $response['message'] = 'Evidencia eliminada correctamente';
                 log_message('info', 'Evidencia con ID ' . $id . ' eliminada correctamente');
@@ -304,6 +313,9 @@ class EvidenciaController extends BaseController
             $result = $evidenciaModel->update($evidenciaId, $data);
             
             if ($result) {
+                // Registrar en auditoría
+                log_update('evidencias', $evidenciaId, $evidencia, $data, "Se subió imagen de resolución para la evidencia ID: {$evidenciaId}");
+                
                 $response['success'] = true;
                 $response['message'] = 'Imagen de resolución guardada correctamente';
                 $response['imagen_path'] = $imagenPath;
@@ -362,9 +374,14 @@ class EvidenciaController extends BaseController
                 $data['fecha_resolucion'] = null;
             }
             
+            $estadoAnterior = $evidencia['estado'] ?? 'N/A';
+            
             $result = $evidenciaModel->update($evidenciaId, $data);
             
             if ($result) {
+                // Registrar en auditoría
+                log_status_change('evidencias', $evidenciaId, $estadoAnterior, $estado, "Se cambió el estado de la evidencia ID: {$evidenciaId} de {$estadoAnterior} a {$estado}");
+                
                 $response['success'] = true;
                 $response['message'] = $estado === 'Resuelta' ? 'Evidencia marcada como resuelta' : 'Evidencia reabierta';
             } else {
@@ -433,12 +450,18 @@ class EvidenciaController extends BaseController
             // Desactivar validación temporalmente si hay problemas
             $evidenciaModel->skipValidation(true);
             
+            $vistoBuenoAnterior = $evidencia['visto_bueno_supervisor'] ?? 0;
+            
             $result = $evidenciaModel->update($evidenciaId, $data);
             
             // Log del resultado
             log_message('info', 'Resultado de actualización: ' . ($result ? 'true' : 'false'));
 
             if ($result) {
+                // Registrar en auditoría
+                $accionTexto = $vistoBuenoValue == 1 ? 'otorgado' : 'revocado';
+                log_activity('visto_bueno', 'evidencias', $evidenciaId, "Se {$accionTexto} el visto bueno del supervisor para la evidencia ID: {$evidenciaId}");
+                
                 $response['success'] = true;
                 $response['message'] = 'Visto Bueno actualizado correctamente';
                 log_message('info', 'Visto Bueno actualizado exitosamente para evidencia ID: ' . $evidenciaId);

@@ -34,6 +34,7 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        'auth'          => \App\Filters\AuthFilter::class,
     ];
 
     /**
@@ -103,5 +104,29 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        'auth' => [
+            'before' => [
+                // Proteger solo las rutas que requieren autenticación
+                // Las rutas públicas se excluyen automáticamente
+                'quejas*',
+                'ventas*',
+                'registro_tecnico*',
+                'blueprints*',
+                'blueprints-excel*',
+                'locations*',
+                'repositorio*',
+                'Inicio*',
+                'incidents*',
+                'inventory*',
+                'staff*',
+                'analytics*',
+                'reports*',
+                'reportes*',
+                'evidencia*',
+                'sedes*',
+                'historial*',
+            ],
+        ],
+    ];
 }

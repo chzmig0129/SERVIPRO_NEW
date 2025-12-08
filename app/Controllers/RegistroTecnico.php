@@ -388,6 +388,12 @@ class RegistroTecnico extends BaseController
             $resultado = $incidenciaModel->insert($data);
             
             if ($resultado) {
+                $incidenciaId = $incidenciaModel->getInsertID();
+                
+                // Registrar en auditoría
+                $descripcion = "Se creó una incidencia: {$data['tipo_plaga']} ({$data['tipo_insecto']}) - Cantidad: {$data['cantidad_organismos']} - Inspector: {$data['inspector']}";
+                log_create('incidencias', $incidenciaId, $data, $descripcion);
+                
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Incidencia guardada correctamente'
@@ -445,10 +451,17 @@ class RegistroTecnico extends BaseController
                 ]);
             }
             
+            // Obtener datos anteriores de la trampa
+            $trampa = $this->trampaModel->find($trampaId);
+            $estadoAnterior = $trampa['estado'] ?? 'N/A';
+            
             // Actualizar el estado en la base de datos
             $actualizado = $this->trampaModel->update($trampaId, ['estado' => $nuevoEstado]);
             
             if ($actualizado) {
+                // Registrar en auditoría
+                log_status_change('trampas', $trampaId, $estadoAnterior, $nuevoEstado, "Se cambió el estado de la trampa ID: {$trampaId} de {$estadoAnterior} a {$nuevoEstado}");
+                
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Estado de la trampa actualizado correctamente'
@@ -506,6 +519,10 @@ class RegistroTecnico extends BaseController
                 ]);
             }
             
+            // Obtener datos anteriores de la queja
+            $queja = $this->quejaModel->find($quejaId);
+            $estadoAnterior = $queja['estado_queja'] ?? 'N/A';
+            
             // Actualizar el estado en la base de datos
             $actualizado = $this->quejaModel->update($quejaId, [
                 'estado_queja' => $nuevoEstado,
@@ -513,6 +530,9 @@ class RegistroTecnico extends BaseController
             ]);
             
             if ($actualizado) {
+                // Registrar en auditoría
+                log_status_change('quejas', $quejaId, $estadoAnterior, $nuevoEstado, "Se cambió el estado de la queja ID: {$quejaId} de {$estadoAnterior} a {$nuevoEstado}");
+                
                 $mensaje = ($nuevoEstado === 'Resuelta') 
                     ? 'La queja ha sido marcada como resuelta correctamente' 
                     : 'La queja ha sido marcada como pendiente correctamente';
