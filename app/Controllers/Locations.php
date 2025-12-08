@@ -23,8 +23,8 @@ class Locations extends BaseController
             $sedeModel = new SedeModel();
             
             // Verificar si la clase SedeModel está completa
-            // Obtener todas las sedes
-            $data['sedes'] = $sedeModel->findAll();
+            // Obtener solo las sedes activas (estatus = 1)
+            $data['sedes'] = $sedeModel->where('estatus', 1)->findAll();
             log_message('debug', 'Sedes cargadas: ' . json_encode($data['sedes']));
         } catch (\Exception $e) {
             log_message('error', 'Error al cargar sedes: ' . $e->getMessage());

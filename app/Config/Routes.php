@@ -92,6 +92,8 @@ $routes->post('evidencia/vistoBuenoSupervisor', 'EvidenciaController::vistoBueno
 $routes->post('sedes/guardar', 'SedesController::guardar');
 $routes->get('sedes/listar', 'SedesController::listar');
 $routes->get('sedes/ver/(:num)', 'SedesController::ver/$1');
+$routes->get('sedes/deshabilitar/(:num)', 'SedesController::deshabilitar/$1');
+$routes->post('sedes/deshabilitar/(:num)', 'SedesController::deshabilitar/$1');
 $routes->get('sedes', 'SedesController::index');
 
 $routes->post('blueprints/guardar_plano', 'Blueprints::guardar_plano');

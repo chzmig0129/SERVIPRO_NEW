@@ -48,7 +48,7 @@ class RegistroTecnico extends BaseController
     {
         // Obtener la sede seleccionada o la primera por defecto
         $sedeSeleccionada = $this->request->getGet('sede_id');
-        $sedes = $this->sedesModel->findAll();
+        $sedes = $this->sedesModel->where('estatus', 1)->findAll();
         
         if (empty($sedeSeleccionada) && !empty($sedes)) {
             $sedeSeleccionada = $sedes[0]['id'];

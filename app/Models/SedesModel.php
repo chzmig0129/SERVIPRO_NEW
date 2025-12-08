@@ -8,5 +8,5 @@ class SedesModel extends Model
 {
     protected $table = 'sedes';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['nombre', 'direccion', 'ciudad', 'estado', 'pais'];
+    protected $allowedFields = ['nombre', 'direccion', 'ciudad', 'estado', 'pais','estatus'];
 } 

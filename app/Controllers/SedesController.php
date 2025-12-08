@@ -41,7 +41,8 @@ class SedesController extends BaseController
                 'direccion'      => $this->request->getPost('direccion'),
                 'ciudad'         => $this->request->getPost('ciudad'),
                 'pais'           => $this->request->getPost('pais'),
-                'fecha_creacion' => $now->format('Y-m-d H:i:s')
+                'fecha_creacion' => $now->format('Y-m-d H:i:s'),
+                'estatus'        => 1  // Por defecto, las nuevas sedes están activas
             ];
 
             // Log de los datos que se intentan guardar
@@ -350,5 +351,59 @@ class SedesController extends BaseController
         }
         
         return $output;
+    }
+
+    /**
+     * Deshabilita una sede cambiando su estatus a 0 (soft delete)
+     * No elimina físicamente el registro para mantener la información sensible
+     */
+    public function deshabilitar($id = null)
+    {
+        // Verificar si se proporcionó un ID
+        if ($id === null) {
+            return redirect()->back()->with('error', 'ID de sede no proporcionado.');
+        }
+
+        try {
+            // Cargar el modelo
+            $sedeModel = new SedeModel();
+
+            // Verificar que la sede existe
+            $sede = $sedeModel->find($id);
+            if (!$sede) {
+                return redirect()->back()->with('error', 'Sede no encontrada.');
+            }
+
+            // Cambiar el estatus a 0 (deshabilitado)
+            // Usar skipValidation para omitir las reglas de validación que esperan strings
+            $resultado = $sedeModel->skipValidation(true)->update($id, ['estatus' => 0]);
+            
+            // Si el update falla, usar consulta directa como fallback
+            if (!$resultado) {
+                $db = \Config\Database::connect();
+                $db->table('sedes')->where('id', $id)->update(['estatus' => 0]);
+                
+                // Verificar que se actualizó
+                $sedeActualizada = $sedeModel->find($id);
+                if (!$sedeActualizada || $sedeActualizada['estatus'] != 0) {
+                    log_message('error', 'No se pudo actualizar el estatus de la sede ID: ' . $id);
+                    throw new \Exception('No se pudo actualizar el estatus de la sede');
+                }
+            }
+            
+            log_message('info', 'Sede deshabilitada correctamente. ID: ' . $id . ', Estatus anterior: ' . ($sede['estatus'] ?? 'N/A'));
+
+            // Redirigir según desde dónde se llamó
+            $referer = $this->request->getHeaderLine('Referer');
+            if (strpos($referer, 'blueprints') !== false) {
+                return redirect()->to('/blueprints')->with('message', 'Planta deshabilitada correctamente. Ya no aparecerá en las vistas ni estadísticas.');
+            }
+
+            return redirect()->to('/Inicio')->with('message', 'Planta deshabilitada correctamente. Ya no aparecerá en las vistas ni estadísticas.');
+        } catch (\Exception $e) {
+            log_message('error', 'Error al deshabilitar sede ID ' . $id . ': ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
+            return redirect()->back()->with('error', 'Error al deshabilitar la planta: ' . $e->getMessage());
+        }
     }
 }

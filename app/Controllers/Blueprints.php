@@ -16,8 +16,8 @@ class Blueprints extends BaseController
         $sedeModel = new SedeModel();
         $planoModel = new PlanoModel();
         
-        // Obtener todas las sedes
-        $data['sedes'] = $sedeModel->findAll();
+        // Obtener solo las sedes activas (estatus = 1)
+        $data['sedes'] = $sedeModel->where('estatus', 1)->findAll();
         
         // Obtener todos los planos
         $planos = $planoModel->findAll();
@@ -46,10 +46,10 @@ class Blueprints extends BaseController
         $sedeModel = new SedeModel();
         $planoModel = new PlanoModel();
 
-        // Obtener información de la sede
-        $sede = $sedeModel->find($id);
+        // Obtener información de la sede (solo activas)
+        $sede = $sedeModel->where('estatus', 1)->find($id);
         if (!$sede) {
-            return redirect()->to('/blueprints')->with('error', 'Sede no encontrada');
+            return redirect()->to('/blueprints')->with('error', 'Sede no encontrada o inactiva');
         }
 
         // Obtener planos de la sede

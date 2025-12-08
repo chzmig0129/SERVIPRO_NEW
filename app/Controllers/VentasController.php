@@ -34,8 +34,8 @@ class VentasController extends Controller
         $fechaInicio = $this->request->getGet('fecha_inicio');
         $fechaFin = $this->request->getGet('fecha_fin');
         
-        // Obtener todas las sedes para el filtro
-        $data['sedes'] = $this->sedeModel->findAll();
+        // Obtener solo las sedes activas (estatus = 1) para el filtro
+        $data['sedes'] = $this->sedeModel->where('estatus', 1)->findAll();
         
         // Construir la consulta base
         $builder = $this->ventaModel
@@ -77,8 +77,8 @@ class VentasController extends Controller
         $fechaInicio = $this->request->getGet('fecha_inicio');
         $fechaFin = $this->request->getGet('fecha_fin');
         
-        // Obtener todas las sedes para el filtro
-        $data['sedes'] = $this->sedeModel->findAll();
+        // Obtener solo las sedes activas (estatus = 1) para el filtro
+        $data['sedes'] = $this->sedeModel->where('estatus', 1)->findAll();
         $data['sede_seleccionada'] = $sedeId;
         $data['fecha_inicio'] = $fechaInicio;
         $data['fecha_fin'] = $fechaFin;
@@ -328,8 +328,8 @@ class VentasController extends Controller
         $db = \Config\Database::connect();
         $sedeId = $this->request->getGet('sede_id');
         
-        // Obtener todas las sedes para el filtro
-        $data['sedes'] = $this->sedeModel->findAll();
+        // Obtener solo las sedes activas (estatus = 1) para el filtro
+        $data['sedes'] = $this->sedeModel->where('estatus', 1)->findAll();
         $data['sede_seleccionada'] = $sedeId;
 
         // Condición WHERE base para el filtro de sede
@@ -469,8 +469,8 @@ class VentasController extends Controller
         $db = \Config\Database::connect();
         $sedeId = $this->request->getGet('sede_id');
         
-        // Obtener todas las sedes para el filtro
-        $data['sedes'] = $this->sedeModel->findAll();
+        // Obtener solo las sedes activas (estatus = 1) para el filtro
+        $data['sedes'] = $this->sedeModel->where('estatus', 1)->findAll();
         $data['sede_seleccionada'] = $sedeId;
 
         // Condición WHERE base para el filtro de sede

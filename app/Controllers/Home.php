@@ -15,8 +15,8 @@ class Home extends BaseController
         $trampaModel = new TrampaModel();
         $planoModel = new PlanoModel();
 
-        // Obtener todas las sedes
-        $sedes = $sedeModel->findAll();
+        // Obtener solo las sedes activas (estatus = 1)
+        $sedes = $sedeModel->where('estatus', 1)->findAll();
 
         // Calcular estadísticas para cada sede
         foreach ($sedes as &$sede) {

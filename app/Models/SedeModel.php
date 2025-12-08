@@ -10,7 +10,7 @@ class SedeModel extends Model
     protected $primaryKey = 'id';
     protected $useAutoIncrement = true;
     protected $returnType = 'array';
-    protected $allowedFields = ['nombre', 'direccion', 'ciudad', 'pais', 'fecha_creacion'];
+    protected $allowedFields = ['nombre', 'direccion', 'ciudad', 'pais', 'fecha_creacion', 'estatus'];
 
     // Validation rules
     protected $validationRules = [
@@ -18,6 +18,7 @@ class SedeModel extends Model
         'direccion' => 'required|min_length[5]|max_length[255]',
         'ciudad' => 'required|min_length[3]|max_length[100]',
         'pais' => 'required|min_length[3]|max_length[100]',
-        'fecha_creacion' => 'required|valid_date'
+        'fecha_creacion' => 'required|valid_date',
+        'estatus' => 'permit_empty|in_list[0,1,Activo,Inactivo]'  // Acepta valores numéricos (0,1) y strings (Activo,Inactivo)
     ];
 }

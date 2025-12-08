@@ -69,12 +69,21 @@
                 </div>
             </div>
         </div>
-        <button onclick="openModal()" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Agregar Plano
-        </button>
+        <div class="flex items-center gap-2">
+            <button onclick="openModal()" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Agregar Plano
+            </button>
+            <button onclick="confirmarDeshabilitar(<?= $sede['id'] ?>, '<?= esc($sede['nombre'], 'js') ?>')" 
+                    class="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Deshabilitar Planta
+            </button>
+        </div>
     </div>
 
     <!-- Lista de Planos -->
@@ -178,6 +187,38 @@
             <?= session()->getFlashdata('error') ?>
         </div>
     <?php endif; ?>
+
+    <!-- Modal Confirmar Deshabilitar -->
+    <div id="modalConfirmarDeshabilitar" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+            <div class="p-6">
+                <div class="flex items-center justify-center mb-4">
+                    <div class="bg-red-100 rounded-full p-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-center mb-2">Confirmar Deshabilitación</h3>
+                <p class="text-center text-gray-600 mb-6">
+                    ¿Estás seguro que deseas deshabilitar la planta <span id="nombreSedeDeshabilitar" class="font-medium text-red-600"></span>? 
+                    La planta dejará de aparecer en las vistas y estadísticas, pero la información se mantendrá en la base de datos.
+                </p>
+                <div class="flex justify-center space-x-3">
+                    <button type="button" onclick="cerrarModalDeshabilitar()"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                        Cancelar
+                    </button>
+                    <form id="formDeshabilitarSede" action="" method="POST" class="inline">
+                        <button type="submit"
+                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200">
+                            Sí, Deshabilitar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -188,6 +229,23 @@ function openModal() {
 function closeModal() {
     document.getElementById('modalAgregarPlano').classList.add('hidden');
 }
+
+function confirmarDeshabilitar(id, nombre) {
+    document.getElementById('nombreSedeDeshabilitar').textContent = nombre;
+    document.getElementById('formDeshabilitarSede').action = '<?= base_url('sedes/deshabilitar/') ?>' + id;
+    document.getElementById('modalConfirmarDeshabilitar').classList.remove('hidden');
+}
+
+function cerrarModalDeshabilitar() {
+    document.getElementById('modalConfirmarDeshabilitar').classList.add('hidden');
+}
+
+// Cerrar modal al hacer clic fuera
+document.getElementById('modalConfirmarDeshabilitar').addEventListener('click', function(e) {
+    if (e.target === this) {
+        cerrarModalDeshabilitar();
+    }
+});
 
 // Cerrar modal al hacer clic fuera
 document.getElementById('modalAgregarPlano').addEventListener('click', function(e) {
