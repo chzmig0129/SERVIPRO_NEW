@@ -262,9 +262,9 @@ class BlueprintsExcel extends BaseController
             $sheet->setCellValue($columna . $fila, $ubicacion);
             $columna++;
             
-            // ID o nombre de la trampa
-            $idTrampa = !empty($trampa['id_trampa']) ? $trampa['id_trampa'] : ($trampa['nombre'] ?? 'T' . $trampa['id']);
-            $sheet->setCellValue($columna . $fila, $idTrampa);
+            // Nombre de la trampa (usar nombre si está disponible, sino id_trampa como fallback)
+            $nombreTrampa = !empty($trampa['nombre']) ? $trampa['nombre'] : (!empty($trampa['id_trampa']) ? $trampa['id_trampa'] : 'T' . $trampa['id']);
+            $sheet->setCellValue($columna . $fila, $nombreTrampa);
             $columna++;
 
             // Columnas para cada tipo de insecto (vacías, listas para llenar)
@@ -392,33 +392,41 @@ class BlueprintsExcel extends BaseController
             // Crear un índice de trampas por ID/nombre para búsqueda rápida
             $trampasIndex = [];
             foreach ($trampas as $trampa) {
+                // Priorizar el nombre si está disponible, sino usar id_trampa
+                $nombreTrampa = !empty($trampa['nombre']) ? $trampa['nombre'] : (!empty($trampa['id_trampa']) ? $trampa['id_trampa'] : 'T' . $trampa['id']);
                 $idTrampa = !empty($trampa['id_trampa']) ? $trampa['id_trampa'] : ($trampa['nombre'] ?? 'T' . $trampa['id']);
                 
-                // Normalizar para búsqueda (eliminar espacios, convertir a mayúsculas)
-                $idTrampaNormalizado = strtoupper(trim((string)$idTrampa));
-                $trampasIndex[$idTrampaNormalizado] = $trampa;
+                // Indexar por nombre (prioridad)
+                $nombreNormalizado = strtoupper(trim((string)$nombreTrampa));
+                $trampasIndex[$nombreNormalizado] = $trampa;
                 
-                // Si el ID tiene formato numérico (ej: "0084"), también indexar sin ceros a la izquierda
-                if (preg_match('/^0+(\d+)$/', $idTrampaNormalizado, $matches)) {
-                    $idSinCeros = $matches[1];
-                    if (!isset($trampasIndex[$idSinCeros])) {
-                        $trampasIndex[$idSinCeros] = $trampa;
+                // También indexar por id_trampa si es diferente del nombre
+                $idTrampaNormalizado = strtoupper(trim((string)$idTrampa));
+                if ($idTrampaNormalizado !== $nombreNormalizado && !isset($trampasIndex[$idTrampaNormalizado])) {
+                    $trampasIndex[$idTrampaNormalizado] = $trampa;
+                }
+                
+                // Si el nombre tiene formato numérico (ej: "0084"), también indexar sin ceros a la izquierda
+                if (preg_match('/^0+(\d+)$/', $nombreNormalizado, $matches)) {
+                    $nombreSinCeros = $matches[1];
+                    if (!isset($trampasIndex[$nombreSinCeros])) {
+                        $trampasIndex[$nombreSinCeros] = $trampa;
                     }
                 }
                 
                 // También indexar con ceros a la izquierda si es numérico
-                if (is_numeric($idTrampaNormalizado)) {
-                    $idConCeros = str_pad($idTrampaNormalizado, 4, '0', STR_PAD_LEFT);
-                    if (!isset($trampasIndex[$idConCeros])) {
-                        $trampasIndex[$idConCeros] = $trampa;
+                if (is_numeric($nombreNormalizado)) {
+                    $nombreConCeros = str_pad($nombreNormalizado, 4, '0', STR_PAD_LEFT);
+                    if (!isset($trampasIndex[$nombreConCeros])) {
+                        $trampasIndex[$nombreConCeros] = $trampa;
                     }
                 }
                 
-                // También indexar por el nombre si es diferente
-                if (!empty($trampa['nombre']) && $trampa['nombre'] !== $idTrampa) {
-                    $nombreNormalizado = strtoupper(trim((string)$trampa['nombre']));
-                    if (!isset($trampasIndex[$nombreNormalizado])) {
-                        $trampasIndex[$nombreNormalizado] = $trampa;
+                // Si el id_trampa tiene formato numérico y es diferente, también indexarlo
+                if ($idTrampaNormalizado !== $nombreNormalizado && preg_match('/^0+(\d+)$/', $idTrampaNormalizado, $matches)) {
+                    $idSinCeros = $matches[1];
+                    if (!isset($trampasIndex[$idSinCeros])) {
+                        $trampasIndex[$idSinCeros] = $trampa;
                     }
                 }
             }

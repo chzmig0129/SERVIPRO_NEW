@@ -575,12 +575,12 @@
                 <span class="text-sm font-semibold text-gray-700">Filtros</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Filtro por ID de Trampa -->
+                <!-- Filtro por Nombre de Trampa -->
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">ID de Trampa</label>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Trampa</label>
                     <input type="text" id="filtroIdTrampa" 
                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
-                           placeholder="Buscar por ID..."
+                           placeholder="Buscar por nombre..."
                            onkeyup="aplicarFiltros()">
                 </div>
                 
@@ -652,7 +652,7 @@
                 <table class="tabla-incidencias w-full text-sm">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">ID Trampa</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Trampa</th>
                             <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Plaga</th>
                             <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Incidencia</th>
                             <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Insecto</th>
@@ -672,7 +672,8 @@
                                 $fecha = new \DateTime($incidencia['fecha']);
                                 $fechaFormateada = $fecha->format('Y-m-d\TH:i');
                             }
-                            $idTrampa = !empty($incidencia['id_trampa']) ? $incidencia['id_trampa'] : ($incidencia['id_trampa'] ?? 'N/A');
+                            // Mostrar el nombre de la trampa si está disponible, sino usar id_trampa como fallback
+                            $nombreTrampa = !empty($incidencia['trampa_nombre']) ? $incidencia['trampa_nombre'] : (!empty($incidencia['id_trampa']) ? $incidencia['id_trampa'] : 'N/A');
                             ?>
                             <tr class="hover:bg-gray-50 transition-colors" data-incidencia-id="<?= $incidencia['id'] ?>" data-original-data='<?= json_encode([
                                 'tipo_plaga' => $incidencia['tipo_plaga'] ?? '',
@@ -683,9 +684,9 @@
                                 'inspector' => $incidencia['inspector'] ?? '',
                                 'notas' => $incidencia['notas'] ?? ''
                             ]) ?>'>
-                                <!-- ID Trampa (solo lectura) -->
+                                <!-- Nombre de la Trampa (solo lectura) -->
                                 <td class="px-4 py-3 border-b border-gray-100 whitespace-nowrap">
-                                    <span class="font-medium text-gray-900"><?= esc($idTrampa) ?></span>
+                                    <span class="font-medium text-gray-900"><?= esc($nombreTrampa) ?></span>
                                 </td>
                                 
                                 <!-- Tipo de Plaga (editable) -->
@@ -2634,9 +2635,15 @@
         function getTipoTrampa(tipo) {
             const tipos = {
                 // Tipos que están en la base de datos (valores exactos)
+                'EDC Químicas': 'EDC Químicas',
+                'EDC Adhesivas': 'EDC Adhesivas',
                 'Equipo de Luz UV': 'Equipo de Luz UV',
                 'Equipo Sónico': 'Equipo Sónico',
                 'Globo terror': 'Globo terror',
+                'Trampa de Feromona Gorgojo': 'Trampa de Feromona Gorgojo',
+                'Trampa atrayente chinches': 'Trampa atrayente chinches',
+                'Trampa atrayente pulgas': 'Trampa atrayente pulgas',
+                'Trampa feromonas picudo rojo': 'Trampa feromonas picudo rojo',
                 // Tipos de códigos internos (para compatibilidad)
                 'edc_quimicas': 'EDC Químicas',
                 'edc_adhesivas': 'EDC Adhesivas',
@@ -4003,9 +4010,10 @@
             document.getElementById('incidencia_id_editar').value = incidencia.id;
             document.getElementById('trampa_id_editar').value = incidencia.id_trampa;
             
-            // Mostrar información de la trampa
+            // Mostrar información de la trampa (mostrar nombre si está disponible, sino id_trampa)
             const trampaInfo = document.getElementById('trampaInfoEditar');
-            trampaInfo.innerHTML = `<p class="text-sm text-gray-600"><strong>ID de Trampa:</strong> ${incidencia.id_trampa || 'N/A'}<br><strong>Ubicación:</strong> ${incidencia.trampa_ubicacion || 'N/A'}</p>`;
+            const nombreTrampa = incidencia.trampa_nombre || incidencia.id_trampa || 'N/A';
+            trampaInfo.innerHTML = `<p class="text-sm text-gray-600"><strong>Trampa:</strong> ${nombreTrampa}<br><strong>Ubicación:</strong> ${incidencia.trampa_ubicacion || 'N/A'}</p>`;
             
             // Tipo de plaga
             const tipoPlaga = incidencia.tipo_plaga || '';
@@ -4561,10 +4569,10 @@
             filas.forEach(fila => {
                 let mostrar = true;
                 
-                // Filtro por ID de Trampa
+                // Filtro por Nombre de Trampa
                 if (filtroIdTrampa) {
-                    const idTrampa = fila.querySelector('td:first-child span').textContent.toLowerCase().trim();
-                    if (!idTrampa.includes(filtroIdTrampa)) {
+                    const nombreTrampa = fila.querySelector('td:first-child span').textContent.toLowerCase().trim();
+                    if (!nombreTrampa.includes(filtroIdTrampa)) {
                         mostrar = false;
                     }
                 }

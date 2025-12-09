@@ -869,14 +869,15 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
         
         // Agregar filas de trampas
         trampasData.forEach((trampa, index) => {
-            const idTrampa = trampa.id_trampa || trampa.nombre || 'T' + trampa.id;
+            // Usar nombre si está disponible, sino id_trampa como fallback
+            const nombreTrampa = trampa.nombre || trampa.id_trampa || 'T' + trampa.id;
             const ubicacion = trampa.ubicacion || 'Sin ubicación';
             const rowId = `semana-${semana}-trampa-${trampa.id}`;
             
             html += `
                         <tr>
                             <td>${ubicacion}</td>
-                            <td>${idTrampa}</td>
+                            <td>${nombreTrampa}</td>
             `;
             
             // Agregar inputs para cada tipo de insecto
@@ -980,7 +981,8 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
         const trampa = trampasData.find(t => t.id == trampaId);
         if (!trampa) return;
         
-        const idTrampa = trampa.id_trampa || trampa.nombre || 'T' + trampa.id;
+        // Usar nombre si está disponible, sino id_trampa como fallback
+        const idTrampa = trampa.nombre || trampa.id_trampa || 'T' + trampa.id;
         const tipoInsecto = tiposInsectos[tipoIndex];
         const mapeo = mapeoTiposInsectos[tipoInsecto];
         
