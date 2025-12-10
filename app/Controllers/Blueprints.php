@@ -637,15 +637,32 @@ class Blueprints extends BaseController
         // Obtener los datos del POST
         $trampaId = $this->request->getPost('trampa_id');
         $tipoPlaga = $this->request->getPost('tipo_plaga');
+        $tipoIncidencia = $this->request->getPost('tipo_incidencia');
+        $zona = $this->request->getPost('zona');
         
         // Agregar logs para debug
         log_message('info', 'trampa_id recibido: ' . $trampaId);
         log_message('info', 'tipo_plaga recibido: ' . $tipoPlaga);
+        log_message('info', 'tipo_incidencia recibido: ' . $tipoIncidencia);
 
-        if (!$trampaId || !$tipoPlaga) {
+        // Validar datos básicos
+        if (!$tipoPlaga) {
             return $this->response->setJSON([
                 'success' => false, 
-                'message' => 'Datos incompletos',
+                'message' => 'Datos incompletos: falta tipo_plaga',
+                'debug' => [
+                    'trampa_id' => $trampaId,
+                    'tipo_plaga' => $tipoPlaga,
+                    'tipo_incidencia' => $tipoIncidencia
+                ]
+            ]);
+        }
+        
+        // Para hallazgos, trampa_id puede estar vacío
+        if ($tipoIncidencia !== 'Hallazgo' && !$trampaId) {
+            return $this->response->setJSON([
+                'success' => false, 
+                'message' => 'Datos incompletos: falta trampa_id',
                 'debug' => [
                     'trampa_id' => $trampaId,
                     'tipo_plaga' => $tipoPlaga
@@ -655,7 +672,6 @@ class Blueprints extends BaseController
         
         // Obtener directamente los valores de los campos del formulario
         $tipoInsecto = $this->request->getPost('tipo_insecto');
-        $tipoIncidencia = $this->request->getPost('tipo_incidencia');
         
         $cantidadOrganismos = $this->request->getPost('cantidad_organismos');
         $notas = $this->request->getPost('notas');
@@ -668,6 +684,7 @@ class Blueprints extends BaseController
             'tipo_insecto' => $tipoInsecto,
             'cantidad_organismos' => $cantidadOrganismos,
             'tipo_incidencia' => $tipoIncidencia,
+            'zona' => $zona,
             'notas' => $notas,
             'inspector' => $inspector
         ]));
@@ -679,35 +696,64 @@ class Blueprints extends BaseController
         }
         
         try {
-            // Cargar el modelo de trampas
-            $trampaModel = new \App\Models\TrampaModel();
+            $idTrampaReciente = null;
+            $idSede = null;
             
-            // Intentar buscar la trampa por id_trampa primero
-            $trampa = $trampaModel->where('id_trampa', $trampaId)->orderBy('id', 'DESC')->first();
-            log_message('info', 'Búsqueda por id_trampa: ' . ($trampa ? 'Encontrada' : 'No encontrada'));
-            
-            // Si no se encuentra por id_trampa, intentar buscar por id
-            if (!$trampa) {
-                $trampa = $trampaModel->find($trampaId);
-                log_message('info', 'Búsqueda por id: ' . ($trampa ? 'Encontrada' : 'No encontrada'));
+            // Si es un hallazgo, no necesitamos buscar la trampa
+            if ($tipoIncidencia === 'Hallazgo') {
+                // Para hallazgos, obtener la sede desde el plano_id o sede_id enviado
+                $planoId = $this->request->getPost('plano_id');
+                $sedeIdEnviado = $this->request->getPost('sede_id');
+                
+                if ($sedeIdEnviado) {
+                    $idSede = $sedeIdEnviado;
+                } elseif ($planoId) {
+                    $planoModel = new \App\Models\PlanoModel();
+                    $plano = $planoModel->find($planoId);
+                    if ($plano && isset($plano['sede_id'])) {
+                        $idSede = $plano['sede_id'];
+                    } else {
+                        return $this->response->setJSON(['success' => false, 'message' => 'No se pudo obtener la sede del plano']);
+                    }
+                } else {
+                    return $this->response->setJSON(['success' => false, 'message' => 'No se proporcionó plano_id ni sede_id para el hallazgo']);
+                }
+                
+                // Agregar la zona a las notas si está disponible
+                if ($zona && !empty($zona)) {
+                    $notas = ($notas ? $notas . ' | ' : '') . 'Zona: ' . $zona;
+                }
+            } else {
+                // Para capturas, buscar la trampa normalmente
+                $trampaModel = new \App\Models\TrampaModel();
+                
+                // Intentar buscar la trampa por id_trampa primero
+                $trampa = $trampaModel->where('id_trampa', $trampaId)->orderBy('id', 'DESC')->first();
+                log_message('info', 'Búsqueda por id_trampa: ' . ($trampa ? 'Encontrada' : 'No encontrada'));
+                
+                // Si no se encuentra por id_trampa, intentar buscar por id
+                if (!$trampa) {
+                    $trampa = $trampaModel->find($trampaId);
+                    log_message('info', 'Búsqueda por id: ' . ($trampa ? 'Encontrada' : 'No encontrada'));
+                }
+                
+                // Si aún no se encuentra, intentar buscar por id numérico
+                if (!$trampa && is_numeric($trampaId)) {
+                    $trampa = $trampaModel->find((int)$trampaId);
+                    log_message('info', 'Búsqueda por id numérico: ' . ($trampa ? 'Encontrada' : 'No encontrada'));
+                }
+                
+                if (!$trampa) {
+                    log_message('error', 'No se encontró la trampa con ID: ' . $trampaId);
+                    return $this->response->setJSON(['success' => false, 'message' => 'No se encontró la trampa especificada (ID: ' . $trampaId . ')']);
+                }
+                
+                // Usar el ID de la trampa encontrada
+                $idTrampaReciente = $trampa['id'];
+                // Obtener el ID de la sede asociada a la trampa
+                $idSede = $trampa['sede_id'];
+                log_message('info', 'ID de trampa encontrado: ' . $idTrampaReciente . ', ID de sede: ' . $idSede);
             }
-            
-            // Si aún no se encuentra, intentar buscar por id numérico
-            if (!$trampa && is_numeric($trampaId)) {
-                $trampa = $trampaModel->find((int)$trampaId);
-                log_message('info', 'Búsqueda por id numérico: ' . ($trampa ? 'Encontrada' : 'No encontrada'));
-            }
-            
-            if (!$trampa) {
-                log_message('error', 'No se encontró la trampa con ID: ' . $trampaId);
-                return $this->response->setJSON(['success' => false, 'message' => 'No se encontró la trampa especificada (ID: ' . $trampaId . ')']);
-            }
-            
-            // Usar el ID de la trampa encontrada
-            $idTrampaReciente = $trampa['id'];
-            // Obtener el ID de la sede asociada a la trampa
-            $idSede = $trampa['sede_id'];
-            log_message('info', 'ID de trampa encontrado: ' . $idTrampaReciente . ', ID de sede: ' . $idSede);
             
             // Cargar el modelo de incidencias
             $incidenciaModel = new \App\Models\IncidenciaModel();
@@ -720,7 +766,7 @@ class Blueprints extends BaseController
             
             // Preparar los datos para guardar - Asegurarse de que los campos estén correctamente asignados
             $data = [
-                'id_trampa' => $idTrampaReciente, // Usamos el ID de la trampa encontrada
+                'id_trampa' => $idTrampaReciente, // Para hallazgos será null, para capturas será el ID de la trampa
                 'sede_id' => $idSede, // Agregamos el ID de la sede
                 'fecha' => $fechaFormateada, // Usamos la fecha proporcionada por el usuario
                 'tipo_plaga' => $tipoPlaga,

@@ -55,11 +55,29 @@ class BlueprintsExcel extends BaseController
         // Obtener parámetros
         $semanas = $this->request->getGet('semanas') ?? 4;
         $fechaInicio = $this->request->getGet('fecha_inicio') ?? date('Y-m-d');
+        $incluirHallazgos = $this->request->getGet('incluir_hallazgos') === 'on' || $this->request->getGet('incluir_hallazgos') === '1';
+        $zonasHallazgos = $this->request->getGet('zonas_hallazgos');
+        
+        // Si zonas_hallazgos viene como array, procesarlo
+        if (is_array($zonasHallazgos)) {
+            $zonasHallazgos = array_filter($zonasHallazgos, function($zona) {
+                return !empty(trim($zona));
+            });
+        } else {
+            $zonasHallazgos = [];
+        }
 
         // Validar parámetros
         $semanas = (int)$semanas;
         if ($semanas < 1 || $semanas > 52) {
             return redirect()->back()->with('error', 'El número de semanas debe estar entre 1 y 52');
+        }
+        
+        // Si se incluyen hallazgos pero no hay zonas, obtener zonas de las trampas
+        if ($incluirHallazgos && empty($zonasHallazgos)) {
+            $trampaModel = new TrampaModel();
+            $trampas = $trampaModel->where('plano_id', $planoId)->findAll();
+            $zonasHallazgos = array_unique(array_filter(array_column($trampas, 'ubicacion')));
         }
 
         try {
@@ -102,12 +120,24 @@ class BlueprintsExcel extends BaseController
                 'Avispas',
                 'Mosquitos',
                 'Cucaracha',
+                'Cucaracha Americana',
+                'Cucaracha Alemana',
                 'Hormiga',
                 'Roedor',
                 'Arañas',
+                'Escarabajo',
+                'Tijerilla',
                 'Lagartijas',
+                'Insectos de áreas verdes',
                 'Otros',
                 'Total de insectos'
+            ];
+            
+            // Mapeo de tipos de trampa a tipos de plaga permitidos
+            $tiposPlagaPorTrampa = [
+                'edc_quimicas' => ['Roedor'],
+                'edc_adhesivas' => ['Roedor', 'Hormiga', 'Cucaracha Americana', 'Cucaracha Alemana', 'Escarabajo', 'Tijerilla', 'Arañas'],
+                'luz_uv' => ['Mosca doméstica', 'Mosca de la fruta', 'Mosca de drenaje', 'Moscas metálicas', 'Mosca forida', 'Palomillas de almacén', 'Otras palomillas', 'Gorgojos', 'Otros escarabajos', 'Abejas', 'Avispas', 'Mosquitos', 'Insectos de áreas verdes', 'Otros']
             ];
 
             // Generar una hoja por cada semana
@@ -129,7 +159,7 @@ class BlueprintsExcel extends BaseController
                 }
                 
                 // Generar la tabla para esta semana
-                $this->generarTablaSemana($sheet, $trampas, $tiposInsectos, $fechaSemana, $plano, $sede);
+                $this->generarTablaSemana($sheet, $trampas, $tiposInsectos, $fechaSemana, $plano, $sede, $tiposPlagaPorTrampa, $incluirHallazgos, $zonasHallazgos);
             }
 
             // Establecer la primera hoja como activa
@@ -164,33 +194,22 @@ class BlueprintsExcel extends BaseController
     /**
      * Genera la tabla para una semana específica
      */
-    private function generarTablaSemana($sheet, $trampas, $tiposInsectos, $fechaInicio, $plano, $sede)
+    private function generarTablaSemana($sheet, $trampas, $tiposInsectos, $fechaInicio, $plano, $sede, $tiposPlagaPorTrampa, $incluirHallazgos = false, $zonasHallazgos = [])
     {
-        // Calcular la última columna necesaria (ÁREA + EQUIPO + tipos de insectos)
-        $numColumnas = 2 + count($tiposInsectos); // ÁREA + EQUIPO + tipos de insectos
-        $ultimaColumnaLetra = chr(65 + $numColumnas - 1); // A=65, entonces calculamos la última columna
-        
-        // Establecer el ancho de las columnas
-        $sheet->getColumnDimension('A')->setWidth(25); // ÁREA más ancho
-        $sheet->getColumnDimension('B')->setWidth(15); // EQUIPO
-        foreach (range('C', $ultimaColumnaLetra) as $col) {
-            $sheet->getColumnDimension($col)->setWidth(15);
-        }
-
         $fila = 1;
 
         // Logo y título (simulado)
         $sheet->setCellValue('A' . $fila, 'SERVIPRO');
-        $sheet->mergeCells('A' . $fila . ':' . $ultimaColumnaLetra . $fila);
+        $sheet->mergeCells('A' . $fila . ':Z' . $fila);
         $sheet->getStyle('A' . $fila)->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A' . $fila)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $fila += 2;
 
-        // Título principal - Incluir nombre del plano como en la imagen
+        // Título principal
         $nombrePlano = strtoupper($plano['nombre']);
         $titulo = 'REGISTRO DE ACTIVIDAD DE INSECTOS VOLADORES EN ' . strtoupper($sede['nombre']) . ' ' . $nombrePlano . ' ' . date('Y');
         $sheet->setCellValue('A' . $fila, $titulo);
-        $sheet->mergeCells('A' . $fila . ':' . $ultimaColumnaLetra . $fila);
+        $sheet->mergeCells('A' . $fila . ':Z' . $fila);
         $sheet->getStyle('A' . $fila)->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A' . $fila)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $fila += 1;
@@ -198,17 +217,14 @@ class BlueprintsExcel extends BaseController
         // Mes
         $nombreMes = $this->obtenerNombreMes($fechaInicio);
         $sheet->setCellValue('A' . $fila, strtoupper($nombreMes));
-        $sheet->mergeCells('A' . $fila . ':' . $ultimaColumnaLetra . $fila);
+        $sheet->mergeCells('A' . $fila . ':Z' . $fila);
         $sheet->getStyle('A' . $fila)->getFont()->setBold(true)->setSize(11);
         $sheet->getStyle('A' . $fila)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $fila += 1;
         
-        // Fila con título y fecha en formato de fecha de Excel
+        // Fecha
         $sheet->setCellValue('A' . $fila, 'Fecha en la que se registrarán las incidencias');
         $sheet->getStyle('A' . $fila)->getFont()->setBold(true)->setSize(10);
-        
-        // Colocar la fecha en la siguiente columna (o en una columna específica)
-        // Usar la fecha de inicio de la semana como fecha de registro
         $fechaExcel = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(strtotime($fechaInicio));
         $sheet->setCellValue('B' . $fila, $fechaExcel);
         $sheet->getStyle('B' . $fila)
@@ -217,7 +233,100 @@ class BlueprintsExcel extends BaseController
         
         $fila += 2;
 
-        // Encabezados de la tabla - Agregar ÁREA antes de EQUIPO
+        // Generar tabla para EDC Químicas
+        $fila = $this->generarTablaPorTipoTrampa($sheet, $trampas, $tiposPlagaPorTrampa['edc_quimicas'] ?? [], 'EDC QUÍMICAS', $fila);
+        
+        // Generar tabla para EDC Adhesivas
+        $fila = $this->generarTablaPorTipoTrampa($sheet, $trampas, $tiposPlagaPorTrampa['edc_adhesivas'] ?? [], 'EDC ADHESIVAS', $fila);
+        
+        // Generar tabla para Equipo de Luz UV
+        $fila = $this->generarTablaPorTipoTrampa($sheet, $trampas, $tiposPlagaPorTrampa['luz_uv'] ?? [], 'EQUIPO DE LUZ UV', $fila);
+        
+        // Generar tabla para otras trampas
+        $fila = $this->generarTablaOtrasTrampas($sheet, $trampas, $tiposInsectos, $fila);
+        
+        // Generar tabla para hallazgos si está habilitado
+        if ($incluirHallazgos && !empty($zonasHallazgos)) {
+            $fila = $this->generarTablaHallazgos($sheet, $zonasHallazgos, $tiposInsectos, $fila);
+        }
+    }
+    
+    /**
+     * Normaliza un tipo de trampa para comparación
+     */
+    private function normalizarTipoTrampa($tipo) {
+        if (empty($tipo)) return '';
+        return strtolower(str_replace([' ', 'á', 'é', 'í', 'ó', 'ú', 'ñ'], ['_', 'a', 'e', 'i', 'o', 'u', 'n'], $tipo));
+    }
+    
+    /**
+     * Genera una tabla para un tipo específico de trampa
+     */
+    private function generarTablaPorTipoTrampa($sheet, $trampas, $tiposPlagaPermitidos, $nombreTipoTrampa, $filaInicio)
+    {
+        // Palabras clave para identificar cada tipo de trampa
+        $palabrasClave = [
+            'EDC QUÍMICAS' => ['edc', 'quimica', 'quimicas'],
+            'EDC ADHESIVAS' => ['edc', 'adhesiva', 'adhesivas'],
+            'EQUIPO DE LUZ UV' => ['luz', 'uv', 'equipo']
+        ];
+        
+        $claves = $palabrasClave[$nombreTipoTrampa] ?? [];
+        
+        // Filtrar trampas por tipo usando palabras clave
+        $trampasFiltradas = array_filter($trampas, function($trampa) use ($claves, $nombreTipoTrampa) {
+            $tipoTrampaNormalizado = $this->normalizarTipoTrampa($trampa['tipo'] ?? '');
+            
+            // Verificar que todas las palabras clave estén presentes
+            $todasLasClavesPresentes = true;
+            foreach ($claves as $clave) {
+                if (strpos($tipoTrampaNormalizado, $clave) === false) {
+                    $todasLasClavesPresentes = false;
+                    break;
+                }
+            }
+            
+            if (!$todasLasClavesPresentes) {
+                return false;
+            }
+            
+            // Para EDC, también verificar que no sea del otro tipo
+            if ($nombreTipoTrampa === 'EDC QUÍMICAS') {
+                // Asegurarse de que no sea adhesiva
+                return strpos($tipoTrampaNormalizado, 'adhesiva') === false;
+            }
+            if ($nombreTipoTrampa === 'EDC ADHESIVAS') {
+                // Asegurarse de que no sea química
+                return strpos($tipoTrampaNormalizado, 'quimica') === false;
+            }
+            
+            return true;
+        });
+        
+        // Si no hay trampas de este tipo, no generar tabla
+        if (empty($trampasFiltradas)) {
+            return $filaInicio;
+        }
+        
+        // Título de la sección
+        $sheet->setCellValue('A' . $filaInicio, $nombreTipoTrampa);
+        $sheet->getStyle('A' . $filaInicio)->getFont()->setBold(true)->setSize(12);
+        $filaInicio += 1;
+        
+        // Calcular número de columnas
+        $numColumnas = 2 + count($tiposPlagaPermitidos) + 1; // ÁREA + EQUIPO + tipos de plaga + Total
+        $ultimaColumnaLetra = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($numColumnas);
+        
+        // Establecer ancho de columnas
+        $sheet->getColumnDimension('A')->setWidth(25);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        foreach (range('C', $ultimaColumnaLetra) as $col) {
+            $sheet->getColumnDimension($col)->setWidth(15);
+        }
+        
+        $fila = $filaInicio;
+        
+        // Encabezados
         $columna = 'A';
         $sheet->setCellValue($columna . $fila, 'ÁREA');
         $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
@@ -225,7 +334,9 @@ class BlueprintsExcel extends BaseController
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('4472C4');
         $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
-        $columna++;
+        $columnaIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($columna);
+        $columnaIndex++;
+        $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
         
         $sheet->setCellValue($columna . $fila, 'EQUIPO');
         $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
@@ -233,63 +344,65 @@ class BlueprintsExcel extends BaseController
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('4472C4');
         $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
-        $columna++;
-
-        foreach ($tiposInsectos as $tipo) {
+        $columnaIndex++;
+        $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+        
+        foreach ($tiposPlagaPermitidos as $tipo) {
             $sheet->setCellValue($columna . $fila, $tipo);
             $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
             $sheet->getStyle($columna . $fila)->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setRGB('4472C4');
             $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
-            
-            // Ajustar ancho si es necesario
             if (strlen($tipo) > 12) {
                 $sheet->getColumnDimension($columna)->setWidth(18);
             }
-            $columna++;
+            $columnaIndex++;
+            $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
         }
-
+        
+        $sheet->setCellValue($columna . $fila, 'Total de insectos');
+        $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
+        $sheet->getStyle($columna . $fila)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
+        
         $fila++;
-
-        // Filas de datos (una por cada trampa/equipo)
-        $filaInicioTabla = $fila; // Guardar la fila donde inicia la tabla de datos
-        foreach ($trampas as $trampa) {
+        $filaInicioTabla = $fila;
+        
+        // Filas de datos
+        foreach ($trampasFiltradas as $trampa) {
             $columna = 'A';
             
-            // Ubicación de la trampa
             $ubicacion = !empty($trampa['ubicacion']) ? $trampa['ubicacion'] : 'Sin ubicación';
             $sheet->setCellValue($columna . $fila, $ubicacion);
-            $columna++;
+            $columnaIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($columna);
+            $columnaIndex++;
+            $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
             
-            // Nombre de la trampa (usar nombre si está disponible, sino id_trampa como fallback)
             $nombreTrampa = !empty($trampa['nombre']) ? $trampa['nombre'] : (!empty($trampa['id_trampa']) ? $trampa['id_trampa'] : 'T' . $trampa['id']);
             $sheet->setCellValue($columna . $fila, $nombreTrampa);
-            $columna++;
-
-            // Columnas para cada tipo de insecto (vacías, listas para llenar)
-            $numTiposSinTotal = count($tiposInsectos) - 1; // Excluir "Total de insectos" del conteo
-            $columnaInicio = 'C'; // Primera columna de datos (después de ÁREA y EQUIPO)
-            // Calcular la última columna de datos antes del Total
-            $columnaFinDatos = chr(65 + 2 + ($numTiposSinTotal - 1)); // C=67, entonces 67 + 13 = 80 = P
+            $columnaIndex++;
+            $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
             
-            foreach (range(0, count($tiposInsectos) - 1) as $index) {
-                if ($index === count($tiposInsectos) - 1) {
-                    // Última columna es "Total de insectos" - agregar fórmula SUM
-                    $sheet->setCellValue($columna . $fila, '=SUM(' . $columnaInicio . $fila . ':' . $columnaFinDatos . $fila . ')');
-                } else {
-                    $sheet->setCellValue($columna . $fila, '0');
-                }
-                $columna++;
+            $columnaInicio = $columna;
+            foreach ($tiposPlagaPermitidos as $tipo) {
+                $sheet->setCellValue($columna . $fila, '0');
+                $columnaIndex++;
+                $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
             }
-
+            
+            $columnaFinDatos = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(
+                \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($columnaInicio) + count($tiposPlagaPermitidos) - 1
+            );
+            $sheet->setCellValue($columna . $fila, '=SUM(' . $columnaInicio . $fila . ':' . $columnaFinDatos . $fila . ')');
+            
             $fila++;
         }
-
-        // Aplicar bordes a toda la tabla
-        $numColumnas = 2 + count($tiposInsectos); // ÁREA + EQUIPO + tipos de insectos
-        $ultimaColumna = chr(65 + $numColumnas - 1); // Última columna
-        $range = 'A' . $filaInicioTabla . ':' . $ultimaColumna . ($fila - 1);
+        
+        // Aplicar bordes
+        $range = 'A' . $filaInicioTabla . ':' . $ultimaColumnaLetra . ($fila - 1);
         $styleArray = [
             'borders' => [
                 'allBorders' => [
@@ -299,6 +412,321 @@ class BlueprintsExcel extends BaseController
             ],
         ];
         $sheet->getStyle($range)->applyFromArray($styleArray);
+        
+        return $fila + 2; // Dejar espacio antes de la siguiente tabla
+    }
+    
+    /**
+     * Genera una tabla para hallazgos (sin trampa asociada, solo zona)
+     */
+    private function generarTablaHallazgos($sheet, $zonasHallazgos, $tiposInsectos, $filaInicio)
+    {
+        if (empty($zonasHallazgos)) {
+            return $filaInicio;
+        }
+        
+        // Filtrar tipos de insectos (excluir "Total de insectos")
+        $tiposSinTotal = array_filter($tiposInsectos, function($tipo) {
+            return $tipo !== 'Total de insectos';
+        });
+        
+        // Título de la sección
+        $sheet->setCellValue('A' . $filaInicio, 'HALLAZGOS');
+        $sheet->getStyle('A' . $filaInicio)->getFont()->setBold(true)->setSize(12);
+        $filaInicio += 1;
+        
+        // Calcular número de columnas (ZONA + todos los tipos de plaga + Total)
+        $numColumnas = 1 + count($tiposSinTotal) + 1; // ZONA + tipos de plaga + Total
+        $ultimaColumnaLetra = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($numColumnas);
+        
+        // Establecer ancho de columnas
+        $sheet->getColumnDimension('A')->setWidth(25);
+        foreach (range('B', $ultimaColumnaLetra) as $col) {
+            $sheet->getColumnDimension($col)->setWidth(15);
+        }
+        
+        $fila = $filaInicio;
+        
+        // Encabezados
+        $columna = 'A';
+        $sheet->setCellValue($columna . $fila, 'ZONA');
+        $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
+        $sheet->getStyle($columna . $fila)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
+        $columnaIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($columna);
+        $columnaIndex++;
+        $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+        
+        foreach ($tiposSinTotal as $tipo) {
+            $sheet->setCellValue($columna . $fila, $tipo);
+            $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
+            $sheet->getStyle($columna . $fila)->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('4472C4');
+            $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
+            if (strlen($tipo) > 12) {
+                $sheet->getColumnDimension($columna)->setWidth(18);
+            }
+            $columnaIndex++;
+            $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+        }
+        
+        $sheet->setCellValue($columna . $fila, 'Total de insectos');
+        $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
+        $sheet->getStyle($columna . $fila)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
+        
+        $fila++;
+        $filaInicioTabla = $fila;
+        
+        // Filas de datos (una por cada zona)
+        foreach ($zonasHallazgos as $zona) {
+            $columna = 'A';
+            
+            $sheet->setCellValue($columna . $fila, $zona);
+            $columnaIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($columna);
+            $columnaIndex++;
+            $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+            
+            $columnaInicio = $columna;
+            foreach ($tiposSinTotal as $tipo) {
+                $sheet->setCellValue($columna . $fila, '0');
+                $columnaIndex++;
+                $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+            }
+            
+            $columnaFinDatos = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(
+                \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($columnaInicio) + count($tiposSinTotal) - 1
+            );
+            $sheet->setCellValue($columna . $fila, '=SUM(' . $columnaInicio . $fila . ':' . $columnaFinDatos . $fila . ')');
+            
+            $fila++;
+        }
+        
+        // Aplicar bordes
+        $range = 'A' . $filaInicioTabla . ':' . $ultimaColumnaLetra . ($fila - 1);
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle($range)->applyFromArray($styleArray);
+        
+        return $fila + 2; // Dejar espacio antes de la siguiente tabla
+    }
+    
+    /**
+     * Genera una tabla para otras trampas (no EDC Químicas, EDC Adhesivas, ni Equipo de Luz UV)
+     */
+    private function generarTablaOtrasTrampas($sheet, $trampas, $tiposInsectos, $filaInicio)
+    {
+        // Filtrar trampas que NO sean de los 3 tipos principales
+        $tiposPrincipales = ['edc_quimicas', 'edc_adhesivas', 'luz_uv'];
+        $trampasFiltradas = array_filter($trampas, function($trampa) use ($tiposPrincipales) {
+            $tipoTrampaNormalizado = $this->normalizarTipoTrampa($trampa['tipo'] ?? '');
+            
+            // Verificar si NO es de los tipos principales
+            $esPrincipal = false;
+            foreach ($tiposPrincipales as $tipoPrincipal) {
+                $palabrasClave = [
+                    'edc_quimicas' => ['edc', 'quimica', 'quimicas'],
+                    'edc_adhesivas' => ['edc', 'adhesiva', 'adhesivas'],
+                    'luz_uv' => ['luz', 'uv', 'equipo']
+                ];
+                
+                $claves = $palabrasClave[$tipoPrincipal] ?? [];
+                $todasLasClavesPresentes = true;
+                foreach ($claves as $clave) {
+                    if (strpos($tipoTrampaNormalizado, $clave) === false) {
+                        $todasLasClavesPresentes = false;
+                        break;
+                    }
+                }
+                
+                if ($todasLasClavesPresentes) {
+                    // Verificar que no sea del otro tipo de EDC
+                    if ($tipoPrincipal === 'edc_quimicas' && strpos($tipoTrampaNormalizado, 'adhesiva') === false) {
+                        $esPrincipal = true;
+                        break;
+                    }
+                    if ($tipoPrincipal === 'edc_adhesivas' && strpos($tipoTrampaNormalizado, 'quimica') === false) {
+                        $esPrincipal = true;
+                        break;
+                    }
+                    if ($tipoPrincipal === 'luz_uv') {
+                        $esPrincipal = true;
+                        break;
+                    }
+                }
+            }
+            
+            return !$esPrincipal;
+        });
+        
+        // Si no hay trampas de otros tipos, no generar tabla
+        if (empty($trampasFiltradas)) {
+            return $filaInicio;
+        }
+        
+        // Función auxiliar para obtener el nombre legible del tipo de trampa
+        $getNombreTipoTrampa = function($tipo) {
+            if (empty($tipo)) return 'Sin tipo';
+            
+            $tipos = [
+                'feromona_gorgojo' => 'Trampa de Feromona Gorgojo',
+                'equipo_sonico' => 'Equipo Sónico',
+                'globo_terror' => 'Globo terror',
+                'atrayente_chinches' => 'Trampa atrayente chinches',
+                'atrayente_pulgas' => 'Trampa atrayente pulgas',
+                'feromona_picudo' => 'Trampa feromonas picudo rojo'
+            ];
+            
+            $tipoNormalizado = $this->normalizarTipoTrampa($tipo);
+            foreach ($tipos as $key => $value) {
+                if (strpos($tipoNormalizado, $this->normalizarTipoTrampa($key)) !== false) {
+                    return $value;
+                }
+            }
+            
+            return $tipo;
+        };
+        
+        // Título de la sección
+        $sheet->setCellValue('A' . $filaInicio, 'OTRAS TRAMPAS');
+        $sheet->getStyle('A' . $filaInicio)->getFont()->setBold(true)->setSize(12);
+        $filaInicio += 1;
+        
+        // Calcular número de columnas (ÁREA + EQUIPO + Tipo de Trampa + todos los tipos de plaga + Total)
+        $tiposSinTotal = array_filter($tiposInsectos, function($tipo) {
+            return $tipo !== 'Total de insectos';
+        });
+        $numColumnas = 3 + count($tiposSinTotal) + 1; // ÁREA + EQUIPO + Tipo de Trampa + tipos de plaga + Total
+        $ultimaColumnaLetra = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($numColumnas);
+        
+        // Establecer ancho de columnas
+        $sheet->getColumnDimension('A')->setWidth(25);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getColumnDimension('C')->setWidth(20); // Tipo de Trampa
+        foreach (range('D', $ultimaColumnaLetra) as $col) {
+            $sheet->getColumnDimension($col)->setWidth(15);
+        }
+        
+        $fila = $filaInicio;
+        
+        // Agregar todos los tipos de insectos (excepto "Total de insectos")
+        $tiposSinTotal = array_filter($tiposInsectos, function($tipo) {
+            return $tipo !== 'Total de insectos';
+        });
+        
+        // Encabezados
+        $columna = 'A';
+        $sheet->setCellValue($columna . $fila, 'ÁREA');
+        $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
+        $sheet->getStyle($columna . $fila)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
+        $columnaIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($columna);
+        $columnaIndex++;
+        $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+        
+        $sheet->setCellValue($columna . $fila, 'EQUIPO');
+        $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
+        $sheet->getStyle($columna . $fila)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
+        $columnaIndex++;
+        $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+        
+        $sheet->setCellValue($columna . $fila, 'Tipo de Trampa');
+        $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
+        $sheet->getStyle($columna . $fila)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
+        $columnaIndex++;
+        $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+        
+        foreach ($tiposSinTotal as $tipo) {
+            $sheet->setCellValue($columna . $fila, $tipo);
+            $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
+            $sheet->getStyle($columna . $fila)->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('4472C4');
+            $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
+            if (strlen($tipo) > 12) {
+                $sheet->getColumnDimension($columna)->setWidth(18);
+            }
+            $columnaIndex++;
+            $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+        }
+        
+        $sheet->setCellValue($columna . $fila, 'Total de insectos');
+        $sheet->getStyle($columna . $fila)->getFont()->setBold(true);
+        $sheet->getStyle($columna . $fila)->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle($columna . $fila)->getFont()->getColor()->setRGB('FFFFFF');
+        
+        $fila++;
+        $filaInicioTabla = $fila;
+        
+        // Filas de datos
+        foreach ($trampasFiltradas as $trampa) {
+            $columna = 'A';
+            
+            $ubicacion = !empty($trampa['ubicacion']) ? $trampa['ubicacion'] : 'Sin ubicación';
+            $sheet->setCellValue($columna . $fila, $ubicacion);
+            $columnaIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($columna);
+            $columnaIndex++;
+            $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+            
+            $nombreTrampa = !empty($trampa['nombre']) ? $trampa['nombre'] : (!empty($trampa['id_trampa']) ? $trampa['id_trampa'] : 'T' . $trampa['id']);
+            $sheet->setCellValue($columna . $fila, $nombreTrampa);
+            $columnaIndex++;
+            $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+            
+            $tipoTrampaNombre = $getNombreTipoTrampa($trampa['tipo'] ?? '');
+            $sheet->setCellValue($columna . $fila, $tipoTrampaNombre);
+            $columnaIndex++;
+            $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+            
+            $columnaInicio = $columna;
+            foreach ($tiposSinTotal as $tipo) {
+                $sheet->setCellValue($columna . $fila, '0');
+                $columnaIndex++;
+                $columna = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($columnaIndex);
+            }
+            
+            $columnaFinDatos = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(
+                \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($columnaInicio) + count($tiposSinTotal) - 1
+            );
+            $sheet->setCellValue($columna . $fila, '=SUM(' . $columnaInicio . $fila . ':' . $columnaFinDatos . $fila . ')');
+            
+            $fila++;
+        }
+        
+        // Aplicar bordes
+        $range = 'A' . $filaInicioTabla . ':' . $ultimaColumnaLetra . ($fila - 1);
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle($range)->applyFromArray($styleArray);
+        
+        return $fila + 2; // Dejar espacio antes de la siguiente tabla
     }
 
     /**
@@ -494,10 +922,15 @@ class BlueprintsExcel extends BaseController
                 'Avispas',
                 'Mosquitos',
                 'Cucaracha',
+                'Cucaracha Americana',
+                'Cucaracha Alemana',
                 'Hormiga',
                 'Roedor',
                 'Arañas',
+                'Escarabajo',
+                'Tijerilla',
                 'Lagartijas',
+                'Insectos de áreas verdes',
                 'Otros',
                 'Total de insectos'
             ];
@@ -518,10 +951,15 @@ class BlueprintsExcel extends BaseController
                 'Avispas' => ['tipo_plaga' => 'avispa', 'tipo_insecto' => 'Volador'],
                 'Mosquitos' => ['tipo_plaga' => 'mosquito', 'tipo_insecto' => 'Volador'],
                 'Cucaracha' => ['tipo_plaga' => 'cucaracha', 'tipo_insecto' => 'Rastrero'],
+                'Cucaracha Americana' => ['tipo_plaga' => 'cucaracha_americana', 'tipo_insecto' => 'Rastrero'],
+                'Cucaracha Alemana' => ['tipo_plaga' => 'cucaracha_alemana', 'tipo_insecto' => 'Rastrero'],
                 'Hormiga' => ['tipo_plaga' => 'hormiga', 'tipo_insecto' => 'Rastrero'],
                 'Roedor' => ['tipo_plaga' => 'roedor', 'tipo_insecto' => 'Rastrero'],
                 'Arañas' => ['tipo_plaga' => 'Arañas', 'tipo_insecto' => 'Rastrero'],
+                'Escarabajo' => ['tipo_plaga' => 'escarabajo', 'tipo_insecto' => 'Rastrero'],
+                'Tijerilla' => ['tipo_plaga' => 'tijerilla', 'tipo_insecto' => 'Rastrero'],
                 'Lagartijas' => ['tipo_plaga' => 'Lagartija', 'tipo_insecto' => 'Rastrero'],
+                'Insectos de áreas verdes' => ['tipo_plaga' => 'insectos_areas_verdes', 'tipo_insecto' => 'Volador'],
                 'Otros' => ['tipo_plaga' => 'otro', 'tipo_insecto' => 'Volador']
             ];
 
@@ -532,6 +970,7 @@ class BlueprintsExcel extends BaseController
             $incidenciasAgregadas = [];
             $hojas = $spreadsheet->getAllSheets();
             $hojasSinFormato = [];
+            $hojasVacias = [];
             $hojasProcesadas = [];
             
             foreach ($hojas as $index => $sheet) {
@@ -545,12 +984,16 @@ class BlueprintsExcel extends BaseController
                 $resultado = $this->procesarHojaExcel($sheet, $trampasIndex, $tiposInsectos, $mapeoTiposInsectos, $inspectorPorDefecto, $numeroSemana, $plano);
                 
                 if (isset($resultado['error'])) {
-                    // La hoja no se pudo procesar
+                    // La hoja tiene formato incorrecto
                     $hojasSinFormato[] = [
                         'nombre' => $nombreHoja,
                         'mensaje' => $resultado['error']
                     ];
+                } elseif (isset($resultado['vacia']) && $resultado['vacia']) {
+                    // La hoja tiene formato correcto pero está vacía
+                    $hojasVacias[] = $nombreHoja;
                 } elseif (!empty($resultado['incidencias'])) {
+                    // La hoja tiene incidencias
                     $incidenciasAgregadas = array_merge($incidenciasAgregadas, $resultado['incidencias']);
                     $hojasProcesadas[] = $nombreHoja;
                 } elseif (!empty($resultado) && is_array($resultado)) {
@@ -558,13 +1001,13 @@ class BlueprintsExcel extends BaseController
                     $incidenciasAgregadas = array_merge($incidenciasAgregadas, $resultado);
                     $hojasProcesadas[] = $nombreHoja;
                 } else {
-                    // Hoja sin datos pero con formato correcto
-                    $hojasProcesadas[] = $nombreHoja;
+                    // Hoja sin datos pero con formato correcto (por compatibilidad)
+                    $hojasVacias[] = $nombreHoja;
                 }
             }
 
             // Si no se procesó ninguna hoja y hay hojas sin formato, es un error de formato
-            if (empty($incidenciasAgregadas) && !empty($hojasSinFormato)) {
+            if (empty($incidenciasAgregadas) && !empty($hojasSinFormato) && empty($hojasVacias)) {
                 return $this->response->setJSON([
                     'success' => false,
                     'error_type' => 'formato_incorrecto',
@@ -574,13 +1017,14 @@ class BlueprintsExcel extends BaseController
                 ]);
             }
 
-            // Si hay incidencias procesadas, retornar éxito (aunque algunas hojas puedan tener errores)
+            // Si hay incidencias procesadas, retornar éxito (aunque algunas hojas puedan tener errores o estar vacías)
             return $this->response->setJSON([
                 'success' => true,
                 'incidencias' => $incidenciasAgregadas,
                 'total' => count($incidenciasAgregadas),
                 'message' => 'Archivo procesado correctamente',
                 'hojas_procesadas' => count($hojasProcesadas),
+                'hojas_vacias' => $hojasVacias,
                 'hojas_con_error' => count($hojasSinFormato),
                 'hojas_sin_formato' => !empty($hojasSinFormato) ? array_column($hojasSinFormato, 'nombre') : []
             ]);
@@ -619,112 +1063,26 @@ class BlueprintsExcel extends BaseController
 
     /**
      * Procesa una hoja específica del Excel y extrae las incidencias
+     * Ahora soporta múltiples tablas en la misma hoja (EDC Químicas, EDC Adhesivas, Equipo de Luz UV)
      */
     private function procesarHojaExcel($sheet, $trampasIndex, $tiposInsectos, $mapeoTiposInsectos, $inspectorPorDefecto, $numeroSemana, $plano)
     {
         $incidencias = [];
         
-        // Buscar la fila de encabezados (buscar "ÁREA" y "EQUIPO")
-        $filaEncabezados = null;
-        $columnaArea = null;
-        $columnaEquipo = null;
-        $columnasTipos = [];
-        
-        for ($fila = 1; $fila <= 20; $fila++) {
-            $valorArea = $sheet->getCell('A' . $fila)->getValue();
-            $valorEquipo = $sheet->getCell('B' . $fila)->getValue();
-            
-            if (is_string($valorArea) && strtoupper(trim($valorArea)) === 'ÁREA' &&
-                is_string($valorEquipo) && strtoupper(trim($valorEquipo)) === 'EQUIPO') {
-                $filaEncabezados = $fila;
-                $columnaArea = 'A';
-                $columnaEquipo = 'B';
-                
-                // Buscar las columnas de tipos de insectos
-                // Empezar desde la columna C y buscar hasta encontrar "Total de insectos" o llegar al límite
-                $columnaActual = 'C';
-                $maxColumnas = 30; // Límite de búsqueda
-                $columnaIndex = 2; // C es el índice 2 (A=0, B=1, C=2)
-                
-                while ($columnaIndex < $maxColumnas) {
-                    $valorColumna = trim((string)$sheet->getCell($columnaActual . $fila)->getValue());
-                    
-                    // Si encontramos "Total de insectos", detener
-                    if (stripos($valorColumna, 'Total') !== false && stripos($valorColumna, 'insectos') !== false) {
-                        break;
-                    }
-                    
-                    // Si la celda está vacía, continuar
-                    if (empty($valorColumna)) {
-                        $columnaActual++;
-                        $columnaIndex++;
-                        continue;
-                    }
-                    
-                    // Buscar el tipo de insecto que coincida
-                    foreach ($tiposInsectos as $tipo) {
-                        if ($tipo === 'Total de insectos') {
-                            continue;
-                        }
-                        
-                        // Comparación flexible (sin acentos, case insensitive)
-                        $tipoNormalizado = $this->normalizarTexto($tipo);
-                        $valorNormalizado = $this->normalizarTexto($valorColumna);
-                        
-                        // Comparación exacta
-                        if ($tipoNormalizado === $valorNormalizado) {
-                            if (!isset($columnasTipos[$tipo])) {
-                                $columnasTipos[$tipo] = $columnaActual;
-                                log_message('info', "Columna encontrada: $tipo en $columnaActual");
-                            }
-                            break;
-                        }
-                    }
-                    
-                    $columnaActual++;
-                    $columnaIndex++;
-                }
-                
-                // Log para debug
-                log_message('info', 'Columnas encontradas: ' . json_encode($columnasTipos));
-                break;
-            }
-        }
-        
-        if (!$filaEncabezados) {
-            // Retornar error en lugar de array vacío
-            return [
-                'error' => 'No se encontraron los encabezados "ÁREA" y "EQUIPO" en esta hoja',
-                'incidencias' => []
-            ];
-        }
-        
-        // Verificar que se encontraron columnas de tipos de insectos
-        if (empty($columnasTipos)) {
-            return [
-                'error' => 'No se encontraron las columnas de tipos de insectos en esta hoja',
-                'incidencias' => []
-            ];
-        }
-
         // Buscar la fecha de la semana (buscar "Fecha en la que se registrarán las incidencias")
         $fechaIncidencia = null;
-        for ($fila = 1; $fila < $filaEncabezados; $fila++) {
+        for ($fila = 1; $fila <= 20; $fila++) {
             $valor = $sheet->getCell('A' . $fila)->getValue();
             if (is_string($valor) && stripos($valor, 'Fecha en la que se registrarán') !== false) {
                 $valorFecha = $sheet->getCell('B' . $fila)->getValue();
                 if ($valorFecha) {
-                    // Intentar convertir la fecha de Excel a PHP
                     try {
                         if (is_numeric($valorFecha)) {
-                            // Es una fecha serial de Excel
                             $fechaIncidencia = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($valorFecha)->format('Y-m-d');
                         } else {
-                            // Intentar parsear como fecha
                             $fechaIncidencia = date('Y-m-d', strtotime($valorFecha));
                         }
                     } catch (\Exception $e) {
-                        // Si falla, usar la fecha actual
                         $fechaIncidencia = date('Y-m-d');
                     }
                 }
@@ -733,128 +1091,355 @@ class BlueprintsExcel extends BaseController
         }
         
         if (!$fechaIncidencia) {
-            $fechaIncidencia = date('Y-m-d'); // Fecha por defecto
+            $fechaIncidencia = date('Y-m-d');
         }
-
-        // Log para debug
-        log_message('info', "Fila de encabezados encontrada: $filaEncabezados");
-        log_message('info', "Total de columnas de tipos encontradas: " . count($columnasTipos));
         
-        // Procesar las filas de datos (empezar después de los encabezados)
-        $filaInicio = $filaEncabezados + 1;
+        // Títulos de las tablas que buscamos
+        $titulosTablas = ['EDC QUÍMICAS', 'EDC ADHESIVAS', 'EQUIPO DE LUZ UV', 'OTRAS TRAMPAS', 'HALLAZGOS', 'EDC QUIMICAS', 'EDC ADHESIVAS', 'EQUIPO DE LUZ UV'];
+        
         $ultimaFila = $sheet->getHighestRow();
         
-        log_message('info', "Procesando filas desde $filaInicio hasta $ultimaFila");
-        
-        for ($fila = $filaInicio; $fila <= $ultimaFila; $fila++) {
-            // Obtener el ID del equipo
-            $idEquipoExcel = $sheet->getCell($columnaEquipo . $fila)->getValue();
+        // Buscar todas las tablas en la hoja
+        for ($fila = 1; $fila <= $ultimaFila; $fila++) {
+            $valorCelda = trim((string)$sheet->getCell('A' . $fila)->getValue());
+            $valorNormalizado = strtoupper($this->normalizarTexto($valorCelda));
             
-            // Convertir a string si es numérico
-            if (is_numeric($idEquipoExcel)) {
-                $idEquipoExcel = (string)$idEquipoExcel;
-                // Agregar ceros a la izquierda si es necesario (ej: 84 -> 0084)
-                if (strlen($idEquipoExcel) < 4 && is_numeric($idEquipoExcel)) {
-                    $idEquipoExcel = str_pad($idEquipoExcel, 4, '0', STR_PAD_LEFT);
-                }
-            }
-            
-            if (empty($idEquipoExcel)) {
-                continue; // Si no hay equipo, saltar esta fila
-            }
-
-            // Normalizar el ID del equipo para búsqueda
-            $idEquipoNormalizado = strtoupper(trim((string)$idEquipoExcel));
-            
-            // Si es numérico, también intentar con y sin ceros a la izquierda
-            $idsParaBuscar = [$idEquipoNormalizado];
-            if (is_numeric($idEquipoNormalizado)) {
-                // Agregar versión con ceros a la izquierda
-                $idConCeros = str_pad($idEquipoNormalizado, 4, '0', STR_PAD_LEFT);
-                if ($idConCeros !== $idEquipoNormalizado) {
-                    $idsParaBuscar[] = $idConCeros;
-                }
-                // Agregar versión sin ceros a la izquierda
-                $idSinCeros = ltrim($idEquipoNormalizado, '0');
-                if ($idSinCeros !== $idEquipoNormalizado && !empty($idSinCeros)) {
-                    $idsParaBuscar[] = $idSinCeros;
-                }
-            }
-            
-            // Buscar la trampa correspondiente
-            $trampa = null;
-            foreach ($idsParaBuscar as $idBuscar) {
-                if (isset($trampasIndex[$idBuscar])) {
-                    $trampa = $trampasIndex[$idBuscar];
+            // Verificar si es un título de tabla
+            $esTituloTabla = false;
+            foreach ($titulosTablas as $titulo) {
+                $tituloNormalizado = strtoupper($this->normalizarTexto($titulo));
+                if ($valorNormalizado === $tituloNormalizado || strpos($valorNormalizado, $tituloNormalizado) !== false) {
+                    $esTituloTabla = true;
                     break;
                 }
             }
             
-            if (!$trampa) {
-                log_message('info', "Equipo no encontrado en índice: $idEquipoNormalizado (Original: $idEquipoExcel). IDs buscados: " . implode(', ', $idsParaBuscar));
-                continue; // No se encontró la trampa, saltar
-            }
-            
-            // Procesar cada tipo de insecto
-            foreach ($columnasTipos as $tipoInsecto => $columna) {
-                // Intentar leer el valor de diferentes formas
-                $cell = $sheet->getCell($columna . $fila);
-                $cantidad = null;
+            if ($esTituloTabla) {
+                // Verificar si es tabla de hallazgos
+                $esTablaHallazgos = (stripos($valorNormalizado, 'HALLAZGOS') !== false || stripos($valorNormalizado, 'HALLAZGO') !== false);
                 
-                // Primero intentar con getCalculatedValue (para fórmulas)
-                try {
-                    $cantidad = $cell->getCalculatedValue();
-                } catch (\Exception $e) {
-                    // Si falla, intentar con getValue
-                    $cantidad = $cell->getValue();
-                }
+                // Buscar los encabezados de esta tabla (deben estar en la siguiente fila)
+                $filaEncabezados = null;
+                $columnasTipos = [];
                 
-                // Si aún es null, intentar getFormattedValue y parsear
-                if ($cantidad === null) {
-                    $cantidad = $cell->getFormattedValue();
-                }
-                
-                // Convertir a número
-                if (is_numeric($cantidad)) {
-                    $cantidad = (float)$cantidad;
-                } elseif (is_string($cantidad)) {
-                    // Limpiar el string y convertir
-                    $cantidad = trim($cantidad);
-                    $cantidad = preg_replace('/[^0-9.]/', '', $cantidad);
-                    $cantidad = !empty($cantidad) ? (float)$cantidad : 0;
-                } else {
-                    $cantidad = 0;
-                }
-                
-                // Log para debug
-                if ($cantidad > 0) {
-                    log_message('info', "Fila $fila, Columna $columna ($tipoInsecto): Cantidad = $cantidad");
-                }
-                
-                if ($cantidad > 0 && isset($mapeoTiposInsectos[$tipoInsecto])) {
-                    $mapeo = $mapeoTiposInsectos[$tipoInsecto];
+                // Buscar encabezados desde la fila siguiente hasta 5 filas después
+                for ($filaBuscar = $fila + 1; $filaBuscar <= min($fila + 5, $ultimaFila); $filaBuscar++) {
+                    $valorArea = trim((string)$sheet->getCell('A' . $filaBuscar)->getValue());
+                    $valorEquipo = trim((string)$sheet->getCell('B' . $filaBuscar)->getValue());
                     
-                    // Crear la incidencia
-                    $incidencias[] = [
-                        'id_trampa' => !empty($trampa['id_trampa']) ? $trampa['id_trampa'] : ('T' . $trampa['id']),
-                        'trampa_id' => $trampa['id'],
-                        'tipo_plaga' => $mapeo['tipo_plaga'],
-                        'tipo_insecto' => $mapeo['tipo_insecto'],
-                        'tipo_incidencia' => 'Captura',
-                        'cantidad_organismos' => (int)$cantidad,
-                        'fecha_incidencia' => $fechaIncidencia,
-                        'inspector' => $inspectorPorDefecto,
-                        'notas' => '',
-                        'semana' => $numeroSemana
-                    ];
+                    // Para tabla de hallazgos, buscar "ZONA" en lugar de "ÁREA" y "EQUIPO"
+                    if ($esTablaHallazgos) {
+                        if (strtoupper($valorArea) === 'ZONA') {
+                            $filaEncabezados = $filaBuscar;
+                            
+                            // Buscar las columnas de tipos de insectos (empiezan en B para hallazgos)
+                            $columnaActual = 'B';
+                            $maxColumnas = 30;
+                            $columnaIndex = 1;
+                            
+                            while ($columnaIndex < $maxColumnas) {
+                                $valorColumna = trim((string)$sheet->getCell($columnaActual . $filaEncabezados)->getValue());
+                                
+                                if (stripos($valorColumna, 'Total') !== false && stripos($valorColumna, 'insectos') !== false) {
+                                    break;
+                                }
+                                
+                                if (empty($valorColumna)) {
+                                    $columnaActual++;
+                                    $columnaIndex++;
+                                    continue;
+                                }
+                                
+                                foreach ($tiposInsectos as $tipo) {
+                                    if ($tipo === 'Total de insectos') {
+                                        continue;
+                                    }
+                                    
+                                    $tipoNormalizado = $this->normalizarTexto($tipo);
+                                    $valorNormalizado = $this->normalizarTexto($valorColumna);
+                                    
+                                    if ($tipoNormalizado === $valorNormalizado) {
+                                        if (!isset($columnasTipos[$tipo])) {
+                                            $columnasTipos[$tipo] = $columnaActual;
+                                        }
+                                        break;
+                                    }
+                                }
+                                
+                                $columnaActual++;
+                                $columnaIndex++;
+                            }
+                            
+                            break;
+                        }
+                    } else {
+                        // Para tablas normales (EDC, Equipo de Luz, Otras Trampas)
+                        if (strtoupper($valorArea) === 'ÁREA' || strtoupper($valorArea) === 'AREA') {
+                            if (strtoupper($valorEquipo) === 'EQUIPO') {
+                                $filaEncabezados = $filaBuscar;
+                                
+                                // Buscar las columnas de tipos de insectos
+                                $columnaActual = 'C';
+                                $maxColumnas = 30;
+                                $columnaIndex = 2;
+                                
+                                while ($columnaIndex < $maxColumnas) {
+                                    $valorColumna = trim((string)$sheet->getCell($columnaActual . $filaEncabezados)->getValue());
+                                    
+                                    if (stripos($valorColumna, 'Total') !== false && stripos($valorColumna, 'insectos') !== false) {
+                                        break;
+                                    }
+                                    
+                                    if (empty($valorColumna)) {
+                                        $columnaActual++;
+                                        $columnaIndex++;
+                                        continue;
+                                    }
+                                    
+                                    foreach ($tiposInsectos as $tipo) {
+                                        if ($tipo === 'Total de insectos') {
+                                            continue;
+                                        }
+                                        
+                                        $tipoNormalizado = $this->normalizarTexto($tipo);
+                                        $valorNormalizado = $this->normalizarTexto($valorColumna);
+                                        
+                                        if ($tipoNormalizado === $valorNormalizado) {
+                                            if (!isset($columnasTipos[$tipo])) {
+                                                $columnasTipos[$tipo] = $columnaActual;
+                                            }
+                                            break;
+                                        }
+                                    }
+                                    
+                                    $columnaActual++;
+                                    $columnaIndex++;
+                                }
+                                
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if ($filaEncabezados && !empty($columnasTipos)) {
+                    // Procesar las filas de esta tabla
+                    $filaInicioDatos = $filaEncabezados + 1;
+                    $filaFinDatos = $ultimaFila;
+                    
+                    // Buscar dónde termina esta tabla (siguiente título o fin de hoja)
+                    for ($filaFin = $filaInicioDatos; $filaFin <= $ultimaFila; $filaFin++) {
+                        $valorSiguiente = trim((string)$sheet->getCell('A' . $filaFin)->getValue());
+                        $valorSiguienteNormalizado = strtoupper($this->normalizarTexto($valorSiguiente));
+                        
+                        // Si encontramos otro título de tabla o una fila vacía después de varias filas con datos, terminar
+                        $esOtroTitulo = false;
+                        foreach ($titulosTablas as $titulo) {
+                            $tituloNormalizado = strtoupper($this->normalizarTexto($titulo));
+                            if ($valorSiguienteNormalizado === $tituloNormalizado || strpos($valorSiguienteNormalizado, $tituloNormalizado) !== false) {
+                                $esOtroTitulo = true;
+                                break;
+                            }
+                        }
+                        
+                        if ($esOtroTitulo) {
+                            $filaFinDatos = $filaFin - 1;
+                            break;
+                        }
+                    }
+                    
+                    // Determinar si es tabla de otras trampas (tiene columna "Tipo de Trampa")
+                    $esTablaOtrasTrampas = false;
+                    if ($filaEncabezados) {
+                        $valorTipoTrampa = trim((string)$sheet->getCell('C' . $filaEncabezados)->getValue());
+                        $esTablaOtrasTrampas = (stripos($valorTipoTrampa, 'tipo') !== false && stripos($valorTipoTrampa, 'trampa') !== false);
+                    }
+                    
+                    // Procesar las filas de esta tabla
+                    for ($filaDatos = $filaInicioDatos; $filaDatos <= $filaFinDatos; $filaDatos++) {
+                        // Para tabla de hallazgos, procesar de manera diferente
+                        if ($esTablaHallazgos) {
+                            // Obtener la zona (columna A)
+                            $zona = trim((string)$sheet->getCell('A' . $filaDatos)->getValue());
+                            
+                            if (empty($zona)) {
+                                continue;
+                            }
+                            
+                            // Procesar cada tipo de insecto para esta zona
+                            foreach ($columnasTipos as $tipoInsecto => $columna) {
+                                $cantidad = $sheet->getCell($columna . $filaDatos)->getValue();
+                                
+                                // Convertir a número
+                                if (is_numeric($cantidad)) {
+                                    $cantidad = (float)$cantidad;
+                                } else {
+                                    $cantidad = 0;
+                                }
+                                
+                                if ($cantidad > 0 && isset($mapeoTiposInsectos[$tipoInsecto])) {
+                                    $mapeo = $mapeoTiposInsectos[$tipoInsecto];
+                                    
+                                    $incidencias[] = [
+                                        'id_trampa' => null, // Hallazgos no tienen trampa
+                                        'trampa_id' => null,
+                                        'zona' => $zona,
+                                        'tipo_plaga' => $mapeo['tipo_plaga'],
+                                        'tipo_insecto' => $mapeo['tipo_insecto'],
+                                        'tipo_incidencia' => 'Hallazgo',
+                                        'cantidad_organismos' => (int)$cantidad,
+                                        'fecha_incidencia' => $fechaIncidencia,
+                                        'fecha' => $fechaIncidencia,
+                                        'inspector' => $inspectorPorDefecto,
+                                        'notas' => 'Zona: ' . $zona,
+                                        'sede_id' => $plano['sede_id'],
+                                        'semana' => $numeroSemana
+                                    ];
+                                }
+                            }
+                            
+                            continue; // Continuar con la siguiente fila
+                        }
+                        
+                        // Para tablas normales (EDC, Equipo de Luz, Otras Trampas)
+                        // Obtener el ID del equipo (siempre está en la columna B)
+                        $idEquipoExcel = $sheet->getCell('B' . $filaDatos)->getValue();
+                        
+                        // Convertir a string si es numérico
+                        if (is_numeric($idEquipoExcel)) {
+                            $idEquipoExcel = (string)$idEquipoExcel;
+                            if (strlen($idEquipoExcel) < 4 && is_numeric($idEquipoExcel)) {
+                                $idEquipoExcel = str_pad($idEquipoExcel, 4, '0', STR_PAD_LEFT);
+                            }
+                        }
+                        
+                        if (empty($idEquipoExcel)) {
+                            continue;
+                        }
+
+                        // Normalizar el ID del equipo para búsqueda
+                        $idEquipoNormalizado = strtoupper(trim((string)$idEquipoExcel));
+                        
+                        $idsParaBuscar = [$idEquipoNormalizado];
+                        if (is_numeric($idEquipoNormalizado)) {
+                            $idConCeros = str_pad($idEquipoNormalizado, 4, '0', STR_PAD_LEFT);
+                            if ($idConCeros !== $idEquipoNormalizado) {
+                                $idsParaBuscar[] = $idConCeros;
+                            }
+                            $idSinCeros = ltrim($idEquipoNormalizado, '0');
+                            if ($idSinCeros !== $idEquipoNormalizado && !empty($idSinCeros)) {
+                                $idsParaBuscar[] = $idSinCeros;
+                            }
+                        }
+                        
+                        // Buscar la trampa correspondiente
+                        $trampa = null;
+                        foreach ($idsParaBuscar as $idBuscar) {
+                            if (isset($trampasIndex[$idBuscar])) {
+                                $trampa = $trampasIndex[$idBuscar];
+                                break;
+                            }
+                        }
+                        
+                        if (!$trampa) {
+                            continue;
+                        }
+                        
+                        // Procesar cada tipo de insecto
+                        foreach ($columnasTipos as $tipoInsecto => $columna) {
+                            $cell = $sheet->getCell($columna . $filaDatos);
+                            $cantidad = null;
+                            
+                            try {
+                                $cantidad = $cell->getCalculatedValue();
+                            } catch (\Exception $e) {
+                                $cantidad = $cell->getValue();
+                            }
+                            
+                            if ($cantidad === null) {
+                                $cantidad = $cell->getFormattedValue();
+                            }
+                            
+                            if (is_numeric($cantidad)) {
+                                $cantidad = (float)$cantidad;
+                            } elseif (is_string($cantidad)) {
+                                $cantidad = trim($cantidad);
+                                $cantidad = preg_replace('/[^0-9.]/', '', $cantidad);
+                                $cantidad = !empty($cantidad) ? (float)$cantidad : 0;
+                            } else {
+                                $cantidad = 0;
+                            }
+                            
+                            if ($cantidad > 0 && isset($mapeoTiposInsectos[$tipoInsecto])) {
+                                $mapeo = $mapeoTiposInsectos[$tipoInsecto];
+                                
+                                $incidencias[] = [
+                                    'id_trampa' => !empty($trampa['id_trampa']) ? $trampa['id_trampa'] : ('T' . $trampa['id']),
+                                    'trampa_id' => $trampa['id'],
+                                    'tipo_plaga' => $mapeo['tipo_plaga'],
+                                    'tipo_insecto' => $mapeo['tipo_insecto'],
+                                    'tipo_incidencia' => 'Captura',
+                                    'cantidad_organismos' => (int)$cantidad,
+                                    'fecha_incidencia' => $fechaIncidencia,
+                                    'fecha' => $fechaIncidencia, // Agregar campo fecha para consistencia
+                                    'inspector' => $inspectorPorDefecto,
+                                    'notas' => '',
+                                    'semana' => $numeroSemana
+                                ];
+                            }
+                        }
+                    }
                 }
             }
         }
         
-        // Retornar las incidencias encontradas
+        // Si no se encontraron incidencias, verificar si se encontraron tablas (formato correcto pero vacío)
+        if (empty($incidencias)) {
+            // Verificar si se encontró al menos una tabla con encabezados (formato correcto)
+            $formatoCorrecto = false;
+            for ($fila = 1; $fila <= $ultimaFila; $fila++) {
+                $valorCelda = trim((string)$sheet->getCell('A' . $fila)->getValue());
+                $valorNormalizado = strtoupper($this->normalizarTexto($valorCelda));
+                
+                foreach ($titulosTablas as $titulo) {
+                    $tituloNormalizado = strtoupper($this->normalizarTexto($titulo));
+                    if ($valorNormalizado === $tituloNormalizado || strpos($valorNormalizado, $tituloNormalizado) !== false) {
+                        // Buscar si hay encabezados después de este título
+                        for ($filaBuscar = $fila + 1; $filaBuscar <= min($fila + 5, $ultimaFila); $filaBuscar++) {
+                            $valorArea = trim((string)$sheet->getCell('A' . $filaBuscar)->getValue());
+                            $valorEquipo = trim((string)$sheet->getCell('B' . $filaBuscar)->getValue());
+                            
+                            if ((strtoupper($valorArea) === 'ÁREA' || strtoupper($valorArea) === 'AREA') && 
+                                strtoupper($valorEquipo) === 'EQUIPO') {
+                                $formatoCorrecto = true;
+                                break 2;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if ($formatoCorrecto) {
+                // Formato correcto pero sin datos (hoja vacía)
+                return [
+                    'incidencias' => [],
+                    'error' => null,
+                    'vacia' => true
+                ];
+            } else {
+                // Formato incorrecto (no se encontraron las tablas esperadas)
+                return [
+                    'error' => 'No se encontraron tablas con el formato esperado en esta hoja',
+                    'incidencias' => [],
+                    'vacia' => false
+                ];
+            }
+        }
+        
         return [
             'incidencias' => $incidencias,
-            'error' => null
+            'error' => null,
+            'vacia' => false
         ];
     }
 

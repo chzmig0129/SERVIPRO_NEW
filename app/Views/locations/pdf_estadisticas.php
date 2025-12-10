@@ -445,6 +445,19 @@
                     <?php endif; ?>
                 </div>
                 <?php endif; ?>
+                
+                <?php if (!empty($chart_images['graficaTipoIncidencia'])): ?>
+                <div class="chart-container chart-break">
+                    <h3 class="chart-title">DISTRIBUCION POR TIPO DE INCIDENCIA</h3>
+                    <img src="<?= $chart_images['graficaTipoIncidencia'] ?>" alt="Gráfico de distribución por tipo de incidencia" class="chart-image">
+                    <?php if (!empty($notas_graficas['graficaTipoIncidencia'])): ?>
+                    <div class="chart-notes">
+                        <p><strong>OBSERVACIONES:</strong></p>
+                        <p><?= nl2br(esc($notas_graficas['graficaTipoIncidencia'])) ?></p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
             </div>
             <?php endif; ?>
 
@@ -455,19 +468,6 @@
                 <div class="actions-content">
                     <p style="white-space: pre-wrap; margin: 0; line-height: 1.6;"><?= nl2br(esc($acciones_seguimiento)) ?></p>
                 </div>
-            </div>
-            <?php else: ?>
-            <!-- Debug: Mostrar si no hay acciones -->
-            <!-- <div style="font-size: 8px; color: #999; margin: 10px 0;">Debug: No se encontraron acciones de seguimiento</div> -->
-            <?php endif; ?>
-            
-            <!-- Debug: Mostrar información de las variables recibidas -->
-            <?php if (ENVIRONMENT === 'development'): ?>
-            <div style="font-size: 8px; color: #999; margin: 10px 0; border: 1px solid #ddd; padding: 5px;">
-                <strong>Debug Info:</strong><br>
-                - Acciones de seguimiento: <?= !empty($acciones_seguimiento) ? 'SÍ (' . strlen($acciones_seguimiento) . ' caracteres)' : 'NO' ?><br>
-                - Notas de gráficas: <?= !empty($notas_graficas) ? 'SÍ (' . count($notas_graficas) . ' gráficas con notas)' : 'NO' ?><br>
-                - Imágenes de gráficos: <?= !empty($chart_images) ? 'SÍ (' . count($chart_images) . ' imágenes)' : 'NO' ?>
             </div>
             <?php endif; ?>
         </div>

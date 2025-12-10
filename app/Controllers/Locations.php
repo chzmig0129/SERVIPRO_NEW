@@ -148,6 +148,44 @@ class Locations extends BaseController
             }
             $data['todasLasIncidencias'] = $query->getResultArray();
 
+            // Obtener conteo de incidencias por tipo (Hallazgo y Captura)
+            // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
+            if (empty($condicionFecha)) {
+                // Sin filtro de fecha
+                $query = $db->table('incidencias i')
+                    ->select('i.tipo_incidencia, COUNT(*) as total')
+                    ->join('trampas t', 'i.id_trampa = t.id', 'inner')
+                    ->where('i.sede_id', $sedeSeleccionada)
+                    ->where('t.sede_id', $sedeSeleccionada)
+                    ->groupBy('i.tipo_incidencia')
+                    ->get();
+            } else {
+                // Con filtro de fecha
+                $query = $db->query("
+                    SELECT i.tipo_incidencia, COUNT(*) as total
+                    FROM incidencias i
+                    INNER JOIN trampas t ON i.id_trampa = t.id
+                    WHERE i.sede_id = {$sedeSeleccionada} 
+                    AND t.sede_id = {$sedeSeleccionada}
+                    {$condicionFecha}
+                    GROUP BY i.tipo_incidencia
+                ");
+            }
+            $conteoPorTipo = $query->getResultArray();
+            
+            // Inicializar contadores
+            $data['totalHallazgos'] = 0;
+            $data['totalCapturas'] = 0;
+            
+            // Procesar resultados
+            foreach ($conteoPorTipo as $item) {
+                if (strtolower($item['tipo_incidencia']) === 'hallazgo') {
+                    $data['totalHallazgos'] = (int)$item['total'];
+                } elseif (strtolower($item['tipo_incidencia']) === 'captura') {
+                    $data['totalCapturas'] = (int)$item['total'];
+                }
+            }
+
             // Obtener el total de capturas (solo incidencias de tipo "Captura")
             // IMPORTANTE: Filtrar por ambas condiciones: i.sede_id = X AND t.sede_id = X
             $capturaQuery = "

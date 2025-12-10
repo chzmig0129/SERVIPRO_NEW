@@ -61,6 +61,19 @@ class LocationsPdfController extends BaseController
         ");
         $data['incidenciasPorTipo'] = $queryIncidenciasTipo->getResultArray();
         
+        // Obtener conteo de incidencias por tipo (Hallazgo y Captura) para la gráfica
+        $conteoPorTipo = $queryIncidenciasTipo->getResultArray();
+        $data['totalHallazgos'] = 0;
+        $data['totalCapturas'] = 0;
+        
+        foreach ($conteoPorTipo as $item) {
+            if (strtolower($item['tipo_incidencia']) === 'hallazgo') {
+                $data['totalHallazgos'] = (int)$item['total'];
+            } elseif (strtolower($item['tipo_incidencia']) === 'captura') {
+                $data['totalCapturas'] = (int)$item['total'];
+            }
+        }
+        
         // Obtener estadísticas de incidencias por mes
         $queryIncidenciasMensual = $db->query("
             SELECT 

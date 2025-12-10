@@ -298,6 +298,16 @@ function formatearFechaEspanol($fecha) {
                     </div>
                 </div>
             </div>
+            
+            <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 hover:shadow-md transition-all">
+                <div class="flex items-start space-x-3">
+                    <input type="checkbox" id="checkbox-graficaTipoIncidencia" name="graficas[]" value="graficaTipoIncidencia" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
+                    <div>
+                        <label for="checkbox-graficaTipoIncidencia" class="block text-gray-800 font-medium">Distribución por Tipo de Incidencia</label>
+                        <p class="text-sm text-gray-600">Muestra la cantidad de Hallazgos y Capturas registradas.</p>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="mt-4 flex justify-between">
@@ -633,6 +643,26 @@ function formatearFechaEspanol($fecha) {
                     </tbody>
                 </table>
             <?php endif; ?>
+        </div>
+        
+        <!-- Gráfica de incidencias por tipo -->
+        <div class="mt-6 bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribución por Tipo de Incidencia</h3>
+            <div class="relative" style="height: 400px;">
+                <canvas id="graficaTipoIncidencia"></canvas>
+            </div>
+            <!-- Notas -->
+            <div class="mt-4">
+                <label for="notas-grafico-graficaTipoIncidencia" class="block text-sm font-medium text-gray-700 mb-1">
+                    Notas sobre esta gráfica:
+                </label>
+                <textarea
+                    id="notas-grafico-graficaTipoIncidencia"
+                    data-grafico="graficaTipoIncidencia"
+                    class="w-full p-2 border border-gray-300 rounded-lg"
+                    rows="2"
+                    placeholder="Ej: 'Se observa mayor cantidad de capturas que hallazgos, indicando efectividad del sistema de trampas.'"></textarea>
+            </div>
         </div>
     </div>
 
@@ -1515,9 +1545,21 @@ function generarPDFConDOM2PDF() {
         
         // Función para convertir Canvas a imagen base64
         function getChartImageData(chartId) {
-            const canvas = document.getElementById(chartId);
-            if (canvas) {
-                return canvas.toDataURL('image/png');
+            try {
+                // Primero intentar obtener la instancia de Chart.js
+                const chartInstance = Chart.getChart(chartId);
+                if (chartInstance && chartInstance.canvas) {
+                    // Usar el método de Chart.js para obtener la imagen
+                    return chartInstance.toBase64Image();
+                }
+                
+                // Si no hay instancia de Chart, intentar con el canvas directamente
+                const canvas = document.getElementById(chartId);
+                if (canvas && canvas instanceof HTMLCanvasElement) {
+                    return canvas.toDataURL('image/png');
+                }
+            } catch (error) {
+                console.error('Error al capturar imagen del gráfico ' + chartId + ':', error);
             }
             return null;
         }
@@ -1553,6 +1595,10 @@ function generarPDFConDOM2PDF() {
             'areasCapturasPorPlaga': { 
                 id: 'areasCapturasPorPlagaChart', 
                 title: 'Áreas que Presentaron Capturas' 
+            },
+            'graficaTipoIncidencia': { 
+                id: 'graficaTipoIncidencia', 
+                title: 'Distribución por Tipo de Incidencia' 
             }
         };
         
@@ -2439,6 +2485,188 @@ Chart.register(ChartDataLabels);
             return `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`;
         }
     });
+
+    // Gráfica de distribución por tipo de incidencia (Hallazgo vs Captura)
+    let intentosGraficaTipoIncidencia = 0;
+    const maxIntentosGraficaTipoIncidencia = 10;
+    
+    function inicializarGraficaTipoIncidencia() {
+        intentosGraficaTipoIncidencia++;
+        
+        // Limitar el número de intentos para evitar loops infinitos
+        if (intentosGraficaTipoIncidencia > maxIntentosGraficaTipoIncidencia) {
+            console.error('Se alcanzó el máximo de intentos para inicializar la gráfica de tipo de incidencia');
+            return;
+        }
+        // Esperar a que Chart.js y ChartDataLabels estén disponibles
+        if (typeof Chart === 'undefined') {
+            console.warn('Chart.js no está disponible aún, reintentando...');
+            setTimeout(inicializarGraficaTipoIncidencia, 100);
+            return;
+        }
+
+        if (typeof ChartDataLabels === 'undefined') {
+            console.warn('ChartDataLabels no está disponible aún, reintentando...');
+            setTimeout(inicializarGraficaTipoIncidencia, 100);
+            return;
+        }
+
+        // Obtener datos de PHP
+        const totalHallazgos = <?= $totalHallazgos ?? 0; ?>;
+        const totalCapturas = <?= $totalCapturas ?? 0; ?>;
+
+        // Verificar si el canvas existe antes de crear el gráfico
+        const canvas = document.getElementById('graficaTipoIncidencia');
+        if (!canvas) {
+            console.warn("Canvas 'graficaTipoIncidencia' no encontrado, reintentando...");
+            setTimeout(inicializarGraficaTipoIncidencia, 100);
+            return;
+        }
+
+        // Verificar que el elemento sea realmente un canvas
+        if (!(canvas instanceof HTMLCanvasElement)) {
+            console.error("Error: El elemento 'graficaTipoIncidencia' no es un canvas válido. Tipo:", typeof canvas, "TagName:", canvas.tagName);
+            // Si el elemento existe pero no es un canvas, no reintentar (probablemente hay un conflicto de IDs)
+            if (canvas && canvas.tagName) {
+                console.error("Conflicto de IDs detectado. El elemento con ID 'graficaTipoIncidencia' es un", canvas.tagName, "no un CANVAS");
+                return;
+            }
+            // Solo reintentar si el elemento no existe
+            setTimeout(inicializarGraficaTipoIncidencia, 200);
+            return;
+        }
+
+        // Verificar que el canvas tenga el método getContext
+        if (typeof canvas.getContext !== 'function') {
+            console.error("Error: El elemento no tiene el método getContext. Tipo:", typeof canvas, "TagName:", canvas.tagName);
+            // Reintentar después de un breve delay
+            setTimeout(inicializarGraficaTipoIncidencia, 200);
+            return;
+        }
+
+        // Verificar si ya existe una instancia del gráfico y destruirla
+        try {
+            const existingChart = Chart.getChart('graficaTipoIncidencia');
+            if (existingChart) {
+                existingChart.destroy();
+            }
+        } catch (e) {
+            // Ignorar errores al intentar obtener el gráfico existente
+        }
+
+        // Verificar que el canvas tenga el método getContext antes de usarlo
+        if (typeof canvas.getContext !== 'function') {
+            console.error("Error: El elemento no tiene el método getContext. Tipo:", typeof canvas, "TagName:", canvas.tagName, "Element:", canvas);
+            // Reintentar después de un breve delay
+            setTimeout(inicializarGraficaTipoIncidencia, 200);
+            return;
+        }
+
+        let ctx;
+        try {
+            ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error("Error: No se pudo obtener el contexto 2d del canvas");
+                return;
+            }
+        } catch (e) {
+            console.error("Error al obtener el contexto del canvas:", e);
+            return;
+        }
+        
+        // Crear gráfico de barras
+        try {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Hallazgo', 'Captura'],
+                    datasets: [{
+                        label: 'Cantidad de Incidencias',
+                        data: [totalHallazgos, totalCapturas],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.8)',  // Verde para Hallazgo
+                            'rgba(54, 162, 235, 0.8)'  // Azul para Captura
+                        ],
+                        borderColor: [
+                            'rgba(40, 167, 69, 1)',
+                            'rgba(54, 162, 235, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: function(value) {
+                                return value;
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 14
+                            },
+                            color: '#374151'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                stepSize: 1
+                            },
+                            title: {
+                                display: true,
+                                text: 'Cantidad de Incidencias',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tipo de Incidencia',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+            console.log('Gráfica de tipo de incidencia inicializada correctamente');
+        } catch (error) {
+            console.error('Error al crear la gráfica de tipo de incidencia:', error);
+        }
+    }
+
+    // Inicializar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener("DOMContentLoaded", function() {
+            // Esperar un poco más para asegurar que Chart.js y el canvas estén completamente cargados
+            setTimeout(inicializarGraficaTipoIncidencia, 500);
+        });
+    } else {
+        // El DOM ya está listo, ejecutar después de un breve delay
+        setTimeout(inicializarGraficaTipoIncidencia, 500);
+    }
 </script>
 
 <style>
@@ -5354,6 +5582,42 @@ document.addEventListener('DOMContentLoaded', function() {
             if (contadorIncidencias) {
                 contadorIncidencias.textContent = incidenciasVisibles;
             }
+            
+            // Actualizar gráfica de tipo de incidencia basándose en las filas visibles
+            actualizarGraficaTipoIncidencia();
+        }
+        
+        // Función para actualizar la gráfica de tipo de incidencia
+        function actualizarGraficaTipoIncidencia() {
+            const canvas = document.getElementById('graficaTipoIncidencia');
+            if (!canvas) return;
+            
+            // Contar hallazgos y capturas de las filas visibles
+            let totalHallazgos = 0;
+            let totalCapturas = 0;
+            
+            if (filasIncidencias && filasIncidencias.length > 0) {
+                filasIncidencias.forEach(fila => {
+                    // Solo contar las filas visibles
+                    if (fila.style.display !== 'none') {
+                        // La columna de tipo de incidencia es la 3ra (índice 2)
+                        const tipoIncidencia = fila.children[2].textContent.trim();
+                        if (tipoIncidencia.toLowerCase() === 'hallazgo') {
+                            totalHallazgos++;
+                        } else if (tipoIncidencia.toLowerCase() === 'captura') {
+                            totalCapturas++;
+                        }
+                    }
+                });
+            }
+            
+            // Obtener la instancia del gráfico
+            const chartInstance = Chart.getChart('graficaTipoIncidencia');
+            if (chartInstance) {
+                // Actualizar los datos
+                chartInstance.data.datasets[0].data = [totalHallazgos, totalCapturas];
+                chartInstance.update();
+            }
         }
         
         
@@ -5901,10 +6165,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Crear un enlace temporal
                     const link = document.createElement('a');
                     link.download = `${titulo.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    
+                    // Intentar usar Chart.js si está disponible
+                    let imgData = null;
+                    const chartInstance = Chart.getChart(canvasId);
+                    if (chartInstance && chartInstance.canvas) {
+                        imgData = chartInstance.toBase64Image();
+                    } else if (canvas && canvas instanceof HTMLCanvasElement) {
+                        imgData = canvas.toDataURL('image/png');
+                    }
+                    
+                    if (imgData) {
+                        link.href = imgData;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } else {
+                        console.error('No se pudo obtener la imagen del gráfico');
+                        alert('No se pudo obtener la imagen de la gráfica.');
+                    }
                 } catch (error) {
                     console.error('Error al descargar la gráfica:', error);
                     alert('Hubo un error al descargar la gráfica. Por favor, intente nuevamente.');
@@ -5998,6 +6277,10 @@ async function exportarAPowerPoint() {
             'trampasPorUbicacion': { 
                 id: 'trampasPorUbicacionChart', 
                 title: 'Distribución de Trampas'
+            },
+            'graficaTipoIncidencia': { 
+                id: 'graficaTipoIncidencia', 
+                title: 'Distribución por Tipo de Incidencia'
             }
         };
 
@@ -6053,17 +6336,29 @@ async function exportarAPowerPoint() {
             });
 
             try {
-                // Convert canvas to image
-                const imgData = canvas.toDataURL('image/png');
+                // Convert canvas to image - usar Chart.js si está disponible
+                let imgData = null;
+                const chartInstance = Chart.getChart(config.id);
+                if (chartInstance && chartInstance.canvas) {
+                    // Usar el método de Chart.js para obtener la imagen
+                    imgData = chartInstance.toBase64Image();
+                } else if (canvas && canvas instanceof HTMLCanvasElement) {
+                    // Si no hay instancia de Chart, usar el canvas directamente
+                    imgData = canvas.toDataURL('image/png');
+                }
                 
-                // Add chart image
-                slide.addImage({
-                    data: imgData,
-                    x: '25%',
-                    y: '25%',
-                    w: '50%',
-                    h: '40%'
-                });
+                if (imgData) {
+                    // Add chart image
+                    slide.addImage({
+                        data: imgData,
+                        x: '25%',
+                        y: '25%',
+                        w: '50%',
+                        h: '40%'
+                    });
+                } else {
+                    console.error('No se pudo obtener la imagen del gráfico', config.id);
+                }
             } catch (error) {
                 console.error('Error al procesar el gráfico:', error);
             }

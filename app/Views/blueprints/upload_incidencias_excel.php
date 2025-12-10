@@ -409,6 +409,49 @@
                     >
                     <p class="text-xs text-gray-500 mt-1">Se generará una hoja por cada semana (máximo 52 semanas)</p>
                 </div>
+                
+                <!-- Checkbox para incluir hallazgos -->
+                <div>
+                    <label class="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            id="incluir_hallazgos"
+                            name="incluir_hallazgos"
+                            class="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        >
+                        <span class="text-sm font-medium text-gray-700">Incluir tabla de hallazgos</span>
+                    </label>
+                </div>
+                
+                <!-- Sección de zonas para hallazgos (oculta por defecto) -->
+                <div id="zonasHallazgosContainer" class="hidden space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Zonas para hallazgos
+                        </label>
+                        <div id="zonasList" class="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2 space-y-2">
+                            <!-- Las zonas se agregarán aquí dinámicamente -->
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                id="nuevaZonaHallazgo"
+                                placeholder="Agregar nueva zona..."
+                                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            >
+                            <button 
+                                type="button"
+                                id="btnAgregarZonaHallazgo"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                            >
+                                <i class="fas fa-plus"></i> Agregar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="mt-6 flex justify-end gap-3">
@@ -490,12 +533,16 @@
 <script>
 // Datos del plano y trampas desde PHP
 const planoData = {
-    id: <?= $plano['id'] ?>,
-    nombre: <?= json_encode($plano['nombre']) ?>,
-    sede: <?= json_encode($sede['nombre']) ?>
+    id: <?= $plano['id'] ?? 0 ?>,
+    nombre: <?= json_encode($plano['nombre'] ?? '') ?>,
+    sede: <?= json_encode($sede['nombre'] ?? '') ?>,
+    sede_id: <?= $plano['sede_id'] ?? 0 ?>
 };
 
 const trampasData = <?= json_encode($trampas ?? []) ?>;
+
+// Obtener zonas únicas de las trampas
+const zonasUnicas = [...new Set(trampasData.map(t => t.ubicacion || '').filter(z => z && z.trim() !== ''))];
 
 // Obtener nombre del inspector de la sesión
 const inspectorPorDefecto = <?= json_encode(session()->get('nombre') ?? 'Sistema') ?>;
@@ -516,10 +563,15 @@ const tiposInsectos = [
     'Avispas',
     'Mosquitos',
     'Cucaracha',
+    'Cucaracha Americana',
+    'Cucaracha Alemana',
     'Hormiga',
     'Roedor',
     'Arañas',
+    'Escarabajo',
+    'Tijerilla',
     'Lagartijas',
+    'Insectos de áreas verdes',
     'Otros'
 ];
 
@@ -539,11 +591,23 @@ const mapeoTiposInsectos = {
     'Avispas': { tipoPlaga: 'avispa', tipoInsecto: 'Volador' },
     'Mosquitos': { tipoPlaga: 'mosquito', tipoInsecto: 'Volador' },
     'Cucaracha': { tipoPlaga: 'cucaracha', tipoInsecto: 'Rastrero' },
+    'Cucaracha Americana': { tipoPlaga: 'cucaracha_americana', tipoInsecto: 'Rastrero' },
+    'Cucaracha Alemana': { tipoPlaga: 'cucaracha_alemana', tipoInsecto: 'Rastrero' },
     'Hormiga': { tipoPlaga: 'hormiga', tipoInsecto: 'Rastrero' },
     'Roedor': { tipoPlaga: 'roedor', tipoInsecto: 'Rastrero' },
     'Arañas': { tipoPlaga: 'Arañas', tipoInsecto: 'Rastrero' },
+    'Escarabajo': { tipoPlaga: 'escarabajo', tipoInsecto: 'Rastrero' },
+    'Tijerilla': { tipoPlaga: 'tijerilla', tipoInsecto: 'Rastrero' },
     'Lagartijas': { tipoPlaga: 'Lagartija', tipoInsecto: 'Rastrero' },
+    'Insectos de áreas verdes': { tipoPlaga: 'insectos_areas_verdes', tipoInsecto: 'Volador' },
     'Otros': { tipoPlaga: 'otro', tipoInsecto: 'Volador' }
+};
+
+// Mapeo de tipos de trampa a tipos de plaga permitidos
+const tiposPlagaPorTrampa = {
+    'edc_quimicas': ['Roedor'],
+    'edc_adhesivas': ['Roedor', 'Hormiga', 'Cucaracha Americana', 'Cucaracha Alemana', 'Escarabajo', 'Tijerilla', 'Arañas'],
+    'luz_uv': ['Mosca doméstica', 'Mosca de la fruta', 'Mosca de drenaje', 'Moscas metálicas', 'Mosca forida', 'Palomillas de almacén', 'Otras palomillas', 'Gorgojos', 'Otros escarabajos', 'Abejas', 'Avispas', 'Mosquitos', 'Insectos de áreas verdes', 'Otros']
 };
 
 // Mapeo inverso: de tipo_plaga a tipo_insecto predeterminado (para cuando se cambia el tipo de plaga en la tabla de incidencias)
@@ -562,10 +626,15 @@ const mapeoTipoPlagaATipoInsecto = {
     'avispa': 'Volador',
     'mosquito': 'Volador',
     'cucaracha': 'Rastrero',
+    'cucaracha_americana': 'Rastrero',
+    'cucaracha_alemana': 'Rastrero',
     'hormiga': 'Rastrero',
     'roedor': 'Rastrero',
     'Arañas': 'Rastrero',
+    'escarabajo': 'Rastrero',
+    'tijerilla': 'Rastrero',
     'Lagartija': 'Rastrero',
+    'insectos_areas_verdes': 'Volador',
     'otro': 'Volador'
 };
 
@@ -588,13 +657,33 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
     const plantillaContainer = document.getElementById('plantillaContainer');
     const mensajeInicial = document.getElementById('mensajeInicial');
 
-    // Abrir modal de configuración
-    function abrirModalConfig() {
-        modalConfig.classList.remove('hidden');
+    // Validar que los elementos existan
+    if (!btnConfigurar) {
+        console.error('No se encontró el botón btnConfigurarPlantilla');
+    }
+    if (!btnDescargar) {
+        console.error('No se encontró el botón btnDescargarPlantilla');
+    }
+    if (!modalConfig) {
+        console.error('No se encontró el modal modalConfigurarPlantilla');
+    }
+    if (!modalDescarga) {
+        console.error('No se encontró el modal modalDescargarPlantilla');
     }
 
-    btnConfigurar.addEventListener('click', abrirModalConfig);
-    btnIniciarConfig.addEventListener('click', abrirModalConfig);
+    // Abrir modal de configuración
+    function abrirModalConfig() {
+        if (modalConfig) {
+            modalConfig.classList.remove('hidden');
+        }
+    }
+
+    if (btnConfigurar) {
+        btnConfigurar.addEventListener('click', abrirModalConfig);
+    }
+    if (btnIniciarConfig) {
+        btnIniciarConfig.addEventListener('click', abrirModalConfig);
+    }
 
     // Cerrar modales
     function cerrarModalConfig() {
@@ -605,15 +694,129 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
         modalDescarga.classList.add('hidden');
     }
 
-    document.getElementById('cerrarModalConfig').addEventListener('click', cerrarModalConfig);
-    document.getElementById('cancelarConfig').addEventListener('click', cerrarModalConfig);
-    document.getElementById('cerrarModal').addEventListener('click', cerrarModalDescarga);
-    document.getElementById('cancelarDescarga').addEventListener('click', cerrarModalDescarga);
+    const cerrarModalConfigBtn = document.getElementById('cerrarModalConfig');
+    const cancelarConfigBtn = document.getElementById('cancelarConfig');
+    const cerrarModalBtn = document.getElementById('cerrarModal');
+    const cancelarDescargaBtn = document.getElementById('cancelarDescarga');
+    
+    if (cerrarModalConfigBtn) {
+        cerrarModalConfigBtn.addEventListener('click', cerrarModalConfig);
+    }
+    if (cancelarConfigBtn) {
+        cancelarConfigBtn.addEventListener('click', cerrarModalConfig);
+    }
+    if (cerrarModalBtn) {
+        cerrarModalBtn.addEventListener('click', cerrarModalDescarga);
+    }
+    if (cancelarDescargaBtn) {
+        cancelarDescargaBtn.addEventListener('click', cerrarModalDescarga);
+    }
 
     // Abrir modal de descarga
-    btnDescargar.addEventListener('click', function() {
-        modalDescarga.classList.remove('hidden');
-    });
+    if (btnDescargar) {
+        btnDescargar.addEventListener('click', function() {
+            if (modalDescarga) {
+                modalDescarga.classList.remove('hidden');
+                inicializarZonasHallazgos();
+            }
+        });
+    }
+    
+    // Inicializar zonas de hallazgos
+    function inicializarZonasHallazgos() {
+        const checkbox = document.getElementById('incluir_hallazgos');
+        const container = document.getElementById('zonasHallazgosContainer');
+        const zonasList = document.getElementById('zonasList');
+        const btnAgregar = document.getElementById('btnAgregarZonaHallazgo');
+        const inputNuevaZona = document.getElementById('nuevaZonaHallazgo');
+        
+        if (!checkbox || !container || !zonasList) return;
+        
+        // Array para almacenar las zonas seleccionadas
+        window.zonasHallazgosSeleccionadas = [...zonasUnicas];
+        
+        // Mostrar/ocultar container según checkbox
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                container.classList.remove('hidden');
+                renderizarZonas();
+            } else {
+                container.classList.add('hidden');
+            }
+        });
+        
+        // Renderizar zonas iniciales
+        function renderizarZonas() {
+            zonasList.innerHTML = '';
+            window.zonasHallazgosSeleccionadas.forEach((zona, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-2 bg-gray-50 rounded';
+                div.innerHTML = `
+                    <span class="text-sm text-gray-700">${zona}</span>
+                    <button type="button" class="text-red-600 hover:text-red-800 text-sm" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                const btnEliminar = div.querySelector('button');
+                btnEliminar.addEventListener('click', function() {
+                    const idx = parseInt(this.getAttribute('data-index'));
+                    window.zonasHallazgosSeleccionadas.splice(idx, 1);
+                    renderizarZonas();
+                });
+                zonasList.appendChild(div);
+            });
+        }
+        
+        // Agregar nueva zona
+        if (btnAgregar && inputNuevaZona) {
+            btnAgregar.addEventListener('click', function() {
+                const nuevaZona = inputNuevaZona.value.trim();
+                if (!nuevaZona) {
+                    alert('Por favor ingrese un nombre de zona');
+                    return;
+                }
+                if (window.zonasHallazgosSeleccionadas.includes(nuevaZona)) {
+                    alert('Esta zona ya existe');
+                    return;
+                }
+                window.zonasHallazgosSeleccionadas.push(nuevaZona);
+                inputNuevaZona.value = '';
+                renderizarZonas();
+            });
+            
+            // Permitir agregar con Enter
+            inputNuevaZona.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    btnAgregar.click();
+                }
+            });
+        }
+        
+        // Renderizar zonas iniciales si el checkbox está marcado
+        if (checkbox.checked) {
+            container.classList.remove('hidden');
+            renderizarZonas();
+        }
+    }
+    
+    // Modificar el envío del formulario para incluir las zonas
+    if (formDescargar) {
+        formDescargar.addEventListener('submit', function(e) {
+            const checkbox = document.getElementById('incluir_hallazgos');
+            if (checkbox && checkbox.checked) {
+                // Agregar las zonas como parámetros ocultos
+                const zonas = window.zonasHallazgosSeleccionadas || [];
+                zonas.forEach((zona, index) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'zonas_hallazgos[]';
+                    input.value = zona;
+                    formDescargar.appendChild(input);
+                });
+            }
+        });
+    }
 
     // Abrir modal de cargar Excel
     if (btnCargarExcel) {
@@ -686,15 +889,42 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
                     procesarIncidenciasDesdeExcel(data.incidencias);
                     cerrarModalCargarExcel();
                     
-                    // Mostrar advertencia si algunas hojas no se procesaron
-                    if (data.hojas_con_error > 0 && data.hojas_sin_formato && data.hojas_sin_formato.length > 0) {
-                        let advertencia = `⚠️ ADVERTENCIA\n\n`;
-                        advertencia += `Se procesaron ${data.hojas_procesadas} hoja(s) correctamente, pero ${data.hojas_con_error} hoja(s) no pudieron ser procesadas debido a formato incorrecto:\n\n`;
-                        data.hojas_sin_formato.forEach(hoja => {
-                            advertencia += `• ${hoja}\n`;
+                    // Construir mensaje informativo
+                    let mensaje = '';
+                    let tieneInformacion = false;
+                    
+                    // Hojas con incidencias procesadas
+                    if (data.hojas_procesadas > 0) {
+                        mensaje += `✅ Se detectaron incidencias en ${data.hojas_procesadas} hoja(s):\n`;
+                        mensaje += `   • ${data.hojas_procesadas} hoja(s) con datos registrados\n\n`;
+                        tieneInformacion = true;
+                    }
+                    
+                    // Hojas vacías (formato correcto pero sin datos)
+                    if (data.hojas_vacias && data.hojas_vacias.length > 0) {
+                        if (tieneInformacion) {
+                            mensaje += `ℹ️ ${data.hojas_vacias.length} hoja(s) sin datos (formato correcto, pero vacías):\n`;
+                        } else {
+                            mensaje += `ℹ️ Se detectaron ${data.hojas_vacias.length} hoja(s) sin datos:\n`;
+                        }
+                        data.hojas_vacias.forEach(hoja => {
+                            mensaje += `   • ${hoja}\n`;
                         });
-                        advertencia += `\nPor favor, revise el formato de estas hojas y descargue la plantilla si es necesario.`;
-                        alert(advertencia);
+                        mensaje += `\n`;
+                    }
+                    
+                    // Hojas con formato incorrecto
+                    if (data.hojas_con_error > 0 && data.hojas_sin_formato && data.hojas_sin_formato.length > 0) {
+                        mensaje += `⚠️ ADVERTENCIA: ${data.hojas_con_error} hoja(s) con formato incorrecto:\n`;
+                        data.hojas_sin_formato.forEach(hoja => {
+                            mensaje += `   • ${hoja}\n`;
+                        });
+                        mensaje += `\nPor favor, revise el formato de estas hojas y descargue la plantilla si es necesario.`;
+                    }
+                    
+                    // Mostrar mensaje solo si hay algo que informar
+                    if (mensaje) {
+                        alert(mensaje.trim());
                     }
                 } else {
                     // Verificar el tipo de error
@@ -826,25 +1056,80 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
         }
     }
 
-    function generarTablaHTML(semana, fecha) {
-        const meses = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 
-                      'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
-        const nombreMes = meses[fecha.getMonth()];
-        const dia = String(fecha.getDate()).padStart(2, '0');
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-        const año = fecha.getFullYear();
-        const fechaFormateada = `${dia}/${mes}/${año}`;
+    // Función auxiliar para normalizar tipos de trampa
+    function normalizarTipoTrampa(tipo) {
+        if (!tipo) return '';
+        // Convertir a minúsculas, reemplazar espacios y acentos
+        return tipo.toLowerCase()
+            .replace(/á/g, 'a')
+            .replace(/é/g, 'e')
+            .replace(/í/g, 'i')
+            .replace(/ó/g, 'o')
+            .replace(/ú/g, 'u')
+            .replace(/\s+/g, '_')
+            .replace(/[^a-z0-9_]/g, '');
+    }
+    
+    // Debug: mostrar tipos de trampa disponibles
+    console.log('Trampas disponibles:', trampasData);
+    trampasData.forEach(t => {
+        console.log(`Trampa ID: ${t.id}, Tipo: "${t.tipo}", Normalizado: "${normalizarTipoTrampa(t.tipo)}"`);
+    });
+
+    // Función auxiliar para generar una tabla por tipo de trampa
+    function generarTablaPorTipoTrampa(semana, fecha, tipoTrampa, nombreTipoTrampa) {
+        // Palabras clave para identificar cada tipo de trampa
+        const palabrasClave = {
+            'edc_quimicas': ['edc', 'quimica', 'quimicas'],
+            'edc_adhesivas': ['edc', 'adhesiva', 'adhesivas'],
+            'luz_uv': ['luz', 'uv', 'equipo']
+        };
         
-        const titulo = `REGISTRO DE ACTIVIDAD DE INSECTOS VOLADORES EN ${planoData.sede.toUpperCase()} ${planoData.nombre.toUpperCase()} ${año}`;
+        // Filtrar trampas por tipo usando palabras clave
+        const trampasFiltradas = trampasData.filter(t => {
+            const tipoTrampaNormalizado = normalizarTipoTrampa(t.tipo || '');
+            const claves = palabrasClave[tipoTrampa] || [];
+            
+            // Verificar que todas las palabras clave estén presentes
+            const todasLasClavesPresentes = claves.every(clave => 
+                tipoTrampaNormalizado.includes(clave)
+            );
+            
+            // Para EDC, también verificar que no sea del otro tipo
+            if (tipoTrampa === 'edc_quimicas' && todasLasClavesPresentes) {
+                // Asegurarse de que no sea adhesiva
+                return !tipoTrampaNormalizado.includes('adhesiva');
+            }
+            if (tipoTrampa === 'edc_adhesivas' && todasLasClavesPresentes) {
+                // Asegurarse de que no sea química
+                return !tipoTrampaNormalizado.includes('quimica');
+            }
+            
+            return todasLasClavesPresentes;
+        });
+        
+        console.log(`Filtrando trampas para ${nombreTipoTrampa} (${tipoTrampa}): ${trampasFiltradas.length} encontradas de ${trampasData.length} totales`);
+        if (trampasFiltradas.length > 0) {
+            console.log('Trampas encontradas:', trampasFiltradas.map(t => ({id: t.id, tipo: t.tipo})));
+        }
+        
+        // Si no hay trampas de este tipo, no generar tabla
+        if (trampasFiltradas.length === 0) {
+            console.warn(`No se encontraron trampas para ${nombreTipoTrampa} (${tipoTrampa})`);
+            return '';
+        }
+        
+        // Obtener tipos de plaga permitidos para este tipo de trampa
+        const tiposPlagaPermitidos = tiposPlagaPorTrampa[tipoTrampa] || [];
+        
+        // Obtener índices de los tipos de insectos permitidos
+        const indicesPermitidos = tiposPlagaPermitidos.map(tipoPlaga => {
+            return tiposInsectos.findIndex(tipo => tipo === tipoPlaga);
+        }).filter(index => index >= 0);
         
         let html = `
-            <div class="table-header">
-                <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">SERVIPRO</h1>
-                <h2 style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">${titulo}</h2>
-                <div class="date-info">
-                    <strong>${nombreMes}</strong><br>
-                    Fecha en la que se registrarán las incidencias: <strong>${fechaFormateada}</strong>
-                </div>
+            <div class="table-header" style="margin-top: 30px;">
+                <h2 style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">${nombreTipoTrampa}</h2>
             </div>
             
             <div class="table-container">
@@ -855,8 +1140,8 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
                             <th>EQUIPO</th>
         `;
         
-        // Agregar encabezados de tipos de insectos
-        tiposInsectos.forEach(tipo => {
+        // Agregar encabezados solo de tipos de insectos permitidos
+        tiposPlagaPermitidos.forEach(tipo => {
             html += `<th>${tipo}</th>`;
         });
         
@@ -867,12 +1152,11 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
                     <tbody>
         `;
         
-        // Agregar filas de trampas
-        trampasData.forEach((trampa, index) => {
-            // Usar nombre si está disponible, sino id_trampa como fallback
+        // Agregar filas de trampas filtradas
+        trampasFiltradas.forEach((trampa, index) => {
             const nombreTrampa = trampa.nombre || trampa.id_trampa || 'T' + trampa.id;
             const ubicacion = trampa.ubicacion || 'Sin ubicación';
-            const rowId = `semana-${semana}-trampa-${trampa.id}`;
+            const rowId = `semana-${semana}-trampa-${trampa.id}-${tipoTrampa}`;
             
             html += `
                         <tr>
@@ -880,9 +1164,10 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
                             <td>${nombreTrampa}</td>
             `;
             
-            // Agregar inputs para cada tipo de insecto
-            tiposInsectos.forEach((tipo, colIndex) => {
-                const inputId = `${rowId}-insecto-${colIndex}`;
+            // Agregar inputs solo para tipos de insectos permitidos
+            tiposPlagaPermitidos.forEach((tipo, colIndex) => {
+                const tipoIndex = tiposInsectos.indexOf(tipo);
+                const inputId = `${rowId}-insecto-${tipoIndex}`;
                 html += `
                             <td>
                                 <input 
@@ -891,7 +1176,8 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
                                     class="insecto-input"
                                     data-semana="${semana}"
                                     data-trampa-id="${trampa.id}"
-                                    data-tipo-index="${colIndex}"
+                                    data-tipo-index="${tipoIndex}"
+                                    data-tipo-trampa="${tipoTrampa}"
                                     data-row-index="${index}"
                                     value="0" 
                                     min="0"
@@ -912,7 +1198,383 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
                     </tbody>
                 </table>
             </div>
+        `;
+        
+        return html;
+    }
+    
+    // Función para generar tabla de otras trampas (no EDC Químicas, EDC Adhesivas, ni Equipo de Luz UV)
+    function generarTablaOtrasTrampas(semana, fecha) {
+        // Filtrar trampas que NO sean de los 3 tipos principales
+        const tiposPrincipales = ['edc_quimicas', 'edc_adhesivas', 'luz_uv'];
+        const trampasFiltradas = trampasData.filter(t => {
+            const tipoTrampaNormalizado = normalizarTipoTrampa(t.tipo || '');
             
+            // Verificar si NO es de los tipos principales
+            const esPrincipal = tiposPrincipales.some(tipoPrincipal => {
+                const claves = {
+                    'edc_quimicas': ['edc', 'quimica'],
+                    'edc_adhesivas': ['edc', 'adhesiva'],
+                    'luz_uv': ['luz', 'uv', 'equipo']
+                };
+                
+                const clavesPrincipal = claves[tipoPrincipal] || [];
+                const todasLasClavesPresentes = clavesPrincipal.every(clave => 
+                    tipoTrampaNormalizado.includes(clave)
+                );
+                
+                if (todasLasClavesPresentes) {
+                    // Verificar que no sea del otro tipo de EDC
+                    if (tipoPrincipal === 'edc_quimicas') {
+                        return !tipoTrampaNormalizado.includes('adhesiva');
+                    }
+                    if (tipoPrincipal === 'edc_adhesivas') {
+                        return !tipoTrampaNormalizado.includes('quimica');
+                    }
+                    return true;
+                }
+                
+                return false;
+            });
+            
+            return !esPrincipal;
+        });
+        
+        // Si no hay trampas de otros tipos, no generar tabla
+        if (trampasFiltradas.length === 0) {
+            return '';
+        }
+        
+        // Función auxiliar para obtener el nombre legible del tipo de trampa
+        function getNombreTipoTrampa(tipo) {
+            if (!tipo) return 'Sin tipo';
+            // Mapeo de tipos comunes
+            const tipos = {
+                'feromona_gorgojo': 'Trampa de Feromona Gorgojo',
+                'equipo_sonico': 'Equipo Sónico',
+                'globo_terror': 'Globo terror',
+                'atrayente_chinches': 'Trampa atrayente chinches',
+                'atrayente_pulgas': 'Trampa atrayente pulgas',
+                'feromona_picudo': 'Trampa feromonas picudo rojo'
+            };
+            
+            const tipoNormalizado = normalizarTipoTrampa(tipo);
+            for (const [key, value] of Object.entries(tipos)) {
+                if (tipoNormalizado.includes(normalizarTipoTrampa(key))) {
+                    return value;
+                }
+            }
+            
+            // Si no está en el mapeo, devolver el tipo original
+            return tipo;
+        }
+        
+        let html = `
+            <div class="table-header" style="margin-top: 30px;">
+                <h2 style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">OTRAS TRAMPAS</h2>
+            </div>
+            
+            <div class="table-container">
+                <table class="incidencias-table">
+                    <thead>
+                        <tr>
+                            <th>ÁREA</th>
+                            <th>EQUIPO</th>
+                            <th>Tipo de Trampa</th>
+        `;
+        
+        // Agregar encabezados de TODOS los tipos de insectos
+        tiposInsectos.forEach(tipo => {
+            html += `<th>${tipo}</th>`;
+        });
+        
+        html += `
+                            <th>Total de insectos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        // Agregar filas de trampas filtradas
+        trampasFiltradas.forEach((trampa, index) => {
+            const nombreTrampa = trampa.nombre || trampa.id_trampa || 'T' + trampa.id;
+            const ubicacion = trampa.ubicacion || 'Sin ubicación';
+            const tipoTrampaNombre = getNombreTipoTrampa(trampa.tipo);
+            const rowId = `semana-${semana}-trampa-${trampa.id}-otras`;
+            
+            html += `
+                        <tr>
+                            <td>${ubicacion}</td>
+                            <td>${nombreTrampa}</td>
+                            <td>${tipoTrampaNombre}</td>
+            `;
+            
+            // Agregar inputs para TODOS los tipos de insectos
+            tiposInsectos.forEach((tipo, colIndex) => {
+                const inputId = `${rowId}-insecto-${colIndex}`;
+                html += `
+                            <td>
+                                <input 
+                                    type="number" 
+                                    id="${inputId}"
+                                    class="insecto-input"
+                                    data-semana="${semana}"
+                                    data-trampa-id="${trampa.id}"
+                                    data-tipo-index="${colIndex}"
+                                    data-tipo-trampa="otras"
+                                    data-row-index="${index}"
+                                    value="0" 
+                                    min="0"
+                                    step="1"
+                                >
+                            </td>
+                `;
+            });
+            
+            // Celda de total (se calculará automáticamente)
+            html += `
+                            <td class="total-cell" id="${rowId}-total">0</td>
+                        </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        return html;
+    }
+
+    // Función para generar tabla de hallazgos (sin trampa asociada, solo zona)
+    function generarTablaHallazgos(semana, fecha) {
+        // Obtener todas las zonas únicas de las trampas
+        const zonasUnicas = [...new Set(trampasData.map(t => t.ubicacion || 'Sin ubicación').filter(z => z))];
+        
+        // Si no hay zonas, usar un array vacío
+        let zonasHallazgos = zonasUnicas.length > 0 ? zonasUnicas : [];
+        
+        // Almacenar zonas de hallazgos por semana (para poder agregar nuevas)
+        if (!window.zonasHallazgosPorSemana) {
+            window.zonasHallazgosPorSemana = {};
+        }
+        if (!window.zonasHallazgosPorSemana[semana]) {
+            window.zonasHallazgosPorSemana[semana] = [...zonasHallazgos];
+        } else {
+            // Combinar zonas existentes con las nuevas
+            zonasHallazgos = [...new Set([...window.zonasHallazgosPorSemana[semana], ...zonasUnicas])];
+            window.zonasHallazgosPorSemana[semana] = zonasHallazgos;
+        }
+        
+        let html = `
+            <div class="table-header" style="margin-top: 30px;">
+                <h2 style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">HALLAZGOS</h2>
+                <div style="margin-bottom: 10px;">
+                    <input 
+                        type="text" 
+                        id="nueva-zona-hallazgo-semana-${semana}"
+                        placeholder="Agregar nueva zona..."
+                        style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; width: 300px; margin-right: 10px;"
+                    >
+                    <button 
+                        type="button"
+                        onclick="agregarZonaHallazgo(${semana})"
+                        style="padding: 8px 16px; background-color: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;"
+                    >
+                        <i class="fas fa-plus"></i> Agregar Zona
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="incidencias-table">
+                    <thead>
+                        <tr>
+                            <th>ZONA</th>
+        `;
+        
+        // Agregar encabezados de TODOS los tipos de insectos
+        tiposInsectos.forEach(tipo => {
+            html += `<th>${tipo}</th>`;
+        });
+        
+        html += `
+                            <th>Total de insectos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-hallazgos-semana-${semana}">
+        `;
+        
+        // Agregar filas de zonas
+        zonasHallazgos.forEach((zona, index) => {
+            const rowId = `semana-${semana}-hallazgo-zona-${index}`;
+            
+            html += `
+                        <tr data-zona="${zona}" data-zona-index="${index}">
+                            <td>${zona}</td>
+            `;
+            
+            // Agregar inputs para todos los tipos de insectos
+            tiposInsectos.forEach((tipo, tipoIndex) => {
+                const inputId = `${rowId}-insecto-${tipoIndex}`;
+                html += `
+                            <td>
+                                <input 
+                                    type="number" 
+                                    id="${inputId}"
+                                    class="insecto-input-hallazgo"
+                                    data-semana="${semana}"
+                                    data-zona="${zona}"
+                                    data-zona-index="${index}"
+                                    data-tipo-index="${tipoIndex}"
+                                    value="0" 
+                                    min="0"
+                                    step="1"
+                                >
+                            </td>
+                `;
+            });
+            
+            // Celda de total (se calculará automáticamente)
+            html += `
+                            <td class="total-cell" id="${rowId}-total">0</td>
+                        </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        return html;
+    }
+
+    // Función para agregar una nueva zona a la tabla de hallazgos
+    window.agregarZonaHallazgo = function(semana) {
+        const input = document.getElementById(`nueva-zona-hallazgo-semana-${semana}`);
+        const nuevaZona = input.value.trim();
+        
+        if (!nuevaZona) {
+            alert('Por favor ingrese un nombre de zona');
+            return;
+        }
+        
+        // Verificar si la zona ya existe
+        const tbody = document.getElementById(`tbody-hallazgos-semana-${semana}`);
+        const zonasExistentes = Array.from(tbody.querySelectorAll('tr')).map(tr => tr.getAttribute('data-zona'));
+        
+        if (zonasExistentes.includes(nuevaZona)) {
+            alert('Esta zona ya existe en la tabla');
+            input.value = '';
+            return;
+        }
+        
+        // Agregar la zona a la lista
+        if (!window.zonasHallazgosPorSemana[semana]) {
+            window.zonasHallazgosPorSemana[semana] = [];
+        }
+        window.zonasHallazgosPorSemana[semana].push(nuevaZona);
+        
+        // Crear nueva fila
+        const index = window.zonasHallazgosPorSemana[semana].length - 1;
+        const rowId = `semana-${semana}-hallazgo-zona-${index}`;
+        
+        let nuevaFila = `
+            <tr data-zona="${nuevaZona}" data-zona-index="${index}">
+                <td>${nuevaZona}</td>
+        `;
+        
+        // Agregar inputs para todos los tipos de insectos
+        tiposInsectos.forEach((tipo, tipoIndex) => {
+            const inputId = `${rowId}-insecto-${tipoIndex}`;
+            nuevaFila += `
+                <td>
+                    <input 
+                        type="number" 
+                        id="${inputId}"
+                        class="insecto-input-hallazgo"
+                        data-semana="${semana}"
+                        data-zona="${nuevaZona}"
+                        data-zona-index="${index}"
+                        data-tipo-index="${tipoIndex}"
+                        value="0" 
+                        min="0"
+                        step="1"
+                    >
+                </td>
+            `;
+        });
+        
+        nuevaFila += `
+                <td class="total-cell" id="${rowId}-total">0</td>
+            </tr>
+        `;
+        
+        tbody.insertAdjacentHTML('beforeend', nuevaFila);
+        
+        // Agregar event listeners a los nuevos inputs
+        tiposInsectos.forEach((tipo, tipoIndex) => {
+            const inputId = `${rowId}-insecto-${tipoIndex}`;
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('input', function() {
+                    calcularTotalFilaHallazgo(semana, index);
+                    actualizarIncidencias();
+                });
+            }
+        });
+        
+        // Limpiar el input
+        input.value = '';
+    };
+
+    function generarTablaHTML(semana, fecha) {
+        const meses = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 
+                      'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+        const nombreMes = meses[fecha.getMonth()];
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const año = fecha.getFullYear();
+        const fechaFormateada = `${dia}/${mes}/${año}`;
+        
+        const titulo = `REGISTRO DE ACTIVIDAD DE INSECTOS VOLADORES EN ${planoData.sede.toUpperCase()} ${planoData.nombre.toUpperCase()} ${año}`;
+        
+        let html = `
+            <div class="table-header">
+                <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 10px;">SERVIPRO</h1>
+                <h2 style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">${titulo}</h2>
+                <div class="date-info">
+                    <strong>${nombreMes}</strong><br>
+                    Fecha en la que se registrarán las incidencias: <strong>${fechaFormateada}</strong>
+                </div>
+            </div>
+        `;
+        
+        // Generar tabla para EDC Químicas
+        html += generarTablaPorTipoTrampa(semana, fecha, 'edc_quimicas', 'EDC QUÍMICAS');
+        console.log('Tabla EDC Químicas generada');
+        
+        // Generar tabla para EDC Adhesivas
+        html += generarTablaPorTipoTrampa(semana, fecha, 'edc_adhesivas', 'EDC ADHESIVAS');
+        console.log('Tabla EDC Adhesivas generada');
+        
+        // Generar tabla para Equipo de Luz UV
+        html += generarTablaPorTipoTrampa(semana, fecha, 'luz_uv', 'EQUIPO DE LUZ UV');
+        console.log('Tabla Equipo de Luz UV generada');
+        
+        // Generar tabla para otras trampas (que no sean de los 3 tipos principales)
+        html += generarTablaOtrasTrampas(semana, fecha);
+        console.log('Tabla Otras Trampas generada');
+        
+        // Generar tabla para hallazgos (sin trampa asociada, solo zona)
+        html += generarTablaHallazgos(semana, fecha);
+        console.log('Tabla Hallazgos generada');
+        
+        // Tabla de incidencias agregadas (común para todas las tablas)
+        html += `
             <!-- Tabla de incidencias agregadas -->
             <div class="incidencias-agregadas">
                 <h3>Incidencias agregadas: <span id="contador-incidencias-semana-${semana}">0</span></h3>
@@ -945,6 +1607,9 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
         if (e.target.classList.contains('insecto-input')) {
             calcularTotalFila(e.target);
             actualizarIncidencias(e.target);
+        } else if (e.target.classList.contains('insecto-input-hallazgo')) {
+            calcularTotalFilaHallazgo(e.target.dataset.semana, e.target.dataset.zonaIndex);
+            actualizarIncidencias(e.target);
         }
     });
 
@@ -952,10 +1617,31 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
         const semana = input.dataset.semana;
         const rowIndex = input.dataset.rowIndex;
         const trampaId = input.dataset.trampaId;
-        const rowId = `semana-${semana}-trampa-${trampaId}`;
+        const tipoTrampa = input.dataset.tipoTrampa || '';
+        const rowId = `semana-${semana}-trampa-${trampaId}-${tipoTrampa}`;
         
-        // Obtener todos los inputs de la misma fila
-        const inputs = document.querySelectorAll(`.insecto-input[data-semana="${semana}"][data-row-index="${rowIndex}"]`);
+        // Obtener todos los inputs de la misma fila (mismo trampa_id, mismo tipo_trampa, mismo row_index)
+        const inputs = document.querySelectorAll(`.insecto-input[data-semana="${semana}"][data-trampa-id="${trampaId}"][data-tipo-trampa="${tipoTrampa}"][data-row-index="${rowIndex}"]`);
+        
+        // Calcular suma
+        let total = 0;
+        inputs.forEach(inp => {
+            const valor = parseFloat(inp.value) || 0;
+            total += valor;
+        });
+        
+        // Actualizar celda de total
+        const totalCell = document.getElementById(`${rowId}-total`);
+        if (totalCell) {
+            totalCell.textContent = total;
+        }
+    }
+
+    function calcularTotalFilaHallazgo(semana, zonaIndex) {
+        const rowId = `semana-${semana}-hallazgo-zona-${zonaIndex}`;
+        
+        // Obtener todos los inputs de la misma fila de hallazgo
+        const inputs = document.querySelectorAll(`.insecto-input-hallazgo[data-semana="${semana}"][data-zona-index="${zonaIndex}"]`);
         
         // Calcular suma
         let total = 0;
@@ -972,6 +1658,12 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
     }
 
     function actualizarIncidencias(input) {
+        // Verificar si es un input de hallazgo
+        if (input.classList.contains('insecto-input-hallazgo')) {
+            actualizarIncidenciasHallazgo(input);
+            return;
+        }
+        
         const semana = input.dataset.semana;
         const trampaId = input.dataset.trampaId;
         const tipoIndex = parseInt(input.dataset.tipoIndex);
@@ -1050,6 +1742,78 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
         actualizarTablaIncidencias(semana);
     }
 
+    function actualizarIncidenciasHallazgo(input) {
+        const semana = input.dataset.semana;
+        const zona = input.dataset.zona;
+        const zonaIndex = input.dataset.zonaIndex;
+        const tipoIndex = parseInt(input.dataset.tipoIndex);
+        const valor = parseFloat(input.value) || 0;
+        
+        const tipoInsecto = tiposInsectos[tipoIndex];
+        const mapeo = mapeoTiposInsectos[tipoInsecto];
+        
+        if (!mapeo) return;
+        
+        // Obtener fecha de la semana
+        const semanaConfig = semanasConfiguradas.find(s => s.numero == semana);
+        if (!semanaConfig) return;
+        
+        const fechaIncidencia = semanaConfig.fechaInicio;
+        
+        // Inicializar array de incidencias para esta semana si no existe
+        if (!incidenciasAgregadas[semana]) {
+            incidenciasAgregadas[semana] = [];
+        }
+        
+        // Obtener inspector global si está configurado
+        const inspectorGlobal = document.getElementById(`inspector-global-semana-${semana}`);
+        const checkboxInspectorGlobal = document.getElementById(`checkbox-inspector-global-semana-${semana}`);
+        let inspectorFinal = '';
+        
+        if (checkboxInspectorGlobal && checkboxInspectorGlobal.checked && inspectorGlobal) {
+            inspectorFinal = inspectorGlobal.value.trim();
+        }
+        
+        // Generar ID único para esta incidencia de hallazgo
+        const incidenciaId = `hallazgo-${semana}-${zona}-${tipoIndex}`;
+        
+        // Buscar si ya existe una incidencia con este ID
+        const indexExistente = incidenciasAgregadas[semana].findIndex(inc => inc.id === incidenciaId);
+        
+        if (valor > 0) {
+            // Crear o actualizar incidencia de hallazgo
+            const incidencia = {
+                id: incidenciaId,
+                id_trampa: null, // Hallazgos no tienen trampa asociada
+                trampa_id: null, // Hallazgos no tienen trampa asociada
+                zona: zona, // Guardar la zona
+                tipo_plaga: mapeo.tipoPlaga,
+                tipo_insecto: mapeo.tipoInsecto,
+                tipo_incidencia: 'Hallazgo', // Tipo de incidencia es Hallazgo
+                cantidad_organismos: valor,
+                fecha_incidencia: fechaIncidencia,
+                inspector: inspectorFinal,
+                notas: ''
+            };
+            
+            if (indexExistente >= 0) {
+                // Actualizar incidencia existente
+                incidenciasAgregadas[semana][indexExistente] = incidencia;
+            } else {
+                // Agregar nueva incidencia
+                incidenciasAgregadas[semana].push(incidencia);
+            }
+        } else {
+            // Si el valor es 0, eliminar la incidencia si existe
+            if (indexExistente >= 0) {
+                incidenciasAgregadas[semana].splice(indexExistente, 1);
+            }
+        }
+        
+        // Actualizar la tabla de incidencias
+        actualizarTablaIncidencias(semana);
+    }
+
     function actualizarTablaIncidencias(semana) {
         const contenedor = document.getElementById(`tabla-incidencias-semana-${semana}`);
         const contador = document.getElementById(`contador-incidencias-semana-${semana}`);
@@ -1096,7 +1860,7 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
             <table class="incidencias-table-preview">
                 <thead>
                     <tr>
-                        <th>ID Trampa</th>
+                        <th>ID Trampa / Zona</th>
                         <th>Tipo de Plaga</th>
                         <th>Tipo de Incidencia</th>
                         <th>Tipo de Insecto</th>
@@ -1111,9 +1875,14 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
         `;
         
         incidencias.forEach((incidencia, index) => {
+            // Para hallazgos, mostrar la zona en lugar del ID de trampa
+            const mostrarIdTrampa = incidencia.tipo_incidencia === 'Hallazgo' 
+                ? (incidencia.zona || 'Sin zona') 
+                : (incidencia.id_trampa || 'N/A');
+            
             html += `
                     <tr data-incidencia-id="${incidencia.id}">
-                        <td>${incidencia.id_trampa}</td>
+                        <td>${mostrarIdTrampa}</td>
                         <td>
                             <select class="editable-tipo-plaga" data-incidencia-id="${incidencia.id}" data-semana="${semana}">
                                 <option value="mosca" ${incidencia.tipo_plaga === 'mosca' ? 'selected' : ''}>Mosca</option>
@@ -1130,10 +1899,15 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
                                 <option value="avispa" ${incidencia.tipo_plaga === 'avispa' ? 'selected' : ''}>Avispas</option>
                                 <option value="mosquito" ${incidencia.tipo_plaga === 'mosquito' ? 'selected' : ''}>Mosquitos</option>
                                 <option value="cucaracha" ${incidencia.tipo_plaga === 'cucaracha' ? 'selected' : ''}>Cucaracha</option>
+                                <option value="cucaracha_americana" ${incidencia.tipo_plaga === 'cucaracha_americana' ? 'selected' : ''}>Cucaracha Americana</option>
+                                <option value="cucaracha_alemana" ${incidencia.tipo_plaga === 'cucaracha_alemana' ? 'selected' : ''}>Cucaracha Alemana</option>
                                 <option value="hormiga" ${incidencia.tipo_plaga === 'hormiga' ? 'selected' : ''}>Hormiga</option>
                                 <option value="roedor" ${incidencia.tipo_plaga === 'roedor' ? 'selected' : ''}>Roedor</option>
                                 <option value="Arañas" ${incidencia.tipo_plaga === 'Arañas' ? 'selected' : ''}>Arañas</option>
+                                <option value="escarabajo" ${incidencia.tipo_plaga === 'escarabajo' ? 'selected' : ''}>Escarabajo</option>
+                                <option value="tijerilla" ${incidencia.tipo_plaga === 'tijerilla' ? 'selected' : ''}>Tijerilla</option>
                                 <option value="Lagartija" ${incidencia.tipo_plaga === 'Lagartija' ? 'selected' : ''}>Lagartijas</option>
+                                <option value="insectos_areas_verdes" ${incidencia.tipo_plaga === 'insectos_areas_verdes' ? 'selected' : ''}>Insectos de áreas verdes</option>
                                 <option value="otro" ${incidencia.tipo_plaga === 'otro' ? 'selected' : ''}>Otro</option>
                             </select>
                         </td>
@@ -1348,9 +2122,11 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
             });
             
             if (tipoIndex >= 0) {
-                const trampaIndex = trampasData.findIndex(t => t.id == trampaId);
-                if (trampaIndex >= 0) {
-                    const inputId = `semana-${semana}-trampa-${trampaId}-insecto-${tipoIndex}`;
+                // Buscar la trampa para obtener su tipo
+                const trampa = trampasData.find(t => t.id == trampaId);
+                if (trampa) {
+                    const tipoTrampa = (trampa.tipo || '').toLowerCase().replace(/\s+/g, '_');
+                    const inputId = `semana-${semana}-trampa-${trampaId}-${tipoTrampa}-insecto-${tipoIndex}`;
                     const input = document.getElementById(inputId);
                     if (input) {
                         input.value = 0;
@@ -1412,7 +2188,15 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
         const promises = incidencias.map((incidencia, index) => {
             return new Promise((resolve) => {
                 const formData = new FormData();
-                formData.append('trampa_id', incidencia.trampa_id); // Usar el ID de la trampa
+                // Para hallazgos, trampa_id es null
+                if (incidencia.tipo_incidencia === 'Hallazgo') {
+                    formData.append('trampa_id', ''); // Enviar vacío para hallazgos
+                    formData.append('zona', incidencia.zona || ''); // Agregar zona para hallazgos
+                    formData.append('plano_id', planoData.id); // Agregar plano_id para hallazgos
+                    formData.append('sede_id', planoData.sede_id); // Agregar sede_id para hallazgos
+                } else {
+                    formData.append('trampa_id', incidencia.trampa_id); // Usar el ID de la trampa
+                }
                 formData.append('tipo_plaga', incidencia.tipo_plaga);
                 formData.append('tipo_incidencia', incidencia.tipo_incidencia);
                 formData.append('tipo_insecto', incidencia.tipo_insecto);
@@ -1565,18 +2349,31 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
                 return;
             }
             
+            // Obtener la semana de la incidencia (debe venir del backend)
+            // El backend ya incluye el campo 'semana' en cada incidencia
             const semana = incidencia.semana || 1;
-            semanasSet.add(semana);
             
-            if (!incidenciasPorSemana[semana]) {
-                incidenciasPorSemana[semana] = [];
+            // Asegurar que la incidencia tenga el campo semana
+            if (!incidencia.semana) {
+                incidencia.semana = semana;
+            }
+            
+            semanasSet.add(incidencia.semana);
+            
+            if (!incidenciasPorSemana[incidencia.semana]) {
+                incidenciasPorSemana[incidencia.semana] = [];
+            }
+            
+            // Asegurar que tenga fecha_incidencia (puede venir como 'fecha' o 'fecha_incidencia')
+            if (!incidencia.fecha_incidencia && incidencia.fecha) {
+                incidencia.fecha_incidencia = incidencia.fecha;
             }
             
             // Generar ID único para la incidencia
-            const incidenciaId = `excel-${semana}-${incidencia.trampa_id || 'unknown'}-${incidencia.tipo_plaga || 'unknown'}-${Date.now()}-${Math.random()}`;
+            const incidenciaId = `excel-${incidencia.semana}-${incidencia.trampa_id || incidencia.zona || 'unknown'}-${incidencia.tipo_plaga || 'unknown'}-${Date.now()}-${Math.random()}`;
             incidencia.id = incidenciaId;
             
-            incidenciasPorSemana[semana].push(incidencia);
+            incidenciasPorSemana[incidencia.semana].push(incidencia);
         });
 
         // Ordenar semanas
@@ -1599,11 +2396,12 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
         semanasOrdenadas.forEach((semanaNum, index) => {
             // Obtener una fecha de ejemplo para esta semana
             const incidenciaEjemplo = incidenciasPorSemana[semanaNum][0];
-            const fechaSemana = new Date(incidenciaEjemplo.fecha_incidencia + 'T00:00:00');
+            const fechaIncidenciaEjemplo = incidenciaEjemplo.fecha_incidencia || incidenciaEjemplo.fecha || fechaMinima;
+            const fechaSemana = new Date(fechaIncidenciaEjemplo + 'T00:00:00');
             
             semanasConfiguradas.push({
                 numero: semanaNum,
-                fechaInicio: incidenciaEjemplo.fecha_incidencia
+                fechaInicio: fechaIncidenciaEjemplo
             });
 
             // Crear tab
@@ -1639,23 +2437,32 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
 
     // Función auxiliar para encontrar el índice del tipo de insecto basado en el tipo_plaga
     function encontrarIndicePorTipoPlaga(tipoPlaga) {
-        // Normalizar el tipo_plaga (a minúsculas y sin espacios)
-        const tipoPlagaNormalizado = tipoPlaga.toLowerCase().trim();
+        if (!tipoPlaga) {
+            console.warn('encontrarIndicePorTipoPlaga: tipoPlaga es null o undefined');
+            return -1;
+        }
+        
+        // Normalizar el tipo_plaga (a minúsculas y sin espacios, reemplazar guiones bajos con espacios)
+        const tipoPlagaNormalizado = tipoPlaga.toLowerCase().trim().replace(/_/g, ' ');
+        
+        console.log(`Buscando índice para tipo_plaga: "${tipoPlaga}" (normalizado: "${tipoPlagaNormalizado}")`);
         
         // Buscar en el array de tiposInsectos
         for (let index = 0; index < tiposInsectos.length; index++) {
             const tipo = tiposInsectos[index];
             if (mapeoTiposInsectos[tipo]) {
                 const tipoPlagaMapeo = mapeoTiposInsectos[tipo].tipoPlaga;
-                const tipoPlagaMapeoNormalizado = tipoPlagaMapeo.toLowerCase().trim();
+                const tipoPlagaMapeoNormalizado = tipoPlagaMapeo.toLowerCase().trim().replace(/_/g, ' ');
                 
                 // Comparación exacta o parcial
                 if (tipoPlagaNormalizado === tipoPlagaMapeoNormalizado) {
+                    console.log(`Encontrado índice ${index} para tipo "${tipo}" con tipo_plaga "${tipoPlagaMapeo}"`);
                     return index;
                 }
             }
         }
         
+        console.warn(`No se encontró índice para tipo_plaga: "${tipoPlaga}"`);
         return -1;
     }
 
@@ -1668,9 +2475,13 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
 
         console.log(`Actualizando valores de tabla principal para semana ${semana} con ${incidencias.length} incidencias`);
 
-        // Agrupar incidencias por trampa_id y tipo_plaga para sumar cantidades si hay múltiples
+        // Separar incidencias normales de hallazgos
+        const incidenciasNormales = incidencias.filter(inc => inc.tipo_incidencia !== 'Hallazgo' && inc.trampa_id !== null);
+        const incidenciasHallazgos = incidencias.filter(inc => inc.tipo_incidencia === 'Hallazgo' || (inc.trampa_id === null && inc.zona));
+
+        // Agrupar incidencias normales por trampa_id y tipo_plaga para sumar cantidades si hay múltiples
         const incidenciasAgrupadas = {};
-        incidencias.forEach(incidencia => {
+        incidenciasNormales.forEach(incidencia => {
             const key = `${incidencia.trampa_id}-${incidencia.tipo_plaga}`;
             if (!incidenciasAgrupadas[key]) {
                 incidenciasAgrupadas[key] = {
@@ -1684,11 +2495,13 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
 
         console.log('Incidencias agrupadas:', incidenciasAgrupadas);
 
-        // Actualizar los inputs en la tabla principal
+        // Actualizar los inputs en la tabla principal para incidencias normales
         Object.values(incidenciasAgrupadas).forEach(incidenciaAgrupada => {
             const trampaId = incidenciaAgrupada.trampa_id;
             const tipoPlaga = incidenciaAgrupada.tipo_plaga;
             const cantidad = incidenciaAgrupada.cantidad;
+            
+            console.log(`Procesando incidencia agrupada: trampa_id=${trampaId}, tipo_plaga=${tipoPlaga}, cantidad=${cantidad}`);
             
             // Buscar el índice del tipo de insecto
             const tipoIndex = encontrarIndicePorTipoPlaga(tipoPlaga);
@@ -1698,26 +2511,160 @@ let estadosInspectorGlobal = {}; // Objeto para almacenar el estado del checkbox
                 return;
             }
 
+            // Buscar la trampa para obtener su tipo
+            const trampa = trampasData.find(t => t.id == trampaId);
+            if (!trampa) {
+                console.warn(`No se encontró trampa con ID: ${trampaId} en trampasData (total: ${trampasData.length})`);
+                console.log('Trampas disponibles:', trampasData.map(t => ({id: t.id, nombre: t.nombre, tipo: t.tipo})));
+                return;
+            }
+            
+            // Normalizar tipo de trampa para coincidir con el formato usado en generarTablaPorTipoTrampa
+            const tipoTrampaNormalizado = normalizarTipoTrampa(trampa.tipo || '');
+            
+            // Determinar el tipo de trampa para el selector
+            let tipoTrampa = '';
+            if (tipoTrampaNormalizado.includes('edc') && tipoTrampaNormalizado.includes('quimica')) {
+                tipoTrampa = 'edc_quimicas';
+            } else if (tipoTrampaNormalizado.includes('edc') && tipoTrampaNormalizado.includes('adhesiva')) {
+                tipoTrampa = 'edc_adhesivas';
+            } else if (tipoTrampaNormalizado.includes('luz') || tipoTrampaNormalizado.includes('uv') || tipoTrampaNormalizado.includes('equipo')) {
+                tipoTrampa = 'luz_uv';
+            } else {
+                tipoTrampa = 'otras';
+            }
+            
+            console.log(`Trampa encontrada: id=${trampa.id}, tipo="${trampa.tipo}", tipoTrampa="${tipoTrampa}"`);
+            
             // Buscar el input correspondiente
-            const inputId = `semana-${semana}-trampa-${trampaId}-insecto-${tipoIndex}`;
-            const input = document.getElementById(inputId);
-
+            // Primero intentar con el tipo de trampa específico
+            let selector = `input.insecto-input[data-semana="${semana}"][data-trampa-id="${trampaId}"][data-tipo-index="${tipoIndex}"][data-tipo-trampa="${tipoTrampa}"]`;
+            console.log(`Buscando input con selector: ${selector}`);
+            let input = document.querySelector(selector);
+            
+            // Si no se encuentra y es tipo "otras", buscar sin el atributo data-tipo-trampa
+            if (!input && tipoTrampa === 'otras') {
+                // Buscar en la tabla de otras trampas (no tiene data-tipo-trampa)
+                const inputsOtras = document.querySelectorAll(`input.insecto-input[data-semana="${semana}"][data-trampa-id="${trampaId}"][data-tipo-index="${tipoIndex}"]`);
+                // Filtrar los que no tienen data-tipo-trampa o tienen data-tipo-trampa="otras" (son de la tabla "otras trampas")
+                input = Array.from(inputsOtras).find(inp => {
+                    const attr = inp.getAttribute('data-tipo-trampa');
+                    return !attr || attr === '' || attr === 'otras';
+                });
+            }
+            
+            // Si aún no se encuentra, buscar cualquier input que coincida (último recurso)
+            if (!input) {
+                selector = `input.insecto-input[data-semana="${semana}"][data-trampa-id="${trampaId}"][data-tipo-index="${tipoIndex}"]`;
+                console.log(`Buscando input con selector alternativo: ${selector}`);
+                input = document.querySelector(selector);
+            }
+            
             if (input) {
                 input.value = cantidad;
-                console.log(`Actualizado input ${inputId} con valor ${cantidad}`);
+                console.log(`✓ Actualizado input para semana ${semana}, trampa ${trampaId}, tipoIndex ${tipoIndex}, tipoTrampa ${tipoTrampa} con valor ${cantidad}`);
                 // Recalcular el total de la fila
                 calcularTotalFila(input);
             } else {
-                console.warn(`No se encontró input con ID: ${inputId} para semana ${semana}, trampa ${trampaId}, tipoIndex ${tipoIndex}`);
-                // Intentar buscar de otra forma - usando selector de atributos
-                const inputAlt = document.querySelector(`input[data-semana="${semana}"][data-trampa-id="${trampaId}"][data-tipo-index="${tipoIndex}"]`);
-                if (inputAlt) {
-                    inputAlt.value = cantidad;
-                    calcularTotalFila(inputAlt);
-                    console.log(`Encontrado input alternativo y actualizado`);
+                console.warn(`✗ No se encontró input para semana ${semana}, trampa ${trampaId}, tipoIndex ${tipoIndex}, tipoTrampa ${tipoTrampa}`);
+                // Intentar encontrar todos los inputs de esta trampa para debug
+                const todosInputs = document.querySelectorAll(`input.insecto-input[data-semana="${semana}"][data-trampa-id="${trampaId}"]`);
+                console.log(`Inputs disponibles para esta trampa: ${todosInputs.length}`);
+                if (todosInputs.length > 0) {
+                    todosInputs.forEach((inp, idx) => {
+                        console.log(`  Input ${idx}: tipo-index=${inp.getAttribute('data-tipo-index')}, tipo-trampa=${inp.getAttribute('data-tipo-trampa')}`);
+                    });
                 }
             }
         });
+        
+        // Procesar incidencias de hallazgos
+        if (incidenciasHallazgos.length > 0) {
+            console.log(`Procesando ${incidenciasHallazgos.length} incidencias de hallazgos para semana ${semana}`);
+            
+            // Agrupar hallazgos por zona y tipo_plaga
+            const hallazgosAgrupados = {};
+            incidenciasHallazgos.forEach(incidencia => {
+                const zona = incidencia.zona || 'Sin zona';
+                const key = `${zona}-${incidencia.tipo_plaga}`;
+                if (!hallazgosAgrupados[key]) {
+                    hallazgosAgrupados[key] = {
+                        zona: zona,
+                        tipo_plaga: incidencia.tipo_plaga,
+                        cantidad: 0
+                    };
+                }
+                hallazgosAgrupados[key].cantidad += parseInt(incidencia.cantidad_organismos) || 0;
+            });
+            
+            console.log(`Hallazgos agrupados:`, hallazgosAgrupados);
+            
+            // Actualizar inputs de hallazgos
+            Object.values(hallazgosAgrupados).forEach(hallazgo => {
+                const zona = hallazgo.zona;
+                const tipoPlaga = hallazgo.tipo_plaga;
+                const cantidad = hallazgo.cantidad;
+                
+                console.log(`Procesando hallazgo: zona=${zona}, tipo_plaga=${tipoPlaga}, cantidad=${cantidad}`);
+                
+                // Buscar el índice del tipo de insecto
+                const tipoIndex = encontrarIndicePorTipoPlaga(tipoPlaga);
+                
+                if (tipoIndex < 0) {
+                    console.warn(`No se encontró índice para tipo_plaga: ${tipoPlaga}`);
+                    return;
+                }
+                
+                // Buscar la fila de hallazgos por zona (buscar en todas las semanas primero, luego filtrar por semana)
+                const filasHallazgo = document.querySelectorAll(`tr[data-zona="${zona}"]`);
+                console.log(`Filas de hallazgo encontradas para zona "${zona}": ${filasHallazgo.length}`);
+                
+                let filaHallazgo = null;
+                for (const fila of filasHallazgo) {
+                    // Verificar que la fila pertenezca a la semana correcta
+                    const tbody = fila.closest('tbody');
+                    if (tbody && tbody.id === `tbody-hallazgos-semana-${semana}`) {
+                        filaHallazgo = fila;
+                        break;
+                    }
+                }
+                
+                if (!filaHallazgo) {
+                    console.warn(`No se encontró fila de hallazgo para zona: ${zona} en semana ${semana}`);
+                    // Intentar encontrar todas las filas de hallazgos para debug
+                    const todasFilas = document.querySelectorAll(`tbody[id^="tbody-hallazgos-semana-"] tr[data-zona]`);
+                    console.log(`Total de filas de hallazgos en DOM: ${todasFilas.length}`);
+                    todasFilas.forEach((f, idx) => {
+                        console.log(`  Fila ${idx}: zona="${f.getAttribute('data-zona')}", zona-index="${f.getAttribute('data-zona-index')}"`);
+                    });
+                    return;
+                }
+                
+                const zonaIndex = filaHallazgo.getAttribute('data-zona-index');
+                console.log(`Fila de hallazgo encontrada: zona-index=${zonaIndex}`);
+                
+                const selector = `input.insecto-input-hallazgo[data-semana="${semana}"][data-zona="${zona}"][data-zona-index="${zonaIndex}"][data-tipo-index="${tipoIndex}"]`;
+                console.log(`Buscando input de hallazgo con selector: ${selector}`);
+                const input = document.querySelector(selector);
+                
+                if (input) {
+                    input.value = cantidad;
+                    console.log(`✓ Actualizado input de hallazgo para semana ${semana}, zona ${zona}, tipoIndex ${tipoIndex} con valor ${cantidad}`);
+                    // Recalcular el total de la fila
+                    calcularTotalFilaHallazgo(semana, zonaIndex);
+                } else {
+                    console.warn(`✗ No se encontró input de hallazgo para semana ${semana}, zona ${zona}, tipoIndex ${tipoIndex}`);
+                    // Intentar encontrar todos los inputs de esta zona para debug
+                    const todosInputs = document.querySelectorAll(`input.insecto-input-hallazgo[data-semana="${semana}"][data-zona="${zona}"]`);
+                    console.log(`Inputs disponibles para esta zona: ${todosInputs.length}`);
+                    if (todosInputs.length > 0) {
+                        todosInputs.forEach((inp, idx) => {
+                            console.log(`  Input ${idx}: tipo-index=${inp.getAttribute('data-tipo-index')}, zona-index=${inp.getAttribute('data-zona-index')}`);
+                        });
+                    }
+                }
+            });
+        }
     }
 });
 </script>
