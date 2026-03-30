@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "SERVIPRO",
+  "project_id": "af8f10d7-8a6c-45f9-983d-540926e38c17"
+}
