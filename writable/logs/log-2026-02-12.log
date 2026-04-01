@@ -1,0 +1,282 @@
+ERROR - 2026-02-12 09:57:56 --> Error connecting to the database: mysqli_sql_exception: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:201
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php(201): mysqli->real_connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#11 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#12 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#13 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:246
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#5 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#11 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#12 {main}
+CRITICAL - 2026-02-12 09:57:56 --> CodeIgniter\Database\Exceptions\DatabaseException: Unable to connect to the database.
+Main connection [MySQLi]: Connection timed out
+[Method: GET, Route: /]
+in SYSTEMPATH/Database/BaseConnection.php on line 467.
+ 1 SYSTEMPATH/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+ 2 SYSTEMPATH/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+ 3 SYSTEMPATH/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 4 SYSTEMPATH/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+ 5 APPPATH/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+ 6 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\Home->index()
+ 7 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+ 8 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+ 9 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+11 FCPATH/index.php(56): CodeIgniter\Boot::bootWeb()
+ERROR - 2026-02-12 10:01:25 --> Error connecting to the database: mysqli_sql_exception: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:201
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php(201): mysqli->real_connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#11 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#12 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#13 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:246
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#5 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#11 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#12 {main}
+CRITICAL - 2026-02-12 10:01:25 --> CodeIgniter\Database\Exceptions\DatabaseException: Unable to connect to the database.
+Main connection [MySQLi]: Connection timed out
+[Method: GET, Route: /]
+in SYSTEMPATH/Database/BaseConnection.php on line 467.
+ 1 SYSTEMPATH/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+ 2 SYSTEMPATH/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+ 3 SYSTEMPATH/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 4 SYSTEMPATH/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+ 5 APPPATH/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+ 6 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\Home->index()
+ 7 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+ 8 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+ 9 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+11 FCPATH/index.php(56): CodeIgniter\Boot::bootWeb()
+ERROR - 2026-02-12 17:29:08 --> Error connecting to the database: mysqli_sql_exception: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:201
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php(201): mysqli->real_connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#11 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#12 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#13 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:246
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#5 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#11 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#12 {main}
+CRITICAL - 2026-02-12 17:29:08 --> CodeIgniter\Database\Exceptions\DatabaseException: Unable to connect to the database.
+Main connection [MySQLi]: Connection timed out
+[Method: GET, Route: /]
+in SYSTEMPATH/Database/BaseConnection.php on line 467.
+ 1 SYSTEMPATH/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+ 2 SYSTEMPATH/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+ 3 SYSTEMPATH/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 4 SYSTEMPATH/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+ 5 APPPATH/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+ 6 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\Home->index()
+ 7 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+ 8 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+ 9 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+11 FCPATH/index.php(56): CodeIgniter\Boot::bootWeb()
+ERROR - 2026-02-12 22:54:19 --> Error connecting to the database: mysqli_sql_exception: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:201
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php(201): mysqli->real_connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#11 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#12 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#13 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:246
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#5 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#11 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#12 {main}
+CRITICAL - 2026-02-12 22:54:19 --> CodeIgniter\Database\Exceptions\DatabaseException: Unable to connect to the database.
+Main connection [MySQLi]: Connection timed out
+[Method: GET, Route: /]
+in SYSTEMPATH/Database/BaseConnection.php on line 467.
+ 1 SYSTEMPATH/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+ 2 SYSTEMPATH/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+ 3 SYSTEMPATH/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 4 SYSTEMPATH/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+ 5 APPPATH/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+ 6 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\Home->index()
+ 7 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+ 8 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+ 9 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+11 FCPATH/index.php(56): CodeIgniter\Boot::bootWeb()
+ERROR - 2026-02-12 22:58:22 --> Error connecting to the database: mysqli_sql_exception: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:201
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php(201): mysqli->real_connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#11 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#12 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#13 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:246
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#5 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#11 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#12 {main}
+CRITICAL - 2026-02-12 22:58:22 --> CodeIgniter\Database\Exceptions\DatabaseException: Unable to connect to the database.
+Main connection [MySQLi]: Connection timed out
+[Method: GET, Route: /]
+in SYSTEMPATH/Database/BaseConnection.php on line 467.
+ 1 SYSTEMPATH/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+ 2 SYSTEMPATH/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+ 3 SYSTEMPATH/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 4 SYSTEMPATH/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+ 5 APPPATH/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+ 6 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\Home->index()
+ 7 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+ 8 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+ 9 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+11 FCPATH/index.php(56): CodeIgniter\Boot::bootWeb()
+ERROR - 2026-02-12 23:39:37 --> Error connecting to the database: mysqli_sql_exception: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:201
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php(201): mysqli->real_connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#11 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#12 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#13 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Connection timed out in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:246
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+#5 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+#6 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Home->index()
+#7 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#11 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#12 {main}
+CRITICAL - 2026-02-12 23:39:37 --> CodeIgniter\Database\Exceptions\DatabaseException: Unable to connect to the database.
+Main connection [MySQLi]: Connection timed out
+[Method: GET, Route: /]
+in SYSTEMPATH/Database/BaseConnection.php on line 467.
+ 1 SYSTEMPATH/Database/BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+ 2 SYSTEMPATH/Database/BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query()
+ 3 SYSTEMPATH/Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 4 SYSTEMPATH/BaseModel.php(675): CodeIgniter\Model->doFindAll()
+ 5 APPPATH/Controllers/Home.php(19): CodeIgniter\BaseModel->findAll()
+ 6 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\Home->index()
+ 7 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+ 8 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+ 9 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+11 FCPATH/index.php(56): CodeIgniter\Boot::bootWeb()

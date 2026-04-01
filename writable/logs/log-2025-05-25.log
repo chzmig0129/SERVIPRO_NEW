@@ -1,0 +1,146 @@
+ERROR - 2025-05-25 00:17:47 --> mysqli_sql_exception: Unknown column 'p.id_sede' in 'WHERE' in C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('\r\n            S...', 0)
+#1 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('\r\n            S...')
+#2 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('\r\n            S...')
+#3 C:\xampp\htdocs\Servipro_pruebareal\app\Controllers\PowerPointController.php(37): CodeIgniter\Database\BaseConnection->query('\r\n            S...', Array)
+#4 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\PowerPointController->generarPresentacion('17')
+#5 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PowerPointController))
+#6 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#7 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(334): CodeIgniter\CodeIgniter->run()
+#8 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#9 C:\xampp\htdocs\Servipro_pruebareal\public\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#10 {main}
+CRITICAL - 2025-05-25 00:17:47 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'p.id_sede' in 'WHERE'
+[Method: GET, Route: powerpoint/generarPresentacion/17]
+in SYSTEMPATH\Database\BaseConnection.php on line 692.
+ 1 APPPATH\Controllers\PowerPointController.php(37): CodeIgniter\Database\BaseConnection->query('
+            SELECT 
+                tipo_incidencia,
+                COUNT(*) as total
+            FROM incidencias i
+            JOIN trampas t ON i.id_trampa = t.id
+            JOIN planos p ON t.id_plano = p.id
+            WHERE p.id_sede = ?
+            GROUP BY tipo_incidencia
+        ', [...])
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PowerPointController->generarPresentacion('17')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PowerPointController))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-05-25 00:17:47 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'p.id_sede' in 'WHERE'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('
+            SELECT 
+                tipo_incidencia,
+                COUNT(*) as total
+            FROM incidencias i
+            JOIN trampas t ON i.id_trampa = t.id
+            JOIN planos p ON t.id_plano = p.id
+            WHERE p.id_sede = \'17\'
+            GROUP BY tipo_incidencia
+        ')
+ 2 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('
+            SELECT 
+                tipo_incidencia,
+                COUNT(*) as total
+            FROM incidencias i
+            JOIN trampas t ON i.id_trampa = t.id
+            JOIN planos p ON t.id_plano = p.id
+            WHERE p.id_sede = \'17\'
+            GROUP BY tipo_incidencia
+        ')
+ 3 APPPATH\Controllers\PowerPointController.php(37): CodeIgniter\Database\BaseConnection->query('
+            SELECT 
+                tipo_incidencia,
+                COUNT(*) as total
+            FROM incidencias i
+            JOIN trampas t ON i.id_trampa = t.id
+            JOIN planos p ON t.id_plano = p.id
+            WHERE p.id_sede = ?
+            GROUP BY tipo_incidencia
+        ', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PowerPointController->generarPresentacion('17')
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PowerPointController))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-05-25 00:17:47 --> [Caused by] mysqli_sql_exception: Unknown column 'p.id_sede' in 'WHERE'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('
+            SELECT 
+                tipo_incidencia,
+                COUNT(*) as total
+            FROM incidencias i
+            JOIN trampas t ON i.id_trampa = t.id
+            JOIN planos p ON t.id_plano = p.id
+            WHERE p.id_sede = \'17\'
+            GROUP BY tipo_incidencia
+        ', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('
+            SELECT 
+                tipo_incidencia,
+                COUNT(*) as total
+            FROM incidencias i
+            JOIN trampas t ON i.id_trampa = t.id
+            JOIN planos p ON t.id_plano = p.id
+            WHERE p.id_sede = \'17\'
+            GROUP BY tipo_incidencia
+        ')
+ 3 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('
+            SELECT 
+                tipo_incidencia,
+                COUNT(*) as total
+            FROM incidencias i
+            JOIN trampas t ON i.id_trampa = t.id
+            JOIN planos p ON t.id_plano = p.id
+            WHERE p.id_sede = \'17\'
+            GROUP BY tipo_incidencia
+        ')
+ 4 APPPATH\Controllers\PowerPointController.php(37): CodeIgniter\Database\BaseConnection->query('
+            SELECT 
+                tipo_incidencia,
+                COUNT(*) as total
+            FROM incidencias i
+            JOIN trampas t ON i.id_trampa = t.id
+            JOIN planos p ON t.id_plano = p.id
+            WHERE p.id_sede = ?
+            GROUP BY tipo_incidencia
+        ', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PowerPointController->generarPresentacion('17')
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PowerPointController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-05-25 00:18:57 --> Error: Call to undefined method PhpOffice\PhpPresentation\Shape\Chart\Type\Pie::setIncludeSpreadsheet()
+[Method: GET, Route: powerpoint/generarPresentacion/17]
+in APPPATH\Controllers\PowerPointController.php on line 184.
+ 1 APPPATH\Controllers\PowerPointController.php(91): App\Controllers\PowerPointController->crearGraficaInsectos(Object(PhpOffice\PhpPresentation\Slide), [])
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\PowerPointController->generarPresentacion('17')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\PowerPointController))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-05-25 00:21:34 --> Error: Call to undefined method App\Controllers\Locations::obtenerDatosDashboard()
+[Method: GET, Route: locations/generarPowerPoint]
+in APPPATH\Controllers\Locations.php on line 1094.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->generarPowerPoint()
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-05-25 00:21:40 --> Error: Call to undefined method App\Controllers\Locations::obtenerDatosDashboard()
+[Method: GET, Route: locations/generarPowerPoint]
+in APPPATH\Controllers\Locations.php on line 1094.
+ 1 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->generarPowerPoint()
+ 2 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 3 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 4 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 5 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 6 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

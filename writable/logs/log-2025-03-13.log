@@ -1,0 +1,210 @@
+CRITICAL - 2025-03-13 11:03:37 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 98.
+ 1 APPPATH\Views\locations\index.php(98): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 98)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:04:14 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 98.
+ 1 APPPATH\Views\locations\index.php(98): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 98)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:05:42 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 98.
+ 1 APPPATH\Views\locations\index.php(98): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 98)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:10:51 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 98.
+ 1 APPPATH\Views\locations\index.php(98): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 98)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:15:16 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 99.
+ 1 APPPATH\Views\locations\index.php(99): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 99)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:16:03 --> ErrorException: Undefined array key "inspector"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 99.
+ 1 APPPATH\Views\locations\index.php(99): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "inspector"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 99)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:16:10 --> ErrorException: Undefined array key "inspector"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 99.
+ 1 APPPATH\Views\locations\index.php(99): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "inspector"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 99)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:17:43 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 100.
+ 1 APPPATH\Views\locations\index.php(100): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 100)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:18:32 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 100.
+ 1 APPPATH\Views\locations\index.php(100): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 100)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:21:18 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 100.
+ 1 APPPATH\Views\locations\index.php(100): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 100)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:28:48 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 99.
+ 1 APPPATH\Views\locations\index.php(99): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 99)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:29:21 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 99.
+ 1 APPPATH\Views\locations\index.php(99): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 99)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:34:08 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 100.
+ 1 APPPATH\Views\locations\index.php(100): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 100)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:36:16 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 99.
+ 1 APPPATH\Views\locations\index.php(99): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 99)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-13 11:36:23 --> ErrorException: Undefined array key "cantidad_organismos"
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 99.
+ 1 APPPATH\Views\locations\index.php(99): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cantidad_organismos"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 99)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(121): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

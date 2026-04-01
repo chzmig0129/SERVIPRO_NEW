@@ -1,0 +1,14 @@
+CRITICAL - 2025-03-11 23:05:55 --> ErrorException: Undefined variable $totalTrampasSede
+[Method: GET, Route: locations]
+in APPPATH\Views\locations\index.php on line 37.
+ 1 APPPATH\Views\locations\index.php(37): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $totalTrampasSede', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php', 37)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\locations\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('locations/index', [], true)
+ 5 APPPATH\Controllers\Locations.php(31): view('locations/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Locations->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Locations))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

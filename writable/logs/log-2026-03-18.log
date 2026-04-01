@@ -1,0 +1,17 @@
+ERROR - 2026-03-18 16:30:13 --> mysqli_sql_exception: CONSTRAINT `planos.archivo` failed for `u976386866_name`.`planos` in /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php:327
+Stack trace:
+#0 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/MySQLi/Connection.php(327): mysqli->query()
+#1 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute()
+#2 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery()
+#3 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Database/BaseBuilder.php(2521): CodeIgniter\Database\BaseConnection->query()
+#4 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(461): CodeIgniter\Database\BaseBuilder->update()
+#5 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/BaseModel.php(1027): CodeIgniter\Model->doUpdate()
+#6 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Model.php(863): CodeIgniter\BaseModel->update()
+#7 /home/u976386866/domains/servipro.site/public_html/app/app/Controllers/Blueprints.php(390): CodeIgniter\Model->update()
+#8 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(933): App\Controllers\Blueprints->guardar_estado()
+#9 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController()
+#10 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest()
+#11 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(334): CodeIgniter\CodeIgniter->run()
+#12 /home/u976386866/domains/servipro.site/public_html/app/vendor/codeigniter4/framework/system/Boot.php(67): CodeIgniter\Boot::runCodeIgniter()
+#13 /home/u976386866/domains/servipro.site/public_html/app/public/index.php(56): CodeIgniter\Boot::bootWeb()
+#14 {main}

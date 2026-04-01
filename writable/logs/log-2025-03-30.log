@@ -1,0 +1,63 @@
+CRITICAL - 2025-03-30 18:54:40 --> ErrorException: Undefined array key "trampa_id"
+[Method: GET, Route: blueprints/view/13]
+in APPPATH\Views\blueprints\plano_capture.php on line 92.
+ 1 APPPATH\Views\blueprints\plano_capture.php(92): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "trampa_id"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\blueprints\\plano_capture.php', 92)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\blueprints\\plano_capture.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('blueprints/plano_capture', [], true)
+ 5 APPPATH\Controllers\Blueprints.php(111): view('blueprints/plano_capture', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Blueprints->view('13')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Blueprints))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-30 18:55:14 --> ErrorException: Undefined array key "trampa_id"
+[Method: GET, Route: blueprints/view/13]
+in APPPATH\Views\blueprints\plano_capture.php on line 92.
+ 1 APPPATH\Views\blueprints\plano_capture.php(92): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "trampa_id"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\blueprints\\plano_capture.php', 92)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\blueprints\\plano_capture.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('blueprints/plano_capture', [], true)
+ 5 APPPATH\Controllers\Blueprints.php(111): view('blueprints/plano_capture', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Blueprints->view('13')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Blueprints))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-30 23:20:21 --> ErrorException: Undefined array key "trampa_id"
+[Method: GET, Route: blueprints/view/13]
+in APPPATH\Views\blueprints\plano_capture.php on line 92.
+ 1 APPPATH\Views\blueprints\plano_capture.php(92): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "trampa_id"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\blueprints\\plano_capture.php', 92)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\blueprints\\plano_capture.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('blueprints/plano_capture', [], true)
+ 5 APPPATH\Controllers\Blueprints.php(111): view('blueprints/plano_capture', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Blueprints->view('13')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Blueprints))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-30 23:29:12 --> Exception: The PHP GD extension is required, but is not installed.
+[Method: GET, Route: reports/pdf_trampas/13]
+in VENDORPATH\dompdf\dompdf\lib\Cpdf.php on line 6091.
+ 1 VENDORPATH\dompdf\dompdf\src\Adapter\CPDF.php(672): Dompdf\Cpdf->addPngFromFile('C:\\Users\\diego\\AppData\\Local\\Temp\\ca_63A2.tmp', 52.76574803149606, 111.94201081208132, 751.3585039370079, 448.5722411564226)
+ 2 VENDORPATH\dompdf\dompdf\src\Renderer\Image.php(63): Dompdf\Adapter\CPDF->image('C:\\Users\\diego\\AppData\\Local\\Temp\\ca_63A2.tmp', 52.76574803149606, 34.76574803149606, 751.3585039370079, 448.5722411564226, 'normal')
+ 3 VENDORPATH\dompdf\dompdf\src\Renderer.php(305): Dompdf\Renderer\Image->render(Object(Dompdf\FrameDecorator\Image))
+ 4 VENDORPATH\dompdf\dompdf\src\Renderer.php(140): Dompdf\Renderer->_render_frame('image', Object(Dompdf\FrameDecorator\Image))
+ 5 VENDORPATH\dompdf\dompdf\src\Renderer.php(207): Dompdf\Renderer->render(Object(Dompdf\FrameDecorator\Image))
+ 6 VENDORPATH\dompdf\dompdf\src\Renderer.php(207): Dompdf\Renderer->render(Object(Dompdf\FrameDecorator\Block))
+ 7 VENDORPATH\dompdf\dompdf\src\Renderer.php(207): Dompdf\Renderer->render(Object(Dompdf\FrameDecorator\Block))
+ 8 VENDORPATH\dompdf\dompdf\src\Renderer.php(207): Dompdf\Renderer->render(Object(Dompdf\FrameDecorator\Block))
+ 9 VENDORPATH\dompdf\dompdf\src\FrameReflower\Page.php(149): Dompdf\Renderer->render(Object(Dompdf\FrameDecorator\Block))
+10 VENDORPATH\dompdf\dompdf\src\FrameDecorator\AbstractFrameDecorator.php(905): Dompdf\FrameReflower\Page->reflow(null)
+11 VENDORPATH\dompdf\dompdf\src\Dompdf.php(808): Dompdf\FrameDecorator\AbstractFrameDecorator->reflow()
+12 APPPATH\Controllers\Reports.php(124): Dompdf\Dompdf->render()
+13 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Reports->pdf_trampas('13')
+14 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Reports))
+15 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+16 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+17 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+18 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

@@ -1,0 +1,603 @@
+ERROR - 2025-03-28 09:19:06 --> mysqli_sql_exception: Unknown column 'sede' in 'SELECT' in C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('\n            SE...', 0)
+#1 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('\n            SE...')
+#2 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('\n            SE...')
+#3 C:\xampp\htdocs\Servipro_pruebareal\app\Controllers\QuejasController.php(28): CodeIgniter\Database\BaseConnection->query('\n            SE...')
+#4 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+#5 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+#6 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#7 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(334): CodeIgniter\CodeIgniter->run()
+#8 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#9 C:\xampp\htdocs\Servipro_pruebareal\public\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#10 {main}
+CRITICAL - 2025-03-28 09:19:06 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'sede' in 'SELECT'
+[Method: GET, Route: quejas/estadisticas]
+in SYSTEMPATH\Database\BaseConnection.php on line 692.
+ 1 APPPATH\Controllers\QuejasController.php(28): CodeIgniter\Database\BaseConnection->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:19:06 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'sede' in 'SELECT'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 2 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 3 APPPATH\Controllers\QuejasController.php(28): CodeIgniter\Database\BaseConnection->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:19:06 --> [Caused by] mysqli_sql_exception: Unknown column 'sede' in 'SELECT'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 3 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 4 APPPATH\Controllers\QuejasController.php(28): CodeIgniter\Database\BaseConnection->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-03-28 09:20:21 --> mysqli_sql_exception: Unknown column 'sede' in 'SELECT' in C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('\n            SE...', 0)
+#1 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('\n            SE...')
+#2 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('\n            SE...')
+#3 C:\xampp\htdocs\Servipro_pruebareal\app\Controllers\QuejasController.php(49): CodeIgniter\Database\BaseConnection->query('\n            SE...')
+#4 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+#5 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+#6 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#7 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(334): CodeIgniter\CodeIgniter->run()
+#8 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#9 C:\xampp\htdocs\Servipro_pruebareal\public\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#10 {main}
+CRITICAL - 2025-03-28 09:20:21 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'sede' in 'SELECT'
+[Method: GET, Route: quejas/estadisticas]
+in SYSTEMPATH\Database\BaseConnection.php on line 692.
+ 1 APPPATH\Controllers\QuejasController.php(49): CodeIgniter\Database\BaseConnection->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:20:21 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'sede' in 'SELECT'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 2 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 3 APPPATH\Controllers\QuejasController.php(49): CodeIgniter\Database\BaseConnection->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:20:21 --> [Caused by] mysqli_sql_exception: Unknown column 'sede' in 'SELECT'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 3 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 4 APPPATH\Controllers\QuejasController.php(49): CodeIgniter\Database\BaseConnection->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-03-28 09:20:24 --> mysqli_sql_exception: Unknown column 'sede' in 'SELECT' in C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:327
+Stack trace:
+#0 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(327): mysqli->query('\n            SE...', 0)
+#1 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('\n            SE...')
+#2 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('\n            SE...')
+#3 C:\xampp\htdocs\Servipro_pruebareal\app\Controllers\QuejasController.php(22): CodeIgniter\Database\BaseConnection->query('\n            SE...')
+#4 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\QuejasController->index()
+#5 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+#6 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#7 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(334): CodeIgniter\CodeIgniter->run()
+#8 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#9 C:\xampp\htdocs\Servipro_pruebareal\public\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#10 {main}
+CRITICAL - 2025-03-28 09:20:24 --> CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'sede' in 'SELECT'
+[Method: GET, Route: quejas]
+in SYSTEMPATH\Database\BaseConnection.php on line 692.
+ 1 APPPATH\Controllers\QuejasController.php(22): CodeIgniter\Database\BaseConnection->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->index()
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:20:24 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Unknown column 'sede' in 'SELECT'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 332.
+ 1 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 2 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 3 APPPATH\Controllers\QuejasController.php(22): CodeIgniter\Database\BaseConnection->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 4 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->index()
+ 5 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 6 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:20:24 --> [Caused by] mysqli_sql_exception: Unknown column 'sede' in 'SELECT'
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 327.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(327): mysqli->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(738): CodeIgniter\Database\MySQLi\Connection->execute('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 3 SYSTEMPATH\Database\BaseConnection.php(652): CodeIgniter\Database\BaseConnection->simpleQuery('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 4 APPPATH\Controllers\QuejasController.php(22): CodeIgniter\Database\BaseConnection->query('
+            SELECT DISTINCT sede 
+            FROM quejas 
+            WHERE sede IS NOT NULL 
+            ORDER BY sede
+        ')
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->index()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:27:28 --> Error: Call to undefined function form_open()
+[Method: GET, Route: quejas/new]
+in APPPATH\Views\quejas\create.php on line 14.
+ 1 SYSTEMPATH\View\View.php(224): include()
+ 2 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('quejas/create', [], true)
+ 4 APPPATH\Controllers\QuejasController.php(96): view('quejas/create', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->new()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:27:34 --> Error: Call to undefined function form_open()
+[Method: GET, Route: quejas/new]
+in APPPATH\Views\quejas\create.php on line 14.
+ 1 SYSTEMPATH\View\View.php(224): include()
+ 2 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('quejas/create', [], true)
+ 4 APPPATH\Controllers\QuejasController.php(96): view('quejas/create', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->new()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:27:53 --> Error: Call to undefined function form_open()
+[Method: GET, Route: quejas/new]
+in APPPATH\Views\quejas\create.php on line 14.
+ 1 SYSTEMPATH\View\View.php(224): include()
+ 2 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('quejas/create', [], true)
+ 4 APPPATH\Controllers\QuejasController.php(96): view('quejas/create', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->new()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:29:37 --> Error: Call to undefined function form_open()
+[Method: GET, Route: quejas/new]
+in APPPATH\Views\quejas\create.php on line 14.
+ 1 SYSTEMPATH\View\View.php(224): include()
+ 2 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('quejas/create', [], true)
+ 4 APPPATH\Controllers\QuejasController.php(96): view('quejas/create', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->new()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:29:43 --> Error: Call to undefined function form_open()
+[Method: GET, Route: quejas/new]
+in APPPATH\Views\quejas\create.php on line 14.
+ 1 SYSTEMPATH\View\View.php(224): include()
+ 2 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('quejas/create', [], true)
+ 4 APPPATH\Controllers\QuejasController.php(96): view('quejas/create', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->new()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:38:05 --> CodeIgniter\Database\Exceptions\DataException: "setTimestamps" is not a valid Model Event callback.
+[Method: POST, Route: quejas/create]
+in SYSTEMPATH\BaseModel.php on line 1694.
+ 1 SYSTEMPATH\BaseModel.php(1694): CodeIgniter\Database\Exceptions\DataException::forInvalidMethodTriggered('setTimestamps')
+ 2 SYSTEMPATH\BaseModel.php(836): CodeIgniter\BaseModel->trigger('beforeInsert', [...])
+ 3 SYSTEMPATH\Model.php(800): CodeIgniter\BaseModel->insert([...], true)
+ 4 APPPATH\Controllers\QuejasController.php(125): CodeIgniter\Model->insert([...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->create()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:39:15 --> CodeIgniter\Database\Exceptions\DataException: "setTimestamps" is not a valid Model Event callback.
+[Method: POST, Route: quejas/create]
+in SYSTEMPATH\BaseModel.php on line 1694.
+ 1 SYSTEMPATH\BaseModel.php(1694): CodeIgniter\Database\Exceptions\DataException::forInvalidMethodTriggered('setTimestamps')
+ 2 SYSTEMPATH\BaseModel.php(836): CodeIgniter\BaseModel->trigger('beforeInsert', [...])
+ 3 SYSTEMPATH\Model.php(800): CodeIgniter\BaseModel->insert([...], true)
+ 4 APPPATH\Controllers\QuejasController.php(125): CodeIgniter\Model->insert([...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->create()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:41:37 --> CodeIgniter\Database\Exceptions\DataException: "setTimestamps" is not a valid Model Event callback.
+[Method: POST, Route: quejas/create]
+in SYSTEMPATH\BaseModel.php on line 1694.
+ 1 SYSTEMPATH\BaseModel.php(1694): CodeIgniter\Database\Exceptions\DataException::forInvalidMethodTriggered('setTimestamps')
+ 2 SYSTEMPATH\BaseModel.php(836): CodeIgniter\BaseModel->trigger('beforeInsert', [...])
+ 3 SYSTEMPATH\Model.php(800): CodeIgniter\BaseModel->insert([...], true)
+ 4 APPPATH\Controllers\QuejasController.php(125): CodeIgniter\Model->insert([...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->create()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:43:27 --> CodeIgniter\Database\Exceptions\DataException: "setTimestamps" is not a valid Model Event callback.
+[Method: POST, Route: quejas/create]
+in SYSTEMPATH\BaseModel.php on line 1694.
+ 1 SYSTEMPATH\BaseModel.php(1694): CodeIgniter\Database\Exceptions\DataException::forInvalidMethodTriggered('setTimestamps')
+ 2 SYSTEMPATH\BaseModel.php(836): CodeIgniter\BaseModel->trigger('beforeInsert', [...])
+ 3 SYSTEMPATH\Model.php(800): CodeIgniter\BaseModel->insert([...], true)
+ 4 APPPATH\Controllers\QuejasController.php(125): CodeIgniter\Model->insert([...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->create()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 09:44:42 --> CodeIgniter\Database\Exceptions\DataException: "setTimestamps" is not a valid Model Event callback.
+[Method: POST, Route: quejas/create]
+in SYSTEMPATH\BaseModel.php on line 1694.
+ 1 SYSTEMPATH\BaseModel.php(1694): CodeIgniter\Database\Exceptions\DataException::forInvalidMethodTriggered('setTimestamps')
+ 2 SYSTEMPATH\BaseModel.php(836): CodeIgniter\BaseModel->trigger('beforeInsert', [...])
+ 3 SYSTEMPATH\Model.php(800): CodeIgniter\BaseModel->insert([...], true)
+ 4 APPPATH\Controllers\QuejasController.php(141): CodeIgniter\Model->insert([...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->create()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-03-28 09:46:20 --> Excepción al crear queja: "setTimestamps" is not a valid Model Event callback.
+ERROR - 2025-03-28 09:46:20 --> Stack trace: #0 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\BaseModel.php(1694): CodeIgniter\Database\Exceptions\DataException::forInvalidMethodTriggered('setTimestamps')
+#1 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\BaseModel.php(836): CodeIgniter\BaseModel->trigger('beforeInsert', Array)
+#2 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Model.php(800): CodeIgniter\BaseModel->insert(Array, true)
+#3 C:\xampp\htdocs\Servipro_pruebareal\app\Controllers\QuejasController.php(152): CodeIgniter\Model->insert(Array)
+#4 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\QuejasController->create()
+#5 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+#6 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#7 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(334): CodeIgniter\CodeIgniter->run()
+#8 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#9 C:\xampp\htdocs\Servipro_pruebareal\public\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#10 {main}
+CRITICAL - 2025-03-28 10:17:35 --> ErrorException: Undefined array key "codigo"
+[Method: GET, Route: reports/pdf_completo/13]
+in APPPATH\Views\reportes\pdf_completo.php on line 493.
+ 1 APPPATH\Views\reportes\pdf_completo.php(493): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "codigo"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\reportes\\pdf_completo.php', 493)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\reportes\\pdf_completo.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('reportes/pdf_completo', [], true)
+ 5 APPPATH\Controllers\Reports.php(295): view('reportes/pdf_completo', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Reports->pdf_completo('13')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Reports))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 10:27:13 --> ErrorException: Undefined variable $fecha_generacion
+[Method: GET, Route: reports/pdf_completo/13]
+in APPPATH\Views\reportes\captura_vista.php on line 299.
+ 1 APPPATH\Views\reportes\captura_vista.php(299): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $fecha_generacion', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\reportes\\captura_vista.php', 299)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\reportes\\captura_vista.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('reportes/captura_vista', [], true)
+ 5 APPPATH\Controllers\Reports.php(300): view('reportes/captura_vista', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Reports->pdf_completo('13')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Reports))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 10:57:40 --> Error: Call to undefined function App\Controllers\imagecreatefromstring()
+[Method: GET, Route: reports/pdf_completo/13]
+in APPPATH\Controllers\Reports.php on line 352.
+ 1 APPPATH\Controllers\Reports.php(279): App\Controllers\Reports->generarImagenTrampas([...], [...], 'http://localhost/Servipro_pruebareal/public/uploads/planos/plano_13_1742250825.jpg')
+ 2 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Reports->pdf_completo('13')
+ 3 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Reports))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 11:33:36 --> ErrorException: Undefined array key "cliente"
+[Method: GET, Route: ventas]
+in APPPATH\Views\ventas\index.php on line 87.
+ 1 APPPATH\Views\ventas\index.php(87): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "cliente"', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\ventas\\index.php', 87)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\ventas\\index.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('ventas/index', [], true)
+ 5 APPPATH\Controllers\VentasController.php(43): view('ventas/index', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\VentasController->index()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\VentasController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 12:41:22 --> ParseError: syntax error, unexpected token "catch", expecting end of file
+[Method: GET, Route: reportes/pdf_optimizado/quejas]
+in APPPATH\Controllers\ReporteController.php on line 748.
+ 1 VENDORPATH\composer\ClassLoader.php(427): Composer\Autoload\{closure}('C:\\xampp\\htdocs\\Servipro_pruebareal\\vendor\\composer/../../app\\Controllers\\ReporteController.php')
+ 2 [internal function]: Composer\Autoload\ClassLoader->loadClass('App\\Controllers\\ReporteController')
+ 3 SYSTEMPATH\CodeIgniter.php(885): class_exists('\\App\\Controllers\\ReporteController', true)
+ 4 SYSTEMPATH\CodeIgniter.php(494): CodeIgniter\CodeIgniter->startController()
+ 5 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-03-28 12:54:25 --> Error connecting to the database: mysqli_sql_exception: Se produjo un error durante el intento de conexión ya que la parte conectada no respondió adecuadamente tras un periodo de tiempo, o bien se produjo un error en la conexión establecida ya que el host conectado no ha podido responder in C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:201
+Stack trace:
+#0 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(201): mysqli->real_connect('191.101.79.1', 'u976386866_user', Object(SensitiveParameterValue), 'u976386866_name', 3306, '', 0)
+#1 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#2 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#3 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT *\nFROM `...', Array, false)
+#4 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#5 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\BaseModel.php(675): CodeIgniter\Model->doFindAll(0, 0)
+#6 C:\xampp\htdocs\Servipro_pruebareal\app\Controllers\QuejasController.php(52): CodeIgniter\BaseModel->findAll()
+#7 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+#8 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+#9 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#10 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(334): CodeIgniter\CodeIgniter->run()
+#11 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#12 C:\xampp\htdocs\Servipro_pruebareal\public\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#13 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Se produjo un error durante el intento de conexión ya que la parte conectada no respondió adecuadamente tras un periodo de tiempo, o bien se produjo un error en la conexión establecida ya que el host conectado no ha podido responder in C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:246
+Stack trace:
+#0 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#1 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#2 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT *\nFROM `...', Array, false)
+#3 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+#4 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\BaseModel.php(675): CodeIgniter\Model->doFindAll(0, 0)
+#5 C:\xampp\htdocs\Servipro_pruebareal\app\Controllers\QuejasController.php(52): CodeIgniter\BaseModel->findAll()
+#6 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+#7 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+#8 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#9 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(334): CodeIgniter\CodeIgniter->run()
+#10 C:\xampp\htdocs\Servipro_pruebareal\vendor\codeigniter4\framework\system\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+#11 C:\xampp\htdocs\Servipro_pruebareal\public\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2025-03-28 12:54:25 --> CodeIgniter\Database\Exceptions\DatabaseException: Unable to connect to the database.
+Main connection [MySQLi]: Se produjo un error durante el intento de conexión ya que la parte conectada no respondió adecuadamente tras un periodo de tiempo, o bien se produjo un error en la conexión establecida ya que el host conectado no ha podido responder
+[Method: GET, Route: quejas/estadisticas]
+in SYSTEMPATH\Database\BaseConnection.php on line 467.
+ 1 SYSTEMPATH\Database\BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+ 2 SYSTEMPATH\Database\BaseBuilder.php(1649): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `sedes`', [], false)
+ 3 SYSTEMPATH\Model.php(286): CodeIgniter\Database\BaseBuilder->get()
+ 4 SYSTEMPATH\BaseModel.php(675): CodeIgniter\Model->doFindAll(0, 0)
+ 5 APPPATH\Controllers\QuejasController.php(52): CodeIgniter\BaseModel->findAll()
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 13:01:26 --> ErrorException: Undefined variable $fechaInicio
+[Method: GET, Route: quejas/estadisticas]
+in APPPATH\Views\quejas\estadisticas.php on line 60.
+ 1 APPPATH\Views\quejas\estadisticas.php(60): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $fechaInicio', 'C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\quejas\\estadisticas.php', 60)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\Servipro_pruebareal\\app\\Views\\quejas\\estadisticas.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('quejas/estadisticas', [], true)
+ 5 APPPATH\Controllers\QuejasController.php(155): view('quejas/estadisticas', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\QuejasController->estadisticas()
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\QuejasController))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 13:12:28 --> Error: Call to undefined function set_value()
+[Method: GET, Route: ventas/new]
+in APPPATH\Views\ventas\create.php on line 38.
+ 1 SYSTEMPATH\View\View.php(224): include()
+ 2 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('ventas/create', [], true)
+ 4 APPPATH\Controllers\VentasController.php(176): view('ventas/create', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\VentasController->new()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\VentasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 13:13:16 --> Error: Call to undefined function set_value()
+[Method: GET, Route: ventas/edit/1]
+in APPPATH\Views\ventas\edit.php on line 39.
+ 1 SYSTEMPATH\View\View.php(224): include()
+ 2 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('ventas/edit', [], true)
+ 4 APPPATH\Controllers\VentasController.php(241): view('ventas/edit', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\VentasController->edit('1')
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\VentasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 13:14:12 --> Error: Call to undefined function set_value()
+[Method: GET, Route: ventas/edit/1]
+in APPPATH\Views\ventas\edit.php on line 39.
+ 1 SYSTEMPATH\View\View.php(224): include()
+ 2 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('ventas/edit', [], true)
+ 4 APPPATH\Controllers\VentasController.php(241): view('ventas/edit', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\VentasController->edit('1')
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\VentasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 13:16:05 --> Error: Call to undefined function set_value()
+[Method: GET, Route: ventas/new]
+in APPPATH\Views\ventas\create.php on line 38.
+ 1 SYSTEMPATH\View\View.php(224): include()
+ 2 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('ventas/create', [], true)
+ 4 APPPATH\Controllers\VentasController.php(176): view('ventas/create', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\VentasController->new()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\VentasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 13:16:16 --> Error: Call to undefined function set_value()
+[Method: GET, Route: ventas/new]
+in APPPATH\Views\ventas\create.php on line 38.
+ 1 SYSTEMPATH\View\View.php(224): include()
+ 2 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('ventas/create', [], true)
+ 4 APPPATH\Controllers\VentasController.php(176): view('ventas/create', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\VentasController->new()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\VentasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-03-28 13:16:30 --> Error: Call to undefined function set_value()
+[Method: GET, Route: ventas/new]
+in APPPATH\Views\ventas\create.php on line 38.
+ 1 SYSTEMPATH\View\View.php(224): include()
+ 2 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('ventas/create', [], true)
+ 4 APPPATH\Controllers\VentasController.php(176): view('ventas/create', [...])
+ 5 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\VentasController->new()
+ 6 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\VentasController))
+ 7 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))

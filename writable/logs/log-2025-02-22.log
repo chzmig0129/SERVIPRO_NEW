@@ -1,0 +1,169 @@
+ERROR - 2025-02-22 20:38:30 --> Error connecting to the database: mysqli_sql_exception: Access denied for user ''@'localhost' (using password: NO) in C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:201
+Stack trace:
+#0 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php(201): mysqli->real_connect('localhost', '', Object(SensitiveParameterValue), '', 3306, '', 0)
+#1 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#2 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#3 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\BaseConnection.php(1525): CodeIgniter\Database\BaseConnection->query('SHOW TABLES FRO...')
+#4 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\BaseConnection.php(1545): CodeIgniter\Database\BaseConnection->listTables()
+#5 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\MigrationRunner.php(758): CodeIgniter\Database\BaseConnection->tableExists('migrations')
+#6 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\MigrationRunner.php(162): CodeIgniter\Database\MigrationRunner->ensureTable()
+#7 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Commands\Database\Migrate.php(85): CodeIgniter\Database\MigrationRunner->latest(NULL)
+#8 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\CLI\Commands.php(70): CodeIgniter\Commands\Database\Migrate->run(Array)
+#9 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\CLI\Console.php(48): CodeIgniter\CLI\Commands->run('migrate', Array)
+#10 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Boot.php(360): CodeIgniter\CLI\Console->run()
+#11 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Boot.php(104): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#12 C:\xampp\htdocs\ci-news\spark(84): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#13 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: Access denied for user ''@'localhost' (using password: NO) in C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\MySQLi\Connection.php:246
+Stack trace:
+#0 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\BaseConnection.php(421): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#1 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\BaseConnection.php(620): CodeIgniter\Database\BaseConnection->initialize()
+#2 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\BaseConnection.php(1525): CodeIgniter\Database\BaseConnection->query('SHOW TABLES FRO...')
+#3 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\BaseConnection.php(1545): CodeIgniter\Database\BaseConnection->listTables()
+#4 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\MigrationRunner.php(758): CodeIgniter\Database\BaseConnection->tableExists('migrations')
+#5 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Database\MigrationRunner.php(162): CodeIgniter\Database\MigrationRunner->ensureTable()
+#6 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Commands\Database\Migrate.php(85): CodeIgniter\Database\MigrationRunner->latest(NULL)
+#7 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\CLI\Commands.php(70): CodeIgniter\Commands\Database\Migrate->run(Array)
+#8 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\CLI\Console.php(48): CodeIgniter\CLI\Commands->run('migrate', Array)
+#9 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Boot.php(360): CodeIgniter\CLI\Console->run()
+#10 C:\xampp\htdocs\ci-news\vendor\codeigniter4\framework\system\Boot.php(104): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+#11 C:\xampp\htdocs\ci-news\spark(84): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+#12 {main}
+CRITICAL - 2025-02-22 21:03:27 --> CodeIgniter\HTTP\Exceptions\BadRequestException: The URI you submitted has disallowed characters: "id=4"
+[Method: GET, Route: sedes/ver/id=4]
+in SYSTEMPATH\Router\Router.php on line 739.
+ 1 SYSTEMPATH\Router\Router.php(207): CodeIgniter\Router\Router->checkDisallowedChars('sedes/ver/id=4')
+ 2 SYSTEMPATH\CodeIgniter.php(832): CodeIgniter\Router\Router->handle('sedes/ver/id=4')
+ 3 SYSTEMPATH\CodeIgniter.php(455): CodeIgniter\CodeIgniter->tryToRouteIt(Object(CodeIgniter\Router\RouteCollection))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-02-22 21:03:33 --> CodeIgniter\HTTP\Exceptions\BadRequestException: The URI you submitted has disallowed characters: "id=2"
+[Method: GET, Route: sedes/ver/id=2]
+in SYSTEMPATH\Router\Router.php on line 739.
+ 1 SYSTEMPATH\Router\Router.php(207): CodeIgniter\Router\Router->checkDisallowedChars('sedes/ver/id=2')
+ 2 SYSTEMPATH\CodeIgniter.php(832): CodeIgniter\Router\Router->handle('sedes/ver/id=2')
+ 3 SYSTEMPATH\CodeIgniter.php(455): CodeIgniter\CodeIgniter->tryToRouteIt(Object(CodeIgniter\Router\RouteCollection))
+ 4 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-02-22 18:07:51 --> ErrorException: Undefined array key "imagen"
+[Method: GET, Route: blueprints/view/6]
+in APPPATH\Views\blueprints\view.php on line 44.
+ 1 APPPATH\Views\blueprints\view.php(44): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "imagen"', 'C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\view.php', 44)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\view.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('blueprints/view', [], true)
+ 5 APPPATH\Controllers\Blueprints.php(46): view('blueprints/view', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Blueprints->view('6')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Blueprints))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-02-22 18:08:56 --> ErrorException: Undefined array key "imagen"
+[Method: GET, Route: blueprints/view/6]
+in APPPATH\Views\blueprints\view.php on line 44.
+ 1 APPPATH\Views\blueprints\view.php(44): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "imagen"', 'C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\view.php', 44)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\view.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('blueprints/view', [], true)
+ 5 APPPATH\Controllers\Blueprints.php(46): view('blueprints/view', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Blueprints->view('6')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Blueprints))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-02-22 18:09:08 --> ErrorException: Undefined array key "imagen"
+[Method: GET, Route: blueprints/view/6]
+in APPPATH\Views\blueprints\view.php on line 44.
+ 1 APPPATH\Views\blueprints\view.php(44): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined array key "imagen"', 'C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\view.php', 44)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\view.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('blueprints/view', [], true)
+ 5 APPPATH\Controllers\Blueprints.php(46): view('blueprints/view', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Blueprints->view('6')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Blueprints))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+ERROR - 2025-02-22 18:35:44 --> Error en guardar_estado: Undefined array key "tipo"
+ERROR - 2025-02-22 18:35:53 --> Error en guardar_estado: Undefined array key "tipo"
+ERROR - 2025-02-22 18:36:54 --> Error en guardar_estado: Datos de trampa incompletos: Array
+(
+    [x] => 687
+    [y] => 501
+    [zona] => 
+)
+
+ERROR - 2025-02-22 18:36:58 --> Error en guardar_estado: Datos de trampa incompletos: Array
+(
+    [x] => 687
+    [y] => 501
+    [zona] => 
+)
+
+ERROR - 2025-02-22 18:37:03 --> Error en guardar_estado: Datos de trampa incompletos: Array
+(
+    [x] => 687
+    [y] => 501
+    [zona] => 
+)
+
+ERROR - 2025-02-22 18:37:24 --> Error en guardar_estado: Datos de trampa incompletos: Array
+(
+    [x] => 847
+    [y] => 292
+    [zona] => 
+)
+
+ERROR - 2025-02-22 18:38:36 --> Error en guardar_estado: Trampa #0: Falta el tipo
+ERROR - 2025-02-22 18:38:39 --> Error en guardar_estado: Trampa #0: Falta el tipo
+ERROR - 2025-02-22 18:38:42 --> Error en guardar_estado: Trampa #0: Falta el tipo
+CRITICAL - 2025-02-22 19:03:52 --> ErrorException: Undefined variable $id_sede
+[Method: GET, Route: blueprints/viewplano/1]
+in APPPATH\Views\blueprints\viewplano.php on line 1184.
+ 1 APPPATH\Views\blueprints\viewplano.php(1184): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $id_sede', 'C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\viewplano.php', 1184)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\viewplano.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('blueprints/viewplano', [], true)
+ 5 APPPATH\Controllers\Blueprints.php(113): view('blueprints/viewplano', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Blueprints->viewplano('1')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Blueprints))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-02-22 19:03:54 --> ErrorException: Undefined variable $id_sede
+[Method: GET, Route: blueprints/viewplano/1]
+in APPPATH\Views\blueprints\viewplano.php on line 1184.
+ 1 APPPATH\Views\blueprints\viewplano.php(1184): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $id_sede', 'C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\viewplano.php', 1184)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\viewplano.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('blueprints/viewplano', [], true)
+ 5 APPPATH\Controllers\Blueprints.php(113): view('blueprints/viewplano', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Blueprints->viewplano('1')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Blueprints))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2025-02-22 19:04:17 --> ErrorException: Undefined variable $id_sede
+[Method: GET, Route: blueprints/viewplano/2]
+in APPPATH\Views\blueprints\viewplano.php on line 1184.
+ 1 APPPATH\Views\blueprints\viewplano.php(1184): CodeIgniter\Debug\Exceptions->errorHandler(2, 'Undefined variable $id_sede', 'C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\viewplano.php', 1184)
+ 2 SYSTEMPATH\View\View.php(224): include('C:\\xampp\\htdocs\\ci-news\\app\\Views\\blueprints\\viewplano.php')
+ 3 SYSTEMPATH\View\View.php(227): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 4 SYSTEMPATH\Common.php(1173): CodeIgniter\View\View->render('blueprints/viewplano', [], true)
+ 5 APPPATH\Controllers\Blueprints.php(113): view('blueprints/viewplano', [...])
+ 6 SYSTEMPATH\CodeIgniter.php(933): App\Controllers\Blueprints->viewplano('2')
+ 7 SYSTEMPATH\CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Blueprints))
+ 8 SYSTEMPATH\CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(334): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
