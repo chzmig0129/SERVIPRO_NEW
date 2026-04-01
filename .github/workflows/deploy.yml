@@ -19,7 +19,8 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: public_html/
+          server-dir: public_html/app/
+          dangerous-clean-slate: true
           exclude: |
             **/.git*
             **/.git*/**
@@ -29,3 +30,7 @@ jobs:
             **/.DS_Store
             **/.env
             **/AGENTS.md
+            **/backup_*.sql
+            **/builds/**
+            **/*.xlsx
+            **/test_reporte.php
