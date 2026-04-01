@@ -1,4 +1,35 @@
+# Dependencies
+node_modules/
+vendor/
 
-# Dolt database files (added by bd init)
-.dolt/
-*.db
+# Environment
+.env
+env
+
+# IDE
+.DS_Store
+.idea/
+.vscode/
+
+# CI4 writable
+writable/logs/*
+writable/cache/*
+writable/session/*
+writable/debugbar/*
+writable/uploads/*
+!writable/logs/.gitkeep
+!writable/cache/.gitkeep
+!writable/session/.gitkeep
+!writable/debugbar/.gitkeep
+!writable/uploads/.gitkeep
+
+# Beads local
+.beads/dolt-server.*
+.beads/interactions.jsonl
+.beads/last-touched
+
+# Backups
+*.sql
+
+# Build artifacts
+builds

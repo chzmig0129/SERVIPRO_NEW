@@ -1,4 +1,0 @@
-CRITICAL - 2025-11-14 09:27:59 --> ErrorException: Allowed memory size of 1610612736 bytes exhausted (tried to allocate 20480 bytes)
-[Method: GET, Route: reports/pdf_incidencias/65]
-in VENDORPATH/dompdf/dompdf/src/Cellmap.php on line 634.
- 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
