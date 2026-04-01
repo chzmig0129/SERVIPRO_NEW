@@ -1528,7 +1528,36 @@ class Blueprints extends BaseController
 
             // Guardar estado anterior para el log
             $estadoAnterior = $plano['habilitado'] ?? 'N/A';
-            
+
+            // === CASCADE DELETE: Eliminar trampas y datos relacionados de ESTE plano específico ===
+            $trampaModel = new \App\Models\TrampaModel();
+            $incidenciaModel = new \App\Models\IncidenciaModel();
+            $estadoTrampaModel = new \App\Models\EstadoTrampaModel();
+            $movimientoModel = new \App\Models\MovimientoTrampaModel();
+
+            // 1. Obtener SOLO las trampas de ESTE plano (filtro estricto por plano_id)
+            $trampasDelPlano = $trampaModel->where('plano_id', $id)->findAll();
+
+            if (!empty($trampasDelPlano)) {
+                foreach ($trampasDelPlano as $trampa) {
+                    // 2a. Eliminar incidencias por trampa.id (columna id_trampa en incidencias guarda el PK numérico)
+                    $incidenciaModel->where('id_trampa', $trampa['id'])->delete();
+
+                    // 2b. Eliminar estados por trampa.id (columna trampa_id en estado_trampas guarda el PK numérico)
+                    $estadoTrampaModel->where('trampa_id', $trampa['id'])->delete();
+
+                    // 2c. Eliminar historial de movimientos por trampa.id_trampa (columna id_trampa en historial_movimientos guarda el STRING label)
+                    // Y TAMBIÉN filtrar por plano_id para no borrar movimientos de trampas con el mismo label en otros planos
+                    $movimientoModel->where('id_trampa', $trampa['id_trampa'])->where('plano_id', $id)->delete();
+                }
+
+                // 3. Eliminar las trampas de ESTE plano
+                $trampaModel->where('plano_id', $id)->delete();
+
+                log_message('info', 'Cascade delete: eliminadas ' . count($trampasDelPlano) . ' trampas y datos relacionados del plano ID: ' . $id);
+            }
+            // === FIN CASCADE DELETE ===
+
             // Cambiar el habilitado a 0 (deshabilitado)
             // Usar skipValidation para omitir las reglas de validación que esperan strings
             $resultado = $planoModel->skipValidation(true)->update($id, ['habilitado' => 0]);
@@ -1608,8 +1637,14 @@ class Blueprints extends BaseController
             // b. DELETE FROM estado_trampas WHERE trampa_id = $dbId
             $estadoTrampaModel->where('trampa_id', $dbId)->delete();
 
-            // c. DELETE FROM historial_movimientos WHERE id_trampa = $dbId
-            $movimientoModel->where('id_trampa', $dbId)->delete();
+            // c. DELETE FROM historial_movimientos WHERE id_trampa = STRING label AND plano_id
+            // historial_movimientos.id_trampa guarda el STRING label (ej: 'LV-01'), no el PK numérico
+            // Filtrar también por plano_id para no borrar movimientos de trampas con el mismo label en otros planos
+            if ($trampaData) {
+                $movimientoModel->where('id_trampa', $trampaData['id_trampa'])
+                                 ->where('plano_id', $trampaData['plano_id'])
+                                 ->delete();
+            }
 
             // Borrar la trampa
             $trampaModel->delete($dbId);
@@ -1627,4 +1662,69 @@ class Blueprints extends BaseController
         }
     }
 
-} 
+    /**
+     * Eliminar TODAS las trampas de un plano específico y sus datos relacionados.
+     * Usado por 'Limpiar Todo' en el frontend.
+     * IMPORTANTE: Solo elimina trampas WHERE plano_id = $planoId recibido.
+     */
+    public function eliminar_trampas_plano()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Solicitud no válida']);
+        }
+
+        $planoId = $this->request->getPost('plano_id');
+
+        if (!$planoId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'plano_id es requerido']);
+        }
+
+        // Verificar que el plano existe
+        $planoModel = new \App\Models\PlanoModel();
+        $plano = $planoModel->find($planoId);
+        if (!$plano) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Plano no encontrado']);
+        }
+
+        try {
+            $trampaModel = new \App\Models\TrampaModel();
+            $incidenciaModel = new \App\Models\IncidenciaModel();
+            $estadoTrampaModel = new \App\Models\EstadoTrampaModel();
+            $movimientoModel = new \App\Models\MovimientoTrampaModel();
+
+            // Obtener SOLO las trampas de ESTE plano
+            $trampasDelPlano = $trampaModel->where('plano_id', $planoId)->findAll();
+            $cantidadEliminadas = count($trampasDelPlano);
+
+            if (!empty($trampasDelPlano)) {
+                foreach ($trampasDelPlano as $trampa) {
+                    // Eliminar incidencias (id_trampa guarda PK numérico de trampas)
+                    $incidenciaModel->where('id_trampa', $trampa['id'])->delete();
+
+                    // Eliminar estados (trampa_id guarda PK numérico de trampas)
+                    $estadoTrampaModel->where('trampa_id', $trampa['id'])->delete();
+
+                    // Eliminar movimientos (id_trampa guarda STRING label, filtrar también por plano_id)
+                    $movimientoModel->where('id_trampa', $trampa['id_trampa'])->where('plano_id', $planoId)->delete();
+                }
+
+                // Eliminar las trampas de ESTE plano
+                $trampaModel->where('plano_id', $planoId)->delete();
+
+                log_message('info', 'Limpiar Todo: eliminadas ' . $cantidadEliminadas . ' trampas del plano ID: ' . $planoId);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Se eliminaron ' . $cantidadEliminadas . ' trampas del plano'
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error en eliminar_trampas_plano: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error al eliminar trampas: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+}

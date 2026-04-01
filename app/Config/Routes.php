@@ -106,6 +106,7 @@ $routes->post('blueprints/guardar_incidencias_batch', 'Blueprints::guardar_incid
 $routes->post('blueprints/actualizar_incidencia', 'Blueprints::actualizar_incidencia');
 $routes->post('blueprints/actualizar_id_trampa', 'Blueprints::actualizar_id_trampa');
 $routes->post('blueprints/eliminar_trampa', 'Blueprints::eliminar_trampa');
+$routes->post('blueprints/eliminar_trampas_plano', 'Blueprints::eliminar_trampas_plano');
 $routes->get('blueprints/deshabilitar/(:num)', 'Blueprints::deshabilitar/$1');
 $routes->post('blueprints/deshabilitar/(:num)', 'Blueprints::deshabilitar/$1');
 
