@@ -1830,13 +1830,13 @@
             document.getElementById('modalLimpiarTodo').classList.remove('hidden');
         });
 
-        function cerrarModalLimpiarTodo() {
+        window.cerrarModalLimpiarTodo = function() {
             document.getElementById('modalLimpiarTodo').classList.add('hidden');
             document.getElementById('chkLimpiarHallazgos').checked = false;
             document.getElementById('chkLimpiarEvidencias').checked = false;
         }
 
-        async function ejecutarLimpiarTodo() {
+        window.ejecutarLimpiarTodo = async function() {
             const borrarHallazgos  = document.getElementById('chkLimpiarHallazgos').checked;
             const borrarEvidencias = document.getElementById('chkLimpiarEvidencias').checked;
             const planoId = <?= $plano['id'] ?>;
