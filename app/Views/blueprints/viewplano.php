@@ -372,7 +372,8 @@
             <h1 class="text-3xl font-bold">Sistema de Mapeo de Trampas</h1>
             <p class="text-gray-500"><?= $plano['nombre'] ?> - <?= $sede['nombre'] ?></p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-3">
+            <!-- Primary actions -->
             <button id="btnSeleccionarImagen" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -389,11 +390,8 @@
                 <i class="fas fa-upload"></i>
                 Cargar Estado
             </button>
-            <button id="btnLimpiar" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                <i class="fas fa-trash-alt"></i>
-                Limpiar Todo
-            </button>
-            <a href="<?= base_url('blueprints/uploadIncidenciasExcel/' . $plano['id']) ?>" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <!-- Secondary actions -->
+            <a href="<?= base_url('blueprints/uploadIncidenciasExcel/' . $plano['id']) ?>" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 border-l border-gray-300 pl-3">
                 <i class="fas fa-file-excel"></i>
                 Subida de incidencias por Excel
             </a>
@@ -401,6 +399,11 @@
                 <i class="fas fa-clipboard-check"></i>
                 Estado de Trampas
             </a>
+            <!-- Danger -->
+            <button id="btnLimpiar" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 border-l border-gray-300 pl-3">
+                <i class="fas fa-trash-alt"></i>
+                Limpiar Todo
+            </button>
 
         </div>
     </div>
@@ -418,73 +421,6 @@
                 </div>
                 <img id="planoImage" class="max-h-full hidden" style="object-fit: contain;" />
                 <p id="placeholderText" class="text-gray-500">Seleccione una imagen para comenzar</p>
-            </div>
-            
-            <!-- Leyenda de Trampas -->
-            <div class="bg-white rounded-lg shadow-md p-4 mt-4">
-                <h3 class="font-semibold mb-4">Leyenda de Trampas</h3>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <div class="flex items-center gap-2 p-2 rounded">
-                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                            <i class="fas fa-flask"></i>
-                        </div>
-                        <span class="text-sm">EDC Químicas</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded">
-                        <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-sm flex-shrink-0" style="color: #3B82F6;">
-                            <i class="fas fa-flask"></i>
-                        </div>
-                        <span class="text-sm">EDC Adhesivas</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded">
-                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                            <i class="fas fa-lightbulb"></i>
-                        </div>
-                        <span class="text-sm">Equipo de Luz UV</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded">
-                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                            <i class="fas fa-bug"></i>
-                        </div>
-                        <span class="text-sm">Trampa de Feromona Gorgojo</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded">
-                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                            <i class="fas fa-feather"></i>
-                        </div>
-                        <span class="text-sm">Trampa de Feromona Palomilla</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded">
-                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                            <i class="fas fa-volume-up"></i>
-                        </div>
-                        <span class="text-sm">Equipo Sónico</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded">
-                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                            <i class="fas fa-circle"></i>
-                        </div>
-                        <span class="text-sm">Globo terror</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded">
-                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                            <i class="fas fa-spider"></i>
-                        </div>
-                        <span class="text-sm">Trampa atrayente chinches</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded">
-                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                            <i class="fas fa-paw"></i>
-                        </div>
-                        <span class="text-sm">Trampa atrayente pulgas</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded">
-                        <div class="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center text-sm flex-shrink-0" style="color: #3B82F6;">
-                            <i class="fas fa-seedling"></i>
-                        </div>
-                        <span class="text-sm">Trampa feromonas picudo rojo</span>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -559,50 +495,70 @@
                 </div>
             </div>
 
-            <!-- Lista de Trampas -->
+            <!-- Leyenda de Trampas -->
             <div class="bg-white rounded-lg shadow-md p-4">
-                <h3 class="font-semibold mb-4">Lista de Trampas</h3>
-                <!-- Filtro por tipo de trampa -->
-                <div class="mb-4">
-                    <label for="filtroTipoTrampa" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por tipo:</label>
-                    <select id="filtroTipoTrampa" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
-                        <option value="">Todos los tipos</option>
-                        <option value="edc_quimicas">EDC Químicas</option>
-                        <option value="edc_adhesivas">EDC Adhesivas</option>
-                        <option value="luz_uv">Equipo de Luz UV</option>
-                        <option value="feromona_gorgojo">Trampa de Feromona Gorgojo</option>
-                        <option value="feromona_palomilla">Trampa de Feromona Palomilla</option>
-                        <option value="equipo_sonico">Equipo Sónico</option>
-                        <option value="globo_terror">Globo terror</option>
-                        <option value="atrayente_chinches">Trampa atrayente chinches</option>
-                        <option value="atrayente_pulgas">Trampa atrayente pulgas</option>
-                        <option value="feromona_picudo">Trampa feromonas picudo rojo</option>
-                        <!-- Mantener compatibilidad con tipos antiguos -->
-                        <option value="rodent">Trampa para Roedores</option>
-                        <option value="insect">Trampa para Insectos</option>
-                        <option value="fly">Trampa para Moscas</option>
-                        <option value="moth">Trampa para Polillas</option>
-                    </select>
-                </div>
-                <div class="overflow-y-auto max-h-[400px]">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left">ID</th>
-                                <th class="px-4 py-2 text-left">Tipo</th>
-                                <th class="px-4 py-2 text-left">Ubicación</th>
-                                <th class="px-4 py-2 text-left">Zona</th>
-                                <th class="px-4 py-2 text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="trampasTableBody">
-                            <tr>
-                                <td colspan="5" class="px-4 py-2 text-center text-gray-500">
-                                    No hay trampas registradas
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <h3 class="font-semibold mb-3">Leyenda de Trampas</h3>
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                            <i class="fas fa-flask" style="font-size: 0.6rem;"></i>
+                        </div>
+                        <span class="text-xs">EDC Químicas</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0" style="color: #3B82F6;">
+                            <i class="fas fa-flask" style="font-size: 0.6rem;"></i>
+                        </div>
+                        <span class="text-xs">EDC Adhesivas</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                            <i class="fas fa-lightbulb" style="font-size: 0.6rem;"></i>
+                        </div>
+                        <span class="text-xs">Equipo de Luz UV</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                            <i class="fas fa-bug" style="font-size: 0.6rem;"></i>
+                        </div>
+                        <span class="text-xs">Trampa de Feromona Gorgojo</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                            <i class="fas fa-feather" style="font-size: 0.6rem;"></i>
+                        </div>
+                        <span class="text-xs">Trampa de Feromona Palomilla</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                            <i class="fas fa-volume-up" style="font-size: 0.6rem;"></i>
+                        </div>
+                        <span class="text-xs">Equipo Sónico</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                            <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
+                        </div>
+                        <span class="text-xs">Globo terror</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                            <i class="fas fa-spider" style="font-size: 0.6rem;"></i>
+                        </div>
+                        <span class="text-xs">Trampa atrayente chinches</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                            <i class="fas fa-paw" style="font-size: 0.6rem;"></i>
+                        </div>
+                        <span class="text-xs">Trampa atrayente pulgas</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0" style="color: #3B82F6;">
+                            <i class="fas fa-seedling" style="font-size: 0.6rem;"></i>
+                        </div>
+                        <span class="text-xs">Trampa feromonas picudo rojo</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -727,14 +683,14 @@
                 <table class="tabla-incidencias w-full text-sm">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Trampa</th>
-                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Plaga</th>
-                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Incidencia</th>
-                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Tipo de Insecto</th>
-                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Cantidad de Organismos</th>
-                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Fecha de Incidencia</th>
-                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Inspector</th>
-                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap min-w-[200px]">Notas Adicionales</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap min-w-[120px]">Trampa</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 min-w-[120px]">Tipo de Plaga</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap min-w-[120px]">Tipo de Incidencia</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap min-w-[80px]">Tipo de Insecto</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap min-w-[80px]">Cantidad</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Fecha</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700">Inspector</th>
+                            <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 min-w-[200px]">Notas</th>
                             <th class="px-4 py-3 text-left border-b border-gray-200 font-semibold text-gray-700 whitespace-nowrap">Acciones</th>
                         </tr>
                     </thead>
@@ -883,9 +839,9 @@
                                            value="<?= esc($fechaFormateada) ?>">
                                 </td>
                                 
-                                <!-- Inspector (editable) -->
-                                <td class="px-4 py-3 border-b border-gray-100 text-gray-700 whitespace-nowrap">
-                                    <span class="display-mode"><?= esc($incidencia['inspector'] ?? 'N/A') ?></span>
+                                 <!-- Inspector (editable) -->
+                                 <td class="px-4 py-3 border-b border-gray-100 text-gray-700">
+                                     <span class="display-mode max-w-[120px] truncate block"><?= esc($incidencia['inspector'] ?? 'N/A') ?></span>
                                     <input type="text" class="edit-mode hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
                                            data-field="inspector" 
                                            placeholder="Nombre del inspector"
@@ -894,9 +850,9 @@
                                 
                                 <!-- Notas Adicionales (editable) -->
                                 <td class="px-4 py-3 border-b border-gray-100 text-gray-700">
-                                    <div class="display-mode max-w-xs" title="<?= esc($incidencia['notas'] ?? '') ?>">
-                                        <?= esc($incidencia['notas'] ?? 'Sin notas') ?>
-                                    </div>
+                                     <div class="display-mode max-w-[200px] truncate" title="<?= esc($incidencia['notas'] ?? '') ?>">
+                                         <?= esc($incidencia['notas'] ?? 'Sin notas') ?>
+                                     </div>
                                     <textarea class="edit-mode hidden w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" 
                                               data-field="notas" 
                                               rows="2"
