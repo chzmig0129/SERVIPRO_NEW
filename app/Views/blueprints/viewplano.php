@@ -564,6 +564,55 @@
         </div>
     </div>
 
+    <!-- Lista de Trampas (full-width) -->
+    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold">Lista de Trampas</h3>
+            <div class="flex items-center gap-4">
+                <div>
+                    <label for="filtroTipoTrampa" class="text-sm font-medium text-gray-700 mr-2">Filtrar por tipo:</label>
+                    <select id="filtroTipoTrampa" class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                        <option value="">Todos los tipos</option>
+                        <option value="edc_quimicas">EDC Químicas</option>
+                        <option value="edc_adhesivas">EDC Adhesivas</option>
+                        <option value="luz_uv">Equipo de Luz UV</option>
+                        <option value="feromona_gorgojo">Trampa de Feromona Gorgojo</option>
+                        <option value="feromona_palomilla">Trampa de Feromona Palomilla</option>
+                        <option value="equipo_sonico">Equipo Sónico</option>
+                        <option value="globo_terror">Globo terror</option>
+                        <option value="atrayente_chinches">Trampa atrayente chinches</option>
+                        <option value="atrayente_pulgas">Trampa atrayente pulgas</option>
+                        <option value="feromona_picudo">Trampa feromonas picudo rojo</option>
+                        <option value="rodent">Trampa para Roedores</option>
+                        <option value="insect">Trampa para Insectos</option>
+                        <option value="fly">Trampa para Moscas</option>
+                        <option value="moth">Trampa para Polillas</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="overflow-y-auto max-h-[400px]">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left">ID</th>
+                        <th class="px-4 py-2 text-left">Tipo</th>
+                        <th class="px-4 py-2 text-left">Ubicación</th>
+                        <th class="px-4 py-2 text-left">Zona</th>
+                        <th class="px-4 py-2 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="trampasTableBody">
+                    <tr>
+                        <td colspan="5" class="px-4 py-2 text-center text-gray-500">
+                            No hay trampas registradas
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Tabla de Incidencias del Plano -->
     <div class="bg-white rounded-lg shadow-md p-6 mt-6">
         <div class="flex items-center justify-between mb-4">
