@@ -205,7 +205,7 @@
     <div class="login-card">
 
         <div class="login-logo-wrap">
-            <img src="<?= base_url('img/servipro-logo.png') ?>" alt="ServiPro" class="login-logo">
+            <img src="<?= base_url('img/servipro-logo-login.png') ?>" alt="ServiPro" class="login-logo">
         </div>
 
         <p class="login-tagline">Gestión Integrada de Plagas</p>

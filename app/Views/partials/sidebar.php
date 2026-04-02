@@ -11,7 +11,7 @@
 <div class="lg:hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40" id="mobile-sidebar-overlay" style="display: none;"></div>
 <div class="lg:hidden fixed inset-y-0 left-0 w-72 bg-white z-50 transform -translate-x-full transition-transform duration-300 shadow-2xl" id="mobile-sidebar">
     <div class="flex h-16 items-center justify-center border-b px-6 bg-gradient-to-r from-blue-600 to-indigo-700">
-        <img src="<?= base_url('img/servipro-logo.png') ?>" alt="ServiPro" class="h-10 object-contain">
+        <img src="<?= base_url('img/servipro-logo-sidebar.png') ?>" alt="ServiPro" class="h-10 object-contain">
     </div>
     <div class="overflow-y-auto h-[calc(100vh-4rem)] p-4">
         <nav class="flex flex-col gap-3">
@@ -23,7 +23,7 @@
 <!-- Desktop Sidebar -->
 <aside class="hidden lg:flex fixed inset-y-0 left-0 flex-col w-72 bg-white border-r shadow-sm">
     <div class="flex h-16 items-center justify-center border-b px-6 bg-gradient-to-r from-blue-600 to-indigo-700">
-        <img src="<?= base_url('img/servipro-logo.png') ?>" alt="ServiPro" class="h-10 object-contain">
+        <img src="<?= base_url('img/servipro-logo-sidebar.png') ?>" alt="ServiPro" class="h-10 object-contain">
     </div>
     <div class="flex-1 overflow-y-auto p-4">
         <nav class="flex flex-col gap-3">
