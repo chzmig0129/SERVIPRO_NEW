@@ -1738,4 +1738,131 @@ class Blueprints extends BaseController
         }
     }
 
+    /**
+     * Eliminar todas las incidencias tipo Hallazgo de un plano específico.
+     * Hallazgos = incidencias con id_trampa IS NULL y plano_id = $planoId.
+     * IMPORTANTE: Solo elimina registros de ESTE plano.
+     */
+    public function eliminar_hallazgos_plano()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Solicitud no válida']);
+        }
+
+        $planoId = $this->request->getPost('plano_id');
+
+        if (!$planoId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'plano_id es requerido']);
+        }
+
+        $planoModel = new \App\Models\PlanoModel();
+        $plano = $planoModel->find($planoId);
+        if (!$plano) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Plano no encontrado']);
+        }
+
+        try {
+            $incidenciaModel = new \App\Models\IncidenciaModel();
+
+            $cantidad = $incidenciaModel
+                ->where('plano_id', $planoId)
+                ->where('id_trampa IS NULL', null, false)
+                ->countAllResults();
+
+            $incidenciaModel
+                ->where('plano_id', $planoId)
+                ->where('id_trampa IS NULL', null, false)
+                ->delete();
+
+            log_message('info', 'Eliminar hallazgos: eliminados ' . $cantidad . ' hallazgos del plano ID: ' . $planoId);
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Se eliminaron ' . $cantidad . ' hallazgos del plano'
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error en eliminar_hallazgos_plano: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error al eliminar hallazgos: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Eliminar todas las evidencias fotográficas de un plano específico,
+     * incluyendo los archivos físicos del filesystem.
+     * IMPORTANTE: Solo elimina registros con id_plano = $planoId.
+     */
+    public function eliminar_evidencias_plano()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Solicitud no válida']);
+        }
+
+        $planoId = $this->request->getPost('plano_id');
+
+        if (!$planoId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'plano_id es requerido']);
+        }
+
+        $planoModel = new \App\Models\PlanoModel();
+        $plano = $planoModel->find($planoId);
+        if (!$plano) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Plano no encontrado']);
+        }
+
+        try {
+            $evidenciaModel = new \App\Models\EvidenciaModel();
+
+            $evidencias = $evidenciaModel->where('id_plano', $planoId)->findAll();
+
+            foreach ($evidencias as $evidencia) {
+                // Eliminar imagen_evidencia del filesystem
+                if (!empty($evidencia['imagen_evidencia'])) {
+                    $path = $evidencia['imagen_evidencia'];
+                    // Manejar rutas relativas y URLs completas
+                    if (filter_var($path, FILTER_VALIDATE_URL)) {
+                        // Extraer la parte relativa de la URL
+                        $parsed = parse_url($path, PHP_URL_PATH);
+                        $path = ltrim($parsed, '/');
+                    }
+                    $fullPath = FCPATH . $path;
+                    if (file_exists($fullPath)) {
+                        unlink($fullPath);
+                    }
+                }
+
+                // Eliminar imagen_resuelta del filesystem
+                if (!empty($evidencia['imagen_resuelta'])) {
+                    $path = $evidencia['imagen_resuelta'];
+                    if (filter_var($path, FILTER_VALIDATE_URL)) {
+                        $parsed = parse_url($path, PHP_URL_PATH);
+                        $path = ltrim($parsed, '/');
+                    }
+                    $fullPath = FCPATH . $path;
+                    if (file_exists($fullPath)) {
+                        unlink($fullPath);
+                    }
+                }
+            }
+
+            $cantidad = count($evidencias);
+            $evidenciaModel->where('id_plano', $planoId)->delete();
+
+            log_message('info', 'Eliminar evidencias: eliminadas ' . $cantidad . ' evidencias del plano ID: ' . $planoId);
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Se eliminaron ' . $cantidad . ' evidencias del plano'
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error en eliminar_evidencias_plano: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error al eliminar evidencias: ' . $e->getMessage()
+            ]);
+        }
+    }
+
 }

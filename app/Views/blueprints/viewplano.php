@@ -1199,6 +1199,88 @@
     </div>
 </div>
 
+<!-- Modal Limpiar Todo -->
+<div id="modalLimpiarTodo" class="fixed inset-0 bg-black bg-opacity-50 hidden" style="z-index: 10000;">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
+            <div class="p-6">
+                <!-- Encabezado -->
+                <div class="flex items-center mb-5">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mr-3">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Limpiar Plano</h3>
+                </div>
+
+                <!-- Opciones -->
+                <p class="text-sm text-gray-600 mb-4">Selecciona qué datos deseas eliminar de este plano:</p>
+
+                <div class="space-y-4 mb-5">
+                    <!-- Checkbox 1: Trampas (siempre marcado, deshabilitado) -->
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5 mt-0.5">
+                            <input id="chkLimpiarTrampas" type="checkbox" checked disabled
+                                   class="w-4 h-4 text-red-600 border-gray-300 rounded cursor-not-allowed opacity-75">
+                        </div>
+                        <div class="ml-3">
+                            <label for="chkLimpiarTrampas" class="text-sm font-medium text-gray-700 cursor-not-allowed">
+                                Trampas/Estaciones y sus capturas asociadas
+                            </label>
+                            <p class="text-xs text-gray-500 mt-0.5">Se eliminarán todas las trampas colocadas en el mapa, sus incidencias de tipo Captura, estados y movimientos.</p>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox 2: Hallazgos -->
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5 mt-0.5">
+                            <input id="chkLimpiarHallazgos" type="checkbox"
+                                   class="w-4 h-4 text-red-600 border-gray-300 rounded cursor-pointer">
+                        </div>
+                        <div class="ml-3">
+                            <label for="chkLimpiarHallazgos" class="text-sm font-medium text-gray-700 cursor-pointer">
+                                Incidencias tipo Hallazgo de este plano
+                            </label>
+                            <p class="text-xs text-gray-500 mt-0.5">Se eliminarán los hallazgos registrados directamente en este plano (no asociados a ninguna trampa).</p>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox 3: Evidencias -->
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5 mt-0.5">
+                            <input id="chkLimpiarEvidencias" type="checkbox"
+                                   class="w-4 h-4 text-red-600 border-gray-300 rounded cursor-pointer">
+                        </div>
+                        <div class="ml-3">
+                            <label for="chkLimpiarEvidencias" class="text-sm font-medium text-gray-700 cursor-pointer">
+                                Evidencias fotográficas de este plano
+                            </label>
+                            <p class="text-xs text-gray-500 mt-0.5">Se eliminarán todas las evidencias (fotos) registradas en este plano, incluyendo imágenes de evidencia y resolución.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerta irreversible -->
+                <div class="flex items-start p-3 bg-red-50 border border-red-200 rounded-md mb-5">
+                    <i class="fas fa-exclamation-triangle text-red-500 mt-0.5 mr-2 flex-shrink-0"></i>
+                    <p class="text-sm text-red-700 font-medium">Esta acción es irreversible. Los datos eliminados no se podrán recuperar.</p>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="cerrarModalLimpiarTodo()"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="button" onclick="ejecutarLimpiarTodo()"
+                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors">
+                        Eliminar datos seleccionados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal para Editar ID de Trampa -->
 <div id="modalEditarId" class="fixed inset-0 bg-black bg-opacity-50 hidden" style="z-index: 10000;">
     <div class="flex items-center justify-center min-h-screen p-4">
@@ -1746,10 +1828,63 @@
 
         // Botón Limpiar Todo
         btnLimpiar.addEventListener('click', () => {
-            if (confirm('¿Está seguro de que desea limpiar todo?')) {
-                limpiarEstadoCompleto();
-            }
+            document.getElementById('modalLimpiarTodo').classList.remove('hidden');
         });
+
+        function cerrarModalLimpiarTodo() {
+            document.getElementById('modalLimpiarTodo').classList.add('hidden');
+            document.getElementById('chkLimpiarHallazgos').checked = false;
+            document.getElementById('chkLimpiarEvidencias').checked = false;
+        }
+
+        async function ejecutarLimpiarTodo() {
+            const borrarHallazgos  = document.getElementById('chkLimpiarHallazgos').checked;
+            const borrarEvidencias = document.getElementById('chkLimpiarEvidencias').checked;
+            const planoId = <?= $plano['id'] ?>;
+
+            cerrarModalLimpiarTodo();
+
+            // Siempre borrar trampas + capturas (comportamiento original)
+            limpiarEstadoCompleto();
+
+            const promesas = [];
+
+            if (borrarHallazgos) {
+                promesas.push(
+                    fetch('<?= base_url('blueprints/eliminar_hallazgos_plano') ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: 'plano_id=' + encodeURIComponent(planoId)
+                    }).then(r => r.json())
+                );
+            }
+
+            if (borrarEvidencias) {
+                promesas.push(
+                    fetch('<?= base_url('blueprints/eliminar_evidencias_plano') ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: 'plano_id=' + encodeURIComponent(planoId)
+                    }).then(r => r.json())
+                );
+            }
+
+            if (promesas.length > 0) {
+                try {
+                    await Promise.all(promesas);
+                } catch (err) {
+                    console.error('Error al limpiar datos adicionales:', err);
+                }
+            }
+
+            mostrarMensaje('Plano limpiado correctamente', 'success');
+        }
 
         // Botón Cargar Estado
         btnCargar.addEventListener('click', () => {
