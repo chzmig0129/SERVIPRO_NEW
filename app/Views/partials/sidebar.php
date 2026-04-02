@@ -10,14 +10,8 @@
 <!-- Mobile Sidebar -->
 <div class="lg:hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40" id="mobile-sidebar-overlay" style="display: none;"></div>
 <div class="lg:hidden fixed inset-y-0 left-0 w-72 bg-white z-50 transform -translate-x-full transition-transform duration-300 shadow-2xl" id="mobile-sidebar">
-    <div class="flex h-16 items-center border-b px-6 bg-gradient-to-r from-blue-600 to-indigo-700">
-        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-            Control de Plagas
-        </h2>
+    <div class="flex h-16 items-center justify-center border-b px-6 bg-gradient-to-r from-blue-600 to-indigo-700">
+        <img src="<?= base_url('img/servipro-logo.png') ?>" alt="ServiPro" class="h-10 object-contain">
     </div>
     <div class="overflow-y-auto h-[calc(100vh-4rem)] p-4">
         <nav class="flex flex-col gap-3">
@@ -28,14 +22,8 @@
 
 <!-- Desktop Sidebar -->
 <aside class="hidden lg:flex fixed inset-y-0 left-0 flex-col w-72 bg-white border-r shadow-sm">
-    <div class="flex h-16 items-center border-b px-6 bg-gradient-to-r from-blue-600 to-indigo-700">
-        <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-            SERVIPRO
-        </h2>
+    <div class="flex h-16 items-center justify-center border-b px-6 bg-gradient-to-r from-blue-600 to-indigo-700">
+        <img src="<?= base_url('img/servipro-logo.png') ?>" alt="ServiPro" class="h-10 object-contain">
     </div>
     <div class="flex-1 overflow-y-auto p-4">
         <nav class="flex flex-col gap-3">
