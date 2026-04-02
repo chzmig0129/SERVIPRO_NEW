@@ -1883,6 +1883,10 @@
             }
 
             mostrarMensaje('Plano limpiado correctamente', 'success');
+            // Recargar la página para reflejar los cambios en la tabla de incidencias (renderizada por PHP)
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
         }
 
         // Botón Cargar Estado
