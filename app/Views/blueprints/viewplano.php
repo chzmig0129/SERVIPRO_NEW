@@ -1370,7 +1370,6 @@
 </div>
 
 <!-- Scripts -->
-<script src="<?= base_url('js/mapa.js') ?>"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Referencias a elementos
