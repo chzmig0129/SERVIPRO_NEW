@@ -311,9 +311,9 @@ function formatearFechaEspanol($fecha) {
             
             <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 hover:shadow-md transition-all">
                 <div class="flex items-start space-x-3">
-                    <input type="checkbox" id="pieVoladores" name="graficas[]" value="pieVoladores" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
+                    <input type="checkbox" id="checkbox-pieVoladores" name="graficas[]" value="pieVoladores" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
                     <div>
-                        <label for="pieVoladores" class="block text-gray-800 font-medium">Distribución de Plagas - Voladores</label>
+                        <label for="checkbox-pieVoladores" class="block text-gray-800 font-medium">Distribución de Plagas - Voladores</label>
                         <p class="text-sm text-gray-600">Distribución de tipos de plaga para organismos voladores.</p>
                     </div>
                 </div>
@@ -321,9 +321,9 @@ function formatearFechaEspanol($fecha) {
             
             <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 hover:shadow-md transition-all">
                 <div class="flex items-start space-x-3">
-                    <input type="checkbox" id="pieRastreros" name="graficas[]" value="pieRastreros" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
+                    <input type="checkbox" id="checkbox-pieRastreros" name="graficas[]" value="pieRastreros" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
                     <div>
-                        <label for="pieRastreros" class="block text-gray-800 font-medium">Distribución de Plagas - Rastreros</label>
+                        <label for="checkbox-pieRastreros" class="block text-gray-800 font-medium">Distribución de Plagas - Rastreros</label>
                         <p class="text-sm text-gray-600">Distribución de tipos de plaga para organismos rastreros.</p>
                     </div>
                 </div>
@@ -331,9 +331,9 @@ function formatearFechaEspanol($fecha) {
             
             <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 hover:shadow-md transition-all">
                 <div class="flex items-start space-x-3">
-                    <input type="checkbox" id="trampasCapturaVoladores" name="graficas[]" value="trampasCapturaVoladores" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
+                    <input type="checkbox" id="checkbox-trampasCapturaVoladores" name="graficas[]" value="trampasCapturaVoladores" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
                     <div>
-                        <label for="trampasCapturaVoladores" class="block text-gray-800 font-medium">Trampas con Mayor Captura - Voladores</label>
+                        <label for="checkbox-trampasCapturaVoladores" class="block text-gray-800 font-medium">Trampas con Mayor Captura - Voladores</label>
                         <p class="text-sm text-gray-600">Muestra las trampas con mayor captura de organismos voladores.</p>
                     </div>
                 </div>
@@ -341,9 +341,9 @@ function formatearFechaEspanol($fecha) {
             
             <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 hover:shadow-md transition-all">
                 <div class="flex items-start space-x-3">
-                    <input type="checkbox" id="trampasCapturaRastreros" name="graficas[]" value="trampasCapturaRastreros" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
+                    <input type="checkbox" id="checkbox-trampasCapturaRastreros" name="graficas[]" value="trampasCapturaRastreros" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
                     <div>
-                        <label for="trampasCapturaRastreros" class="block text-gray-800 font-medium">Trampas con Mayor Captura - Rastreros</label>
+                        <label for="checkbox-trampasCapturaRastreros" class="block text-gray-800 font-medium">Trampas con Mayor Captura - Rastreros</label>
                         <p class="text-sm text-gray-600">Muestra las trampas con mayor captura de organismos rastreros.</p>
                     </div>
                 </div>
@@ -351,9 +351,9 @@ function formatearFechaEspanol($fecha) {
             
             <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 hover:shadow-md transition-all">
                 <div class="flex items-start space-x-3">
-                    <input type="checkbox" id="areasCapturaVoladores" name="graficas[]" value="areasCapturaVoladores" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
+                    <input type="checkbox" id="checkbox-areasCapturaVoladores" name="graficas[]" value="areasCapturaVoladores" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
                     <div>
-                        <label for="areasCapturaVoladores" class="block text-gray-800 font-medium">Áreas que Presentaron Capturas - Voladores</label>
+                        <label for="checkbox-areasCapturaVoladores" class="block text-gray-800 font-medium">Áreas que Presentaron Capturas - Voladores</label>
                         <p class="text-sm text-gray-600">Muestra las áreas donde se registraron capturas de organismos voladores.</p>
                     </div>
                 </div>
@@ -361,9 +361,9 @@ function formatearFechaEspanol($fecha) {
             
             <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 hover:shadow-md transition-all">
                 <div class="flex items-start space-x-3">
-                    <input type="checkbox" id="areasCapturaRastreros" name="graficas[]" value="areasCapturaRastreros" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
+                    <input type="checkbox" id="checkbox-areasCapturaRastreros" name="graficas[]" value="areasCapturaRastreros" class="mt-1 h-5 w-5 text-blue-600 rounded" checked>
                     <div>
-                        <label for="areasCapturaRastreros" class="block text-gray-800 font-medium">Áreas que Presentaron Capturas - Rastreros</label>
+                        <label for="checkbox-areasCapturaRastreros" class="block text-gray-800 font-medium">Áreas que Presentaron Capturas - Rastreros</label>
                         <p class="text-sm text-gray-600">Muestra las áreas donde se registraron capturas de organismos rastreros.</p>
                     </div>
                 </div>
@@ -7258,19 +7258,6 @@ function limpiarTodosLosUmbrales() {
                             font: { family: "'Segoe UI', 'Helvetica', 'Arial', sans-serif", size: 16, weight: 'bold' },
                             padding: { top: 10, bottom: 20 }
                         },
-                        beforeDraw: function(chart) {
-                            if (chart.data.datasets[0].data.length === 0) {
-                                const ctx = chart.ctx;
-                                chart.clear();
-                                ctx.save();
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'middle';
-                                ctx.font = '16px Arial';
-                                ctx.fillStyle = '#666';
-                                ctx.fillText('Sin datos', chart.width / 2, chart.height / 2);
-                                ctx.restore();
-                            }
-                        },
                         datalabels: {
                             color: '#fff',
                             formatter: (value, ctx) => {
@@ -7309,7 +7296,21 @@ function limpiarTodosLosUmbrales() {
                     },
                     animation: { animateScale: true, animateRotate: true, duration: 1000, easing: 'easeOutQuart' }
                 },
-                plugins: [ChartDataLabels]
+                plugins: [ChartDataLabels, {
+                    beforeDraw: function(chart) {
+                        if (chart.data.datasets[0].data.length === 0) {
+                            const ctx = chart.ctx;
+                            chart.clear();
+                            ctx.save();
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.font = '16px Arial';
+                            ctx.fillStyle = '#666';
+                            ctx.fillText('Sin datos de voladores disponibles', chart.width / 2, chart.height / 2);
+                            ctx.restore();
+                        }
+                    }
+                }]
             });
         })();
 
@@ -7373,19 +7374,6 @@ function limpiarTodosLosUmbrales() {
                             font: { family: "'Segoe UI', 'Helvetica', 'Arial', sans-serif", size: 16, weight: 'bold' },
                             padding: { top: 10, bottom: 20 }
                         },
-                        beforeDraw: function(chart) {
-                            if (chart.data.datasets[0].data.length === 0) {
-                                const ctx = chart.ctx;
-                                chart.clear();
-                                ctx.save();
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'middle';
-                                ctx.font = '16px Arial';
-                                ctx.fillStyle = '#666';
-                                ctx.fillText('Sin datos', chart.width / 2, chart.height / 2);
-                                ctx.restore();
-                            }
-                        },
                         datalabels: {
                             color: '#fff',
                             formatter: (value, ctx) => {
@@ -7424,7 +7412,21 @@ function limpiarTodosLosUmbrales() {
                     },
                     animation: { animateScale: true, animateRotate: true, duration: 1000, easing: 'easeOutQuart' }
                 },
-                plugins: [ChartDataLabels]
+                plugins: [ChartDataLabels, {
+                    beforeDraw: function(chart) {
+                        if (chart.data.datasets[0].data.length === 0) {
+                            const ctx = chart.ctx;
+                            chart.clear();
+                            ctx.save();
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.font = '16px Arial';
+                            ctx.fillStyle = '#666';
+                            ctx.fillText('Sin datos de rastreros disponibles', chart.width / 2, chart.height / 2);
+                            ctx.restore();
+                        }
+                    }
+                }]
             });
         })();
 
