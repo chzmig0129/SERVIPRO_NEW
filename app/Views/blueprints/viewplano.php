@@ -365,7 +365,7 @@
     }
 </style>
 
-<div class="space-y-6">
+<div class="space-y-4">
     <!-- Encabezado -->
     <div class="flex items-center justify-between">
         <div>
@@ -409,7 +409,7 @@
     </div>
 
     <!-- Área del Plano -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <!-- Plano -->
         <div class="lg:col-span-3 bg-white rounded-lg shadow-md p-4">
             <div id="planoContainer" class="w-full h-[600px] bg-gray-100 rounded-lg flex items-center justify-center relative">
@@ -425,7 +425,7 @@
         </div>
 
         <!-- Panel Lateral -->
-        <div class="space-y-6">
+        <div class="space-y-4">
             <!-- Herramientas -->
             <div class="bg-white rounded-lg shadow-md p-4">
                 <h3 class="font-semibold mb-4">Herramientas</h3>
@@ -565,7 +565,7 @@
     </div>
 
     <!-- Lista de Trampas (full-width) -->
-    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+    <div class="bg-white rounded-lg shadow-md p-6 mt-4">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold">Lista de Trampas</h3>
             <div class="flex items-center gap-4">
@@ -614,7 +614,7 @@
     </div>
 
     <!-- Tabla de Incidencias del Plano -->
-    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+    <div class="bg-white rounded-lg shadow-md p-6 mt-4">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-semibold">Incidencias del Plano</h3>
             <div class="flex items-center gap-4">
