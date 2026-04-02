@@ -1714,6 +1714,17 @@ class Blueprints extends BaseController
                 log_message('info', 'Limpiar Todo: eliminadas ' . $cantidadEliminadas . ' trampas del plano ID: ' . $planoId);
             }
 
+            // Limpiar el array de trampas dentro del campo JSON `archivo` del plano
+            // para que al hacer refresh no reaparezcan desde el fallback del frontend
+            if (!empty($plano['archivo'])) {
+                $archivoData = json_decode($plano['archivo'], true);
+                if (is_array($archivoData)) {
+                    $archivoData['trampas'] = [];
+                    $planoModel->update($planoId, ['archivo' => json_encode($archivoData)]);
+                    log_message('info', 'Limpiar Todo: campo archivo.trampas vaciado para plano ID: ' . $planoId);
+                }
+            }
+
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Se eliminaron ' . $cantidadEliminadas . ' trampas del plano'
