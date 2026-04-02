@@ -40,6 +40,7 @@
 
     <!-- Stats summary -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Total Plantas -->
         <div class="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow duration-200 group">
             <div class="flex items-center">
                 <div class="bg-blue-100 p-3 rounded-lg mr-4 group-hover:bg-blue-200 transition-colors duration-200">
@@ -54,8 +55,23 @@
                     <p class="text-3xl font-bold mt-1"><?= count($sedes) ?></p>
                 </div>
             </div>
+            <div class="mt-3 pt-3 border-t">
+                <button onclick="toggleDetail('detailPlantas', this)" class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 transition-colors">
+                    <span>Ver detalle</span>
+                    <svg class="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div id="detailPlantas" class="hidden mt-3 space-y-2">
+                    <?php foreach ($sedes as $sede): ?>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600"><?= $sede['nombre'] ?></span>
+                        <span class="font-medium text-blue-600">1</span>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
-        
+
+        <!-- Total Planos -->
         <div class="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow duration-200 group">
             <div class="flex items-center">
                 <div class="bg-green-100 p-3 rounded-lg mr-4 group-hover:bg-green-200 transition-colors duration-200">
@@ -70,10 +86,25 @@
                     <p class="text-3xl font-bold mt-1"><?= array_sum(array_column($sedes, 'total_planos')) ?></p>
                 </div>
             </div>
+            <div class="mt-3 pt-3 border-t">
+                <button onclick="toggleDetail('detailPlanos', this)" class="text-xs text-green-600 hover:text-green-800 font-medium flex items-center gap-1 transition-colors">
+                    <span>Ver detalle</span>
+                    <svg class="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div id="detailPlanos" class="hidden mt-3 space-y-2">
+                    <?php foreach ($sedes as $sede): ?>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600"><?= $sede['nombre'] ?></span>
+                        <span class="font-medium text-green-600"><?= $sede['total_planos'] ?></span>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
-        
+
+        <!-- Total Trampas -->
         <div class="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow duration-200 group">
-            <div class="flex items-center mb-4">
+            <div class="flex items-center">
                 <div class="bg-amber-100 p-3 rounded-lg mr-4 group-hover:bg-amber-200 transition-colors duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-600">
                         <path d="M18 8a6 6 0 0 0-9.33-5"></path>
@@ -87,13 +118,19 @@
                     <p class="text-3xl font-bold mt-1"><?= array_sum(array_column($sedes, 'total_trampas')) ?></p>
                 </div>
             </div>
-            <div class="space-y-2 mt-2 pt-3 border-t">
-                <?php foreach ($sedes as $sede): ?>
+            <div class="mt-3 pt-3 border-t">
+                <button onclick="toggleDetail('detailTrampas', this)" class="text-xs text-amber-600 hover:text-amber-800 font-medium flex items-center gap-1 transition-colors">
+                    <span>Ver detalle</span>
+                    <svg class="w-3 h-3 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div id="detailTrampas" class="hidden mt-3 space-y-2">
+                    <?php foreach ($sedes as $sede): ?>
                     <div class="flex items-center justify-between text-sm">
                         <span class="text-gray-600"><?= $sede['nombre'] ?></span>
                         <span class="font-medium text-amber-600"><?= $sede['total_trampas'] ?></span>
                     </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </div>
     </div>
@@ -357,6 +394,22 @@
 </div>
 
 <script>
+// Toggle detail sections in stat cards
+function toggleDetail(id, btn) {
+    const detail = document.getElementById(id);
+    const span = btn.querySelector('span');
+    const arrow = btn.querySelector('svg');
+    if (detail.classList.contains('hidden')) {
+        detail.classList.remove('hidden');
+        span.textContent = 'Ocultar';
+        arrow.style.transform = 'rotate(180deg)';
+    } else {
+        detail.classList.add('hidden');
+        span.textContent = 'Ver detalle';
+        arrow.style.transform = 'rotate(0deg)';
+    }
+}
+
 // Modal management
 const sedeModal = {
     element: document.getElementById('modalAgregarSede'),
